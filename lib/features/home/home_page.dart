@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'widgets/header.dart';
+import 'widgets/games_grid.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -6,29 +8,22 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("GameShelf")),
-      body: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              "GameShelf",
-              style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
-            ),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            children: const [
 
-            const SizedBox(height: 24),
+              Header(),
 
-            Row(
-              children: const [
-                Text("10 jocs"),
-                SizedBox(width: 24),
-                Text("6 completats"),
-                SizedBox(width: 24),
-                Text("429h"),
-              ],
-            ),
-          ],
+              SizedBox(height: 24),
+
+              Expanded(
+                child: GamesGrid(),
+              ),
+
+            ],
+          ),
         ),
       ),
     );
