@@ -2,12 +2,12 @@ class Game {
   final String title;
   final String platform;
   final double rating;
-  final String image;
+  final String cover;
 
   const Game({
     required this.title,
     required this.platform,
     required this.rating,
-    required this.image,
+    required this.cover,
   });
 }
