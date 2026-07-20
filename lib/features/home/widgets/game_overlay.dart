@@ -5,11 +5,7 @@ class GameOverlay extends StatelessWidget {
   final Game game;
   final bool visible;
 
-  const GameOverlay({
-    super.key,
-    required this.game,
-    required this.visible,
-  });
+  const GameOverlay({super.key, required this.game, required this.visible});
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +36,6 @@ class GameOverlay extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-
               Text(
                 game.title,
                 maxLines: 2,
@@ -56,20 +51,13 @@ class GameOverlay extends StatelessWidget {
 
               Row(
                 children: [
-
-                  const Icon(
-                    Icons.star,
-                    size: 18,
-                    color: Colors.amber,
-                  ),
+                  const Icon(Icons.star, size: 18, color: Colors.amber),
 
                   const SizedBox(width: 6),
 
                   Text(
                     "${game.rating}/10",
-                    style: const TextStyle(
-                      color: Colors.white,
-                    ),
+                    style: const TextStyle(color: Colors.white),
                   ),
                 ],
               ),
@@ -78,20 +66,17 @@ class GameOverlay extends StatelessWidget {
 
               Row(
                 children: [
-
                   Icon(
-                    Icons.check_circle,
+                    game.finished ? Icons.check_circle : Icons.schedule,
                     size: 16,
-                    color: Colors.green.shade400,
+                    color: game.finished ? Colors.green : Colors.red,
                   ),
 
                   const SizedBox(width: 6),
 
-                  const Text(
-                    "Completed",
-                    style: TextStyle(
-                      color: Colors.white70,
-                    ),
+                  Text(
+                    "${game.length}h",
+                    style: const TextStyle(color: Colors.white70),
                   ),
                 ],
               ),

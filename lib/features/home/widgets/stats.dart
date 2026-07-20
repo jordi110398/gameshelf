@@ -11,7 +11,7 @@ class Stats extends StatelessWidget {
         SizedBox(width: 24),
         Text("2 completats"),
         SizedBox(width: 24),
-        Text("49h"),
+        Text("Total jugat: 49h"),
       ],
     );
   }
