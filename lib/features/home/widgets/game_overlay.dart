@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gameshelf/models/game.dart';
+import 'package:gameshelf/core/widgets/rating_stars.dart';
 
 class GameOverlay extends StatelessWidget {
   final Game game;
@@ -49,33 +50,22 @@ class GameOverlay extends StatelessWidget {
 
               const SizedBox(height: 8),
 
-              Row(
-                children: [
-                  const Icon(Icons.star, size: 18, color: Colors.amber),
-
-                  const SizedBox(width: 6),
-
-                  Text(
-                    "${game.rating}/10",
-                    style: const TextStyle(color: Colors.white),
-                  ),
-                ],
-              ),
+              RatingStars(rating: game.rating),
 
               const SizedBox(height: 6),
 
               Row(
                 children: [
                   Icon(
-                    game.finished ? Icons.check_circle : Icons.schedule,
+                    game.status=='finished' ? Icons.check_circle : Icons.schedule,
                     size: 16,
-                    color: game.finished ? Colors.green : Colors.red,
+                    color: game.status=='complete' ? Colors.green : Colors.red,
                   ),
 
                   const SizedBox(width: 6),
 
                   Text(
-                    "${game.length}h",
+                    "${game.hoursPlayed}h",
                     style: const TextStyle(color: Colors.white70),
                   ),
                 ],

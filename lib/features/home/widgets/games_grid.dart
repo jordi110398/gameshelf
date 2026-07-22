@@ -1,36 +1,31 @@
 import 'package:flutter/material.dart';
-import 'package:gameshelf/data/mock_games.dart';
+import 'package:gameshelf/models/game.dart';
 import 'game_card.dart';
 
-class GamesGrid extends StatelessWidget {
-  const GamesGrid({super.key});
+class GameGrid extends StatelessWidget {
+  final List<Game> games;
+
+  const GameGrid({
+    super.key,
+    required this.games,
+  });
 
   @override
   Widget build(BuildContext context) {
-
     return GridView.builder(
+      itemCount: games.length,
 
-      itemCount: mockGames.length,
-
-      gridDelegate:
-          const SliverGridDelegateWithFixedCrossAxisCount(
-
-        crossAxisCount: 3,
-
-        crossAxisSpacing: 16,
-
-        mainAxisSpacing: 16,
-
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 5,
+        crossAxisSpacing: 20,
+        mainAxisSpacing: 20,
         childAspectRatio: 2 / 3,
-
       ),
 
       itemBuilder: (context, index) {
-
         return GameCard(
-          game: mockGames[index],
+          game: games[index],
         );
-
       },
     );
   }

@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:gameshelf/app/theme.dart';
-import 'package:gameshelf/features/home/home_page.dart';
+import 'package:gameshelf/core/router/app_router.dart';
 
 class GameShelfApp extends StatelessWidget {
   const GameShelfApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       debugShowCheckedModeBanner: false,
       title: 'GameShelf',
       theme: AppTheme.dark,
-      home: const HomePage(),
+
+      routerConfig: appRouter,
     );
   }
 }
