@@ -12,19 +12,29 @@ class GameGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GridView.builder(
-      itemCount: games.length,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        int columns = (constraints.maxWidth / 190).floor();
 
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 5,
-        crossAxisSpacing: 20,
-        mainAxisSpacing: 20,
-        childAspectRatio: 2 / 3,
-      ),
+        if (columns < 2) columns = 2;
 
-      itemBuilder: (context, index) {
-        return GameCard(
-          game: games[index],
+        return GridView.builder(
+          padding: const EdgeInsets.all(24),
+
+          itemCount: games.length,
+
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: columns,
+            crossAxisSpacing: 20,
+            mainAxisSpacing: 20,
+            childAspectRatio: 2 / 3,
+          ),
+
+          itemBuilder: (context, index) {
+            return GameCard(
+              game: games[index],
+            );
+          },
         );
       },
     );

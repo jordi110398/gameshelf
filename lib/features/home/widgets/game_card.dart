@@ -6,10 +6,7 @@ import 'game_overlay.dart';
 class GameCard extends StatefulWidget {
   final Game game;
 
-  const GameCard({
-    super.key,
-    required this.game,
-  });
+  const GameCard({super.key, required this.game});
 
   @override
   State<GameCard> createState() => _GameCardState();
@@ -24,9 +21,7 @@ class _GameCardState extends State<GameCard> {
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(
-            builder: (_) => GameDetailPage(game: widget.game),
-          ),
+          MaterialPageRoute(builder: (_) => GameDetailPage(game: widget.game)),
         );
       },
       child: MouseRegion(
@@ -42,18 +37,14 @@ class _GameCardState extends State<GameCard> {
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-
                   // PORTADA
-                  Image.asset(
-                    widget.game.cover,
-                    fit: BoxFit.cover,
+                  Hero(
+                    tag: widget.game.id,
+                    child: Image.asset(widget.game.cover, fit: BoxFit.cover),
                   ),
 
                   // OVERLAY
-                  GameOverlay(
-                    game: widget.game,
-                    visible: isHovered,
-                  ),
+                  GameOverlay(game: widget.game, visible: isHovered),
                 ],
               ),
             ),

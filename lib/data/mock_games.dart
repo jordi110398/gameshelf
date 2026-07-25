@@ -1,15 +1,17 @@
 import 'package:gameshelf/models/game.dart';
+import 'package:gameshelf/models/game_status.dart';
 
-const mockGames = [
+const List<Game> mockGames = [
   Game(
     id: 1,
     title: "The Witcher 3",
     platform: "PC",
     rating: 3,
-    length: 28,
-    finished: true,
+    hoursPlayed: 28,
+    status: GameStatus.completed,
     cover: "assets/covers/tw3.jpg",
     review:"",
+    favorite: false,
   ),
 
   Game(
@@ -17,10 +19,11 @@ const mockGames = [
     title: "Elden Ring",
     platform: "Switch 2",
     rating: 4,
-    length: 19,
-    finished: true,
+    hoursPlayed: 19,
+    status: GameStatus.completed,
     cover: "assets/covers/elden.jpg",
     review: "Una obra mestra. El món és increïble i l'exploració és de les millors que he jugat.",
+    favorite: true,
   ),
 
   Game(
@@ -28,9 +31,10 @@ const mockGames = [
     title: "Hollow Knight",
     platform: "Switch",
     rating: 4,
-    length: 1,
-    finished: false,
+    hoursPlayed: 1,
+    status: GameStatus.playing,
     cover: "assets/covers/hollow.jpg",
     review: "",
+    favorite: false,
   ),
 ];

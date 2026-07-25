@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gameshelf/models/game.dart';
+import 'package:gameshelf/models/game_status.dart';
 import 'package:gameshelf/core/widgets/rating_stars.dart';
 
 class GameDetailPage extends StatelessWidget {
@@ -20,10 +21,10 @@ class GameDetailPage extends StatelessWidget {
 
           children: [
             // PORTADA
-            Center(
+            Hero(
+              tag: game.id,
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(20),
-
                 child: Image.asset(game.cover, width: 220),
               ),
             ),
@@ -44,13 +45,10 @@ class GameDetailPage extends StatelessWidget {
             Row(
               children: [
                 Icon(
-                  game.finished ? Icons.check_circle : Icons.cancel,
-                  color: game.finished ? Colors.green : Colors.red,
+                  game.status == GameStatus.completed
+                      ? Icons.check_circle
+                      : Icons.cancel,
                 ),
-
-                const SizedBox(width: 8),
-
-                Text(game.finished ? "Completat" : "No completat"),
               ],
             ),
 
@@ -62,7 +60,7 @@ class GameDetailPage extends StatelessWidget {
 
                 const SizedBox(width: 8),
 
-                Text("${game.length} hores"),
+                Text("${game.hoursPlayed} hores"),
               ],
             ),
 

@@ -7,22 +7,28 @@ class Header extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Column(
-      children: [
+    return const Padding(
+      padding: EdgeInsets.fromLTRB(24, 24, 24, 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          TopBar(),
 
-        TopBar(),
+          SizedBox(height: 24),
 
-        SizedBox(height: 24),
+          Text(
+            "Keru's GameShelf",
+            style: TextStyle(
+              fontSize: 32,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
 
-        Text("Keru's GameShelf",
-          style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
-        ),
+          SizedBox(height: 24),
 
-        SizedBox(height: 24),
-
-        Stats(),
-
-      ],
+          Stats(),
+        ],
+      ),
     );
   }
 }
