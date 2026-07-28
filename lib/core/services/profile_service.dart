@@ -1,20 +1,33 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ProfileService {
-  final SupabaseClient _client = Supabase.instance.client;
+  final _supabase = Supabase.instance.client;
 
   Future<void> createProfile({
     required String nickname,
+    required String email,
   }) async {
-    final user = _client.auth.currentUser;
+    final user = _supabase.auth.currentUser!;
 
-    if (user == null) {
-      throw Exception("No hi ha cap usuari autenticat.");
+    await _supabase.from("profiles").insert({
+      "id": user.id,
+      "nickname": nickname,
+      "email": email,
+    });
+  }
+
+  Future<String?> getEmailFromNickname(String nickname) async {
+    final response = await _supabase.functions.invoke(
+      "get-email-from-nickname",
+      body: {
+        "nickname": nickname,
+      },
+    );
+
+    if (response.data == null) {
+      return null;
     }
 
-    await _client.from('profiles').insert({
-      'id': user.id,
-      'nickname': nickname,
-    });
+    return response.data["email"] as String?;
   }
 }

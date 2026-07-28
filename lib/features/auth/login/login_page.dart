@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:gameshelf/core/services/auth_service.dart';
 import '../widgets/auth_text_field.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:gameshelf/core/services/profile_service.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -13,6 +14,7 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   final authService = AuthService();
+  final profileService = ProfileService();
 
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
@@ -30,10 +32,15 @@ class _LoginPageState extends State<LoginPage> {
     setState(() => _loading = true);
 
     try {
-      await authService.signIn(
-        email: emailController.text.trim(),
-        password: passwordController.text,
-      );
+      String input = emailController.text.trim();
+
+      if (!input.contains("@")) {
+        input = await profileService.getEmailFromNickname(input) ?? "";
+      }
+
+      await authService.signIn(email: input, password: passwordController.text);
+
+
       print(authService.currentSession);
       print(authService.currentUser);
       print(authService.currentSession);
@@ -82,7 +89,7 @@ class _LoginPageState extends State<LoginPage> {
 
                 AuthTextField(
                   controller: emailController,
-                  label: "Correu electrònic",
+                  label: "Email o usuari",
                   icon: Icons.email,
                 ),
 

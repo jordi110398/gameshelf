@@ -35,6 +35,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
     await ProfileService().createProfile(
       nickname: nicknameController.text.trim(),
+      email: emailController.text.trim(),
     );
 
     if (!mounted) return;
