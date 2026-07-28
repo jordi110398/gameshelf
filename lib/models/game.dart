@@ -1,4 +1,4 @@
-import 'package:gameshelf/models/game_status.dart';
+
 class Game {
   final int id;
 
@@ -7,14 +7,7 @@ class Game {
   final String cover;
   final String platform;
 
-  // Usuari
-  final int rating;          // 0-5
-  final int hoursPlayed;
-  final String review;
-
-  final GameStatus status;
-
-  final bool favorite;
+  
 
   const Game({
     required this.id,
