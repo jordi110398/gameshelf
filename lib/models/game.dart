@@ -1,23 +1,58 @@
-
 class Game {
-  final int id;
+  final int igdbId;
 
-  // IGDB
   final String title;
-  final String cover;
-  final String platform;
+  final String? coverUrl;
 
-  
+  final String? summary;
+  final String? storyline;
+
+  final DateTime? releaseDate;
+
+  final double? rating;
+  final int? ratingCount;
+
+  final String? slug;
 
   const Game({
-    required this.id,
+    required this.igdbId,
     required this.title,
-    required this.cover,
-    required this.platform,
-    required this.rating,
-    required this.hoursPlayed,
-    required this.review,
-    required this.status,
-    required this.favorite,
+    this.coverUrl,
+    this.summary,
+    this.storyline,
+    this.releaseDate,
+    this.rating,
+    this.ratingCount,
+    this.slug,
   });
+
+  factory Game.fromMap(Map<String, dynamic> map) {
+    return Game(
+      igdbId: map["igdb_id"] as int,
+      title: map["title"] as String,
+      coverUrl: map["cover_url"],
+      summary: map["summary"],
+      storyline: map["storyline"],
+      releaseDate: map["release_date"] != null
+          ? DateTime.parse(map["release_date"])
+          : null,
+      rating: map["rating"]?.toDouble(),
+      ratingCount: map["rating_count"],
+      slug: map["slug"],
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      "igdb_id": igdbId,
+      "title": title,
+      "cover_url": coverUrl,
+      "summary": summary,
+      "storyline": storyline,
+      "release_date": releaseDate?.toIso8601String(),
+      "rating": rating,
+      "rating_count": ratingCount,
+      "slug": slug,
+    };
+  }
 }
