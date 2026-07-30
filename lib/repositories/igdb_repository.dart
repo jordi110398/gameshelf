@@ -12,9 +12,6 @@ class IgdbRepository {
       body: {"query": query},
     );
 
-    print("STATUS: ${response.status}");
-    print("DATA: ${response.data}");
-
     final data = response.data as List;
 
     return data.map((e) => Game.fromMap(e as Map<String, dynamic>)).toList();
