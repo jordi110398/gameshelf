@@ -7,33 +7,35 @@ import 'package:gameshelf/repositories/supabase_library_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:gameshelf/models/library_game.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  State<HomePage> createState() => _HomePageState();
+}
 
-    final repository = SupabaseLibraryRepository(
-      Supabase.instance.client,
-    );
+class _HomePageState extends State<HomePage> {
+  @override
+  Widget build(BuildContext context) {
+    final repository = SupabaseLibraryRepository(Supabase.instance.client);
 
     return Scaffold(
       appBar: AppBar(
         title: const Text("GameShelf"),
 
         actions: [
-
           // Botó cerca
           IconButton(
             icon: const Icon(Icons.search),
-            tooltip: "Buscar jocs",
-            onPressed: () {
-              Navigator.push(
+            onPressed: () async {
+              final refresh = await Navigator.push(
                 context,
-                MaterialPageRoute(
-                  builder: (_) => const SearchPage(),
-                ),
+                MaterialPageRoute(builder: (_) => const SearchPage()),
               );
+
+              if (refresh == true && context.mounted) {
+                setState(() {});
+              }
             },
           ),
 
@@ -52,37 +54,23 @@ class HomePage extends StatelessWidget {
         future: repository.getLibrary(),
 
         builder: (context, snapshot) {
-
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
+            return const Center(child: CircularProgressIndicator());
           }
 
           if (snapshot.hasError) {
-            return Center(
-              child: Text(
-                "Error: ${snapshot.error}",
-              ),
-            );
+            return Center(child: Text("Error: ${snapshot.error}"));
           }
 
           if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(
-              child: Text("No hi ha jocs"),
-            );
+            return const Center(child: Text("No hi ha jocs"));
           }
 
           return Column(
             children: [
-
               const Header(),
 
-              Expanded(
-                child: GameGrid(
-                  games: snapshot.data!,
-                ),
-              ),
+              Expanded(child: GameGrid(games: snapshot.data!)),
             ],
           );
         },
@@ -90,3 +78,4 @@ class HomePage extends StatelessWidget {
     );
   }
 }
+

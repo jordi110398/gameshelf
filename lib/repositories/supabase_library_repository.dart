@@ -38,4 +38,25 @@ class SupabaseLibraryRepository implements LibraryRepository {
   Future<void> removeGame(int igdbId) async {
     await client.from('user_games').delete().eq('igdb_id', igdbId);
   }
+
+  Future<void> saveGame(Game game) async {
+    await client.from("games").upsert(game.toMap(), onConflict: "igdb_id");
+  }
+
+  Future<void> addToLibrary(Game game) async {
+    await saveGame(game);
+
+    await client.from("user_games").insert({
+      "user_id": client.auth.currentUser!.id,
+      "igdb_id": game.igdbId,
+      "status": "backlog",
+      "rating": null,
+      "hours_played": 0,
+      "favorite": false,
+      "review": null,
+      "started_at": null,
+      "completed_at": null,
+    
+    });
+  }
 }

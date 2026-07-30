@@ -7,10 +7,7 @@ import 'game_overlay.dart';
 class GameCard extends StatefulWidget {
   final LibraryGame libraryGame;
 
-  const GameCard({
-    super.key,
-    required this.libraryGame,
-  });
+  const GameCard({super.key, required this.libraryGame});
 
   @override
   State<GameCard> createState() => _GameCardState();
@@ -29,7 +26,8 @@ class _GameCardState extends State<GameCard> {
           context,
           MaterialPageRoute(
             builder: (_) => GameDetailPage(
-              libraryGame: widget.libraryGame,
+              game: widget.libraryGame.game,
+              userGame: widget.libraryGame.userGame,
             ),
           ),
         );
@@ -50,10 +48,7 @@ class _GameCardState extends State<GameCard> {
                   Hero(
                     tag: game.igdbId,
                     child: game.coverUrl != null
-                        ? Image.network(
-                            game.coverUrl!,
-                            fit: BoxFit.cover,
-                          )
+                        ? Image.network(game.coverUrl!, fit: BoxFit.cover)
                         : Container(
                             color: Colors.grey.shade800,
                             child: const Icon(
