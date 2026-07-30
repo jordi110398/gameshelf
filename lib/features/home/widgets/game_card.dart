@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:gameshelf/features/game/pages/game_detail_page.dart';
-import 'package:gameshelf/models/game.dart';
+import 'package:gameshelf/models/library_game.dart';
+
 import 'game_overlay.dart';
 
 class GameCard extends StatefulWidget {
-  final Game game;
+  final LibraryGame libraryGame;
 
-  const GameCard({super.key, required this.game});
+  const GameCard({super.key, required this.libraryGame});
 
   @override
   State<GameCard> createState() => _GameCardState();
@@ -17,11 +18,18 @@ class _GameCardState extends State<GameCard> {
 
   @override
   Widget build(BuildContext context) {
+    final game = widget.libraryGame.game;
+
     return GestureDetector(
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (_) => GameDetailPage(game: widget.game)),
+          MaterialPageRoute(
+            builder: (_) => GameDetailPage(
+              game: widget.libraryGame.game,
+              userGame: widget.libraryGame.userGame,
+            ),
+          ),
         );
       },
       child: MouseRegion(
@@ -37,14 +45,23 @@ class _GameCardState extends State<GameCard> {
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  // PORTADA
                   Hero(
-                    tag: widget.game.id,
-                    child: Image.asset(widget.game.cover, fit: BoxFit.cover),
+                    tag: game.igdbId,
+                    child: game.coverUrl != null
+                        ? Image.network(game.coverUrl!, fit: BoxFit.cover)
+                        : Container(
+                            color: Colors.grey.shade800,
+                            child: const Icon(
+                              Icons.image_not_supported,
+                              size: 48,
+                            ),
+                          ),
                   ),
 
-                  // OVERLAY
-                  GameOverlay(game: widget.game, visible: isHovered),
+                  GameOverlay(
+                    libraryGame: widget.libraryGame,
+                    visible: isHovered,
+                  ),
                 ],
               ),
             ),

@@ -8,7 +8,7 @@ Future<void> main() async {
 
   await Supabase.initialize(
     url: 'https://qpcruteqjhnhrzwunqeh.supabase.co',
-    anonKey: 'sb_publishable_2RB3HIc0YzcNpErzonle1g_xlIFWfuA',
+    publishableKey: 'sb_publishable_2RB3HIc0YzcNpErzonle1g_xlIFWfuA',
   );
 
   runApp(const GameShelfApp());

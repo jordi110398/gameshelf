@@ -1,14 +1,7 @@
-import 'package:gameshelf/data/mock_games.dart';
-import 'package:gameshelf/models/game.dart';
+import '../models/game.dart';
 
-class GameRepository {
-  List<Game> getGames() {
-    return mockGames;
-  }
+abstract class GameRepository {
+  Future<Game?> getGameById(int igdbId);
 
-  Game getGameById(int id) {
-    return mockGames.firstWhere(
-      (game) => game.id == id
-    );
-  }
+  Future<List<Game>> searchGames(String query);
 }

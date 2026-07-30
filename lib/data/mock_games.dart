@@ -1,7 +1,7 @@
 import 'package:gameshelf/models/game.dart';
-import 'package:gameshelf/models/game_status.dart';
 
 const List<Game> mockGames = [
+  /*
   Game(
     id: 1,
     title: "The Witcher 3",
@@ -37,4 +37,5 @@ const List<Game> mockGames = [
     review: "",
     favorite: false,
   ),
+  */
 ];

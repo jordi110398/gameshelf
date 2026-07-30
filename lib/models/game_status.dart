@@ -1,7 +1,8 @@
 enum GameStatus {
+  backlog,
   playing,
   completed,
- paused,
   dropped,
+  paused,
   wishlist,
 }

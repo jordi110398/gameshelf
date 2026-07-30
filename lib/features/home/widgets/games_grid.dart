@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:gameshelf/models/game.dart';
+import 'package:gameshelf/models/library_game.dart';
 import 'game_card.dart';
 
 class GameGrid extends StatelessWidget {
-  final List<Game> games;
+  final List<LibraryGame> games;
 
   const GameGrid({
     super.key,
@@ -32,7 +32,7 @@ class GameGrid extends StatelessWidget {
 
           itemBuilder: (context, index) {
             return GameCard(
-              game: games[index],
+              libraryGame: games[index],
             );
           },
         );

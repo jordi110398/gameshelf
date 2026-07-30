@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:gameshelf/core/services/auth_service.dart';
 import '../widgets/auth_text_field.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:gameshelf/core/services/profile_service.dart';
 
 class LoginPage extends StatefulWidget {
@@ -39,11 +38,6 @@ class _LoginPageState extends State<LoginPage> {
       }
 
       await authService.signIn(email: input, password: passwordController.text);
-
-
-      print(authService.currentSession);
-      print(authService.currentUser);
-      print(authService.currentSession);
 
       if (!mounted) return;
 
