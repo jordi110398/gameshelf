@@ -56,7 +56,14 @@ class SupabaseLibraryRepository implements LibraryRepository {
       "review": null,
       "started_at": null,
       "completed_at": null,
-    
     });
+  }
+
+  Future<void> updateUserGame(UserGame userGame) async {
+    await client
+        .from("user_games")
+        .update(userGame.toMap())
+        .eq("user_id", client.auth.currentUser!.id)
+        .eq("igdb_id", userGame.igdbId);
   }
 }

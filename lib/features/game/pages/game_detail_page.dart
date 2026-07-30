@@ -5,6 +5,7 @@ import 'package:gameshelf/models/game_status.dart';
 import 'package:gameshelf/models/user_game.dart';
 import 'package:gameshelf/repositories/supabase_library_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:gameshelf/features/game/pages/edit_game_page.dart';
 
 class GameDetailPage extends StatelessWidget {
   final Game game;
@@ -119,7 +120,16 @@ class GameDetailPage extends StatelessWidget {
                       Navigator.pop(context, true);
                     }
                   } else {
-                    // més endavant editar
+                    final refresh = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) =>
+                            EditGamePage(game: game, userGame: userGame!),
+                      ),
+                    );
+                    if (refresh == true && context.mounted) {
+                      Navigator.pop(context, true);
+                    }
                   }
                 },
                 icon: Icon(inLibrary ? Icons.edit : Icons.add),
