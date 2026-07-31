@@ -86,7 +86,9 @@ class _HomePageState extends State<HomePage> {
 
           return Column(
             children: [
-              const Header(),
+              Header(
+                games: snapshot.data!,
+              ),
               Expanded(
                 child: GameGrid(
                   games: snapshot.data!,

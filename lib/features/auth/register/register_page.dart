@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:gameshelf/core/services/auth_service.dart';
-import 'package:gameshelf/features/auth/widgets/auth_text_field.dart';
 import 'package:gameshelf/core/services/profile_service.dart';
+import 'package:gameshelf/features/auth/widgets/auth_text_field.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -27,36 +27,44 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   Future<void> _register() async {
-  try {
-    await authService.signUp(
-      email: emailController.text.trim(),
-      password: passwordController.text,
-    );
+    try {
+      final response = await authService.signUp(
+        email: emailController.text.trim(),
+        password: passwordController.text,
+      );
 
-    await ProfileService().createProfile(
-      nickname: nicknameController.text.trim(),
-      email: emailController.text.trim(),
-    );
+      final user = response.user;
 
-    if (!mounted) return;
+      if (user == null) {
+        throw Exception("No s'ha pogut crear l'usuari.");
+      }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text("Compte creat correctament!"),
-      ),
-    );
+      await ProfileService().createProfile(
+        userId: user.id,
+        nickname: nicknameController.text.trim(),
+        email: user.email!,
+      );
 
-    context.go("/");
-  } catch (e) {
-    if (!mounted) return;
+      if (!mounted) return;
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(e.toString()),
-      ),
-    );
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Compte creat correctament!"),
+        ),
+      );
+
+      context.go("/");
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.toString()),
+        ),
+      );
+    }
   }
-}
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -74,7 +82,10 @@ class _RegisterPageState extends State<RegisterPage> {
 
                 const Text(
                   "GameShelf",
-                  style: TextStyle(fontSize: 34, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    fontSize: 34,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
 
                 const SizedBox(height: 40),
@@ -116,7 +127,9 @@ class _RegisterPageState extends State<RegisterPage> {
 
                 TextButton(
                   onPressed: () => context.go("/"),
-                  child: const Text("Already have an account? Log in"),
+                  child: const Text(
+                    "Already have an account? Log in",
+                  ),
                 ),
               ],
             ),
