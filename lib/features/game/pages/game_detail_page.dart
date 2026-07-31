@@ -1,35 +1,68 @@
 import 'package:flutter/material.dart';
 import 'package:gameshelf/core/widgets/rating_stars.dart';
+import 'package:gameshelf/features/game/pages/edit_game_page.dart';
 import 'package:gameshelf/models/game.dart';
 import 'package:gameshelf/models/game_status.dart';
 import 'package:gameshelf/models/user_game.dart';
 import 'package:gameshelf/repositories/supabase_library_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:gameshelf/features/game/pages/edit_game_page.dart';
 
-class GameDetailPage extends StatelessWidget {
+class GameDetailPage extends StatefulWidget {
   final Game game;
-  final UserGame? userGame;
 
-  const GameDetailPage({super.key, required this.game, this.userGame});
+  const GameDetailPage({super.key, required this.game});
+
+  @override
+  State<GameDetailPage> createState() => _GameDetailPageState();
+}
+
+class _GameDetailPageState extends State<GameDetailPage> {
+  UserGame? userGame;
+  bool hasChanges = false;
+  late final SupabaseLibraryRepository repository;
+
+  @override
+  void initState() {
+    super.initState();
+    repository = SupabaseLibraryRepository(Supabase.instance.client);
+    loadUserGame();
+  }
+
+  Future<void> loadUserGame() async {
+    final game = await repository.getUserGame(widget.game.igdbId);
+
+    if (!mounted) return;
+
+    setState(() {
+      userGame = game;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final inLibrary = userGame != null;
 
     return Scaffold(
-      appBar: AppBar(title: Text(game.title)),
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context, hasChanges);
+          },
+        ),
+        title: Text(widget.game.title),
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Hero(
-              tag: game.igdbId,
+              tag: widget.game.igdbId,
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(20),
-                child: game.coverUrl != null
-                    ? Image.network(game.coverUrl!, width: 220)
+                child: widget.game.coverUrl != null
+                    ? Image.network(widget.game.coverUrl!, width: 220)
                     : const SizedBox(
                         width: 220,
                         height: 330,
@@ -41,21 +74,21 @@ class GameDetailPage extends StatelessWidget {
             const SizedBox(height: 24),
 
             Text(
-              game.title,
+              widget.game.title,
               style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
             ),
 
-            if (game.releaseDate != null) ...[
+            if (widget.game.releaseDate != null) ...[
               const SizedBox(height: 8),
               Text(
-                "${game.releaseDate!.year}",
+                widget.game.releaseDate!.year.toString(),
                 style: const TextStyle(fontSize: 18),
               ),
             ],
 
-            if (game.rating != null) ...[
+            if (widget.game.rating != null) ...[
               const SizedBox(height: 12),
-              Text("Valoració IGDB: ${game.rating!.toStringAsFixed(1)}"),
+              Text("Valoració IGDB: ${widget.game.rating!.toStringAsFixed(1)}"),
             ],
 
             if (inLibrary) ...[
@@ -86,9 +119,24 @@ class GameDetailPage extends StatelessWidget {
                   Text("${userGame!.hoursPlayed} hores"),
                 ],
               ),
+
+              if (userGame!.review != null && userGame!.review!.isNotEmpty) ...[
+                const SizedBox(height: 24),
+                const Divider(),
+                const SizedBox(height: 16),
+
+                const Text(
+                  "La meva review",
+                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                ),
+
+                const SizedBox(height: 12),
+
+                Text(userGame!.review!),
+              ],
             ],
 
-            if (game.summary != null) ...[
+            if (widget.game.summary != null) ...[
               const SizedBox(height: 32),
               const Divider(),
               const SizedBox(height: 24),
@@ -100,7 +148,7 @@ class GameDetailPage extends StatelessWidget {
 
               const SizedBox(height: 12),
 
-              Text(game.summary!),
+              Text(widget.game.summary!),
             ],
 
             const SizedBox(height: 40),
@@ -108,32 +156,29 @@ class GameDetailPage extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: FilledButton.icon(
-                onPressed: () async {
-                  if (userGame == null) {
-                    final repository = SupabaseLibraryRepository(
-                      Supabase.instance.client,
-                    );
-
-                    await repository.addToLibrary(game);
-
-                    if (context.mounted) {
-                      Navigator.pop(context, true);
-                    }
-                  } else {
-                    final refresh = await Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) =>
-                            EditGamePage(game: game, userGame: userGame!),
-                      ),
-                    );
-                    if (refresh == true && context.mounted) {
-                      Navigator.pop(context, true);
-                    }
-                  }
-                },
                 icon: Icon(inLibrary ? Icons.edit : Icons.add),
                 label: Text(inLibrary ? "Editar" : "Afegir a la biblioteca"),
+                onPressed: () async {
+                  if (!inLibrary) {
+                    await repository.addToLibrary(widget.game);
+                    await loadUserGame();
+                    
+                    hasChanges = true;
+
+                    return;
+                  }
+
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) =>
+                          EditGamePage(game: widget.game, userGame: userGame!),
+                    ),
+                  );
+
+                  await loadUserGame();
+                  hasChanges = true;
+                },
               ),
             ),
           ],

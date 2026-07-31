@@ -45,6 +45,7 @@ class _EditGamePageState extends State<EditGamePage> {
   }
 
   Future<void> save() async {
+    debugPrint("SAVING");
     final updatedUserGame = UserGame(
       igdbId: widget.userGame.igdbId,
       status: status,

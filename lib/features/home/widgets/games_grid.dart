@@ -4,10 +4,12 @@ import 'game_card.dart';
 
 class GameGrid extends StatelessWidget {
   final List<LibraryGame> games;
+  final VoidCallback onLibraryChanged;
 
   const GameGrid({
     super.key,
     required this.games,
+    required this.onLibraryChanged,
   });
 
   @override
@@ -33,6 +35,7 @@ class GameGrid extends StatelessWidget {
           itemBuilder: (context, index) {
             return GameCard(
               libraryGame: games[index],
+              onLibraryChanged: onLibraryChanged,
             );
           },
         );

@@ -66,4 +66,21 @@ class SupabaseLibraryRepository implements LibraryRepository {
         .eq("user_id", client.auth.currentUser!.id)
         .eq("igdb_id", userGame.igdbId);
   }
+
+  Future<UserGame?> getUserGame(int igdbId) async {
+    final userId = client.auth.currentUser!.id;
+
+    final response = await client
+        .from("user_games")
+        .select()
+        .eq("user_id", userId)
+        .eq("igdb_id", igdbId)
+        .maybeSingle();
+
+    if (response == null) {
+      return null;
+    }
+
+    return UserGame.fromMap(response);
+  }
 }

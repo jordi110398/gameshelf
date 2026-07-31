@@ -6,8 +6,13 @@ import 'game_overlay.dart';
 
 class GameCard extends StatefulWidget {
   final LibraryGame libraryGame;
+  final VoidCallback onLibraryChanged;
 
-  const GameCard({super.key, required this.libraryGame});
+  const GameCard({
+    super.key,
+    required this.libraryGame,
+    required this.onLibraryChanged,
+  });
 
   @override
   State<GameCard> createState() => _GameCardState();
@@ -21,16 +26,17 @@ class _GameCardState extends State<GameCard> {
     final game = widget.libraryGame.game;
 
     return GestureDetector(
-      onTap: () {
-        Navigator.push(
+      onTap: () async {
+        final refresh = await Navigator.push<bool>(
           context,
           MaterialPageRoute(
-            builder: (_) => GameDetailPage(
-              game: widget.libraryGame.game,
-              userGame: widget.libraryGame.userGame,
-            ),
+            builder: (_) => GameDetailPage(game: widget.libraryGame.game),
           ),
         );
+
+        if (refresh == true) {
+          widget.onLibraryChanged();
+        }
       },
       child: MouseRegion(
         onEnter: (_) => setState(() => isHovered = true),
