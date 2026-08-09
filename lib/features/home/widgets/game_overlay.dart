@@ -15,52 +15,75 @@ class GameOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final game = libraryGame.game;
     final userGame = libraryGame.userGame;
+    final status = userGame.status;
 
     return Positioned(
       left: 0,
       right: 0,
       bottom: 0,
+      height: 110,
       child: AnimatedOpacity(
         opacity: visible ? 1 : 0,
         duration: const Duration(milliseconds: 200),
-
         child: Container(
-          padding: const EdgeInsets.all(16),
-          decoration: const BoxDecoration(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 14),
+          alignment: Alignment.bottomCenter,
+          decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
                 Colors.transparent,
                 Colors.transparent,
-                Colors.black54,
-                Colors.black87,
+                status.color.withValues(alpha: 0.10),
+                status.color.withValues(alpha: 0.20),
               ],
             ),
           ),
+          child: status == GameStatus.wantToPlay
+              ? Center(child: Icon(status.icon, color: status.color, size: 26))
+              : Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Estat + valoració
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(status.icon, color: status.color, size: 22),
 
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(game.title, maxLines: 2, overflow: TextOverflow.ellipsis),
+                        const SizedBox(width: 8),
 
-              RatingStars(rating: userGame.rating ?? 0),
+                        RatingStars(rating: userGame.rating ?? 0),
+                      ],
+                    ),
 
-              Row(
-                children: [
-                  Icon(
-                    userGame.status == GameStatus.completed
-                        ? Icons.check_circle
-                        : Icons.cancel,
-                  ),
+                    const SizedBox(height: 4),
 
-                  Text("${userGame.hoursPlayed}h"),
-                ],
-              ),
-            ],
-          ),
+                    // Hores
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.schedule,
+                          size: 17,
+                          color: Colors.white70,
+                        ),
+
+                        const SizedBox(width: 4),
+
+                        Text(
+                          "${userGame.hoursPlayed}h",
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
         ),
       ),
     );

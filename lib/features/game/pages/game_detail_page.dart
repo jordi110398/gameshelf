@@ -38,6 +38,91 @@ class _GameDetailPageState extends State<GameDetailPage> {
     });
   }
 
+  Future<void> showAddToLibrarySheet() async {
+    final status = await showModalBottomSheet<GameStatus>(
+      context: context,
+      builder: (context) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Padding(
+                padding: EdgeInsets.all(20),
+                child: Text(
+                  "Afegir a GameShelf",
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+              ),
+
+              ListTile(
+                leading: Icon(
+                  GameStatus.playing.icon,
+                  color: GameStatus.playing.color,
+                ),
+                title: const Text("Playing"),
+                onTap: () {
+                  Navigator.pop(context, GameStatus.playing);
+                },
+              ),
+
+              ListTile(
+                leading: Icon(
+                  GameStatus.completed.icon,
+                  color: GameStatus.completed.color,
+                ),
+                title: const Text("Completed"),
+                onTap: () {
+                  Navigator.pop(context, GameStatus.completed);
+                },
+              ),
+
+              ListTile(
+                leading: Icon(
+                  GameStatus.wantToPlay.icon,
+                  color: GameStatus.wantToPlay.color,
+                ),
+                title: const Text("Want to Play"),
+                onTap: () {
+                  Navigator.pop(context, GameStatus.wantToPlay);
+                },
+              ),
+
+              ListTile(
+                leading: Icon(
+                  GameStatus.paused.icon,
+                  color: GameStatus.paused.color,
+                ),
+                title: const Text("Paused"),
+                onTap: () {
+                  Navigator.pop(context, GameStatus.paused);
+                },
+              ),
+
+              ListTile(
+                leading: Icon(
+                  GameStatus.dropped.icon,
+                  color: GameStatus.dropped.color,
+                ),
+                title: const Text("Dropped"),
+                onTap: () {
+                  Navigator.pop(context, GameStatus.dropped);
+                },
+              ),
+
+              const SizedBox(height: 8),
+            ],
+          ),
+        );
+      },
+    );
+
+    if (status == null) return;
+
+    await repository.addToLibrary(widget.game, status: status);
+
+    await loadUserGame();
+  }
+
   @override
   Widget build(BuildContext context) {
     final inLibrary = userGame != null;
@@ -100,27 +185,24 @@ class _GameDetailPageState extends State<GameDetailPage> {
 
               Row(
                 children: [
-                  Icon(
-                    userGame!.status == GameStatus.completed
-                        ? Icons.check_circle
-                        : Icons.play_circle,
-                  ),
+                  Icon(userGame!.status.icon, color: userGame!.status.color),
                   const SizedBox(width: 8),
-                  Text(userGame!.status.name),
+                  Text(userGame!.status.displayName),
                 ],
               ),
 
               const SizedBox(height: 12),
 
-              Row(
-                children: [
-                  const Icon(Icons.schedule),
-                  const SizedBox(width: 8),
-                  Text("${userGame!.hoursPlayed} hores"),
-                ],
-              ),
+              if (userGame!.status != GameStatus.wantToPlay)
+                Row(
+                  children: [
+                    const Icon(Icons.schedule),
+                    const SizedBox(width: 8),
+                    Text("${userGame!.hoursPlayed} hores"),
+                  ],
+                ),
 
-              if (userGame!.review != null && userGame!.review!.isNotEmpty) ...[
+              if (userGame!.status != GameStatus.wantToPlay &&userGame!.review != null && userGame!.review!.isNotEmpty) ...[
                 const SizedBox(height: 24),
                 const Divider(),
                 const SizedBox(height: 16),
@@ -160,11 +242,7 @@ class _GameDetailPageState extends State<GameDetailPage> {
                 label: Text(inLibrary ? "Editar" : "Afegir a la biblioteca"),
                 onPressed: () async {
                   if (!inLibrary) {
-                    await repository.addToLibrary(widget.game);
-                    await loadUserGame();
-                    
-                    hasChanges = true;
-
+                    await showAddToLibrarySheet();
                     return;
                   }
 
@@ -177,7 +255,6 @@ class _GameDetailPageState extends State<GameDetailPage> {
                   );
 
                   await loadUserGame();
-                  hasChanges = true;
                 },
               ),
             ),

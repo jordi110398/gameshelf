@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:gameshelf/models/game.dart';
 import 'package:gameshelf/repositories/igdb_repository.dart';
@@ -13,77 +15,172 @@ class SearchPage extends StatefulWidget {
 
 class _SearchPageState extends State<SearchPage> {
   final repository = IgdbRepository(Supabase.instance.client);
-
   final controller = TextEditingController();
 
   List<Game> games = [];
 
   bool loading = false;
 
-  Future<void> search() async {
-    setState(() => loading = true);
+  Timer? _debounce;
 
-    games = await repository.searchGames(controller.text);
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    controller.dispose();
+    super.dispose();
+  }
 
-    setState(() => loading = false);
+  void onSearchChanged(String value) {
+    _debounce?.cancel();
+
+    if (value.trim().isEmpty) {
+      setState(() {
+        games = [];
+        loading = false;
+      });
+      return;
+    }
+
+    setState(() {
+      loading = true;
+    });
+
+    _debounce = Timer(
+      const Duration(milliseconds: 400),
+      () async {
+        final results = await repository.searchGames(value.trim());
+
+        if (!mounted) return;
+
+        setState(() {
+          games = results;
+          loading = false;
+        });
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Buscar jocs")),
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
 
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16),
+        title: SizedBox(
+          height: 40,
+          child: TextField(
+            controller: controller,
+            autofocus: true,
+            onChanged: onSearchChanged,
+            decoration: InputDecoration(
+              hintText: "Buscar jocs...",
+              prefixIcon: const Icon(
+                Icons.search,
+                size: 20,
+              ),
+              filled: true,
+              fillColor: Theme.of(context)
+                  .colorScheme
+                  .surfaceContainerHighest,
 
-            child: SearchBar(
-              controller: controller,
-              hintText: "Buscar...",
-              trailing: [
-                IconButton(onPressed: search, icon: const Icon(Icons.search)),
-              ],
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide(
+                  color: Colors.grey.shade600,
+                ),
+              ),
+
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide(
+                  color: Colors.grey.shade600,
+                ),
+              ),
+
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide(
+                  color: Theme.of(context).colorScheme.primary,
+                  width: 2,
+                ),
+              ),
+
+              contentPadding: const EdgeInsets.symmetric(
+                vertical: 0,
+                horizontal: 8,
+              ),
             ),
           ),
-
-          Expanded(
-            child: loading
-                ? const Center(child: CircularProgressIndicator())
-                : ListView.builder(
-                    itemCount: games.length,
-
-                    itemBuilder: (_, i) {
-                      final game = games[i];
-
-                      return ListTile(
-                        leading: game.coverUrl != null
-                            ? Image.network(game.coverUrl!, width: 50)
-                            : null,
-
-                        title: Text(game.title),
-
-                        subtitle: Text(game.releaseDate?.year.toString() ?? ""),
-
-                        trailing: const Icon(Icons.chevron_right),
-
-                        onTap: () async {
-                          final refresh = await Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => GameDetailPage(game: game),
-                            ),
-                          );
-                          if (refresh == true && context.mounted) {
-                            Navigator.pop(context, true);
-                          }
-                        },
-                      );
-                    },
-                  ),
-          ),
-        ],
+        ),
       ),
+
+      body: loading
+          ? const Center(
+              child: CircularProgressIndicator(),
+            )
+          : games.isEmpty
+              ? const Center(
+                  child: Text(
+                    "Busca un joc per començar",
+                  ),
+                )
+              : ListView.builder(
+                  itemCount: games.length,
+                  itemBuilder: (_, i) {
+                    final game = games[i];
+
+                    return ListTile(
+                      leading: game.coverUrl != null
+                          ? ClipRRect(
+                              borderRadius: BorderRadius.circular(6),
+                              child: Image.network(
+                                game.coverUrl!,
+                                width: 50,
+                                height: 70,
+                                fit: BoxFit.cover,
+                              ),
+                            )
+                          : const SizedBox(
+                              width: 50,
+                              height: 70,
+                              child: ColoredBox(
+                                color: Colors.grey,
+                              ),
+                            ),
+
+                      title: Text(game.title),
+
+                      subtitle: Text(
+                        game.releaseDate?.year.toString() ?? "",
+                      ),
+
+                      trailing: const Icon(
+                        Icons.chevron_right,
+                      ),
+
+                      onTap: () async {
+                        final refresh =
+                            await Navigator.push<bool>(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                GameDetailPage(game: game),
+                          ),
+                        );
+
+                        if (refresh == true && context.mounted) {
+                          Navigator.pop(context, true);
+                        }
+                      },
+                    );
+                  },
+                ),
     );
   }
 }
+

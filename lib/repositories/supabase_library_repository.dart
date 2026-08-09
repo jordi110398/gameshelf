@@ -3,6 +3,7 @@ import '../models/library_game.dart';
 import '../models/game.dart';
 import '../models/user_game.dart';
 import 'library_repository.dart';
+import '../models/game_status.dart';
 
 class SupabaseLibraryRepository implements LibraryRepository {
   final SupabaseClient client;
@@ -43,13 +44,16 @@ class SupabaseLibraryRepository implements LibraryRepository {
     await client.from("games").upsert(game.toMap(), onConflict: "igdb_id");
   }
 
-  Future<void> addToLibrary(Game game) async {
+  Future<void> addToLibrary(
+    Game game, {
+    GameStatus status = GameStatus.wantToPlay,
+  }) async {
     await saveGame(game);
 
     await client.from("user_games").insert({
       "user_id": client.auth.currentUser!.id,
       "igdb_id": game.igdbId,
-      "status": "backlog",
+      "status": status.databaseValue,
       "rating": null,
       "hours_played": 0,
       "favorite": false,
