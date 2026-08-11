@@ -37,7 +37,17 @@ class SupabaseLibraryRepository implements LibraryRepository {
 
   @override
   Future<void> removeGame(int igdbId) async {
-    await client.from('user_games').delete().eq('igdb_id', igdbId);
+    final user = Supabase.instance.client.auth.currentUser;
+
+    if (user == null) {
+      throw Exception("Usuari no autenticat");
+    }
+
+    await Supabase.instance.client
+        .from("user_games")
+        .delete()
+        .eq("user_id", user.id)
+        .eq("igdb_id", igdbId);
   }
 
   Future<void> saveGame(Game game) async {

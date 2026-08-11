@@ -119,6 +119,7 @@ class _GameDetailPageState extends State<GameDetailPage> {
     if (status == null) return;
 
     await repository.addToLibrary(widget.game, status: status);
+    hasChanges = true;
 
     await loadUserGame();
   }
@@ -202,7 +203,9 @@ class _GameDetailPageState extends State<GameDetailPage> {
                   ],
                 ),
 
-              if (userGame!.status != GameStatus.wantToPlay &&userGame!.review != null && userGame!.review!.isNotEmpty) ...[
+              if (userGame!.status != GameStatus.wantToPlay &&
+                  userGame!.review != null &&
+                  userGame!.review!.isNotEmpty) ...[
                 const SizedBox(height: 24),
                 const Divider(),
                 const SizedBox(height: 16),
@@ -246,13 +249,17 @@ class _GameDetailPageState extends State<GameDetailPage> {
                     return;
                   }
 
-                  await Navigator.push(
+                  final edited = await Navigator.push<bool>(
                     context,
                     MaterialPageRoute(
                       builder: (_) =>
                           EditGamePage(game: widget.game, userGame: userGame!),
                     ),
                   );
+
+                  if (edited == true) {
+                    hasChanges = true;
+                  }
 
                   await loadUserGame();
                 },

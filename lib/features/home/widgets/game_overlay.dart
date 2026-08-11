@@ -46,6 +46,32 @@ class GameOverlay extends StatelessWidget {
               : Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
+                    if (userGame.review != null &&
+                        userGame.review!.trim().isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 8,
+                        ),
+                        child: Text(
+                          userGame.review!,
+                          maxLines: 3,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 13,
+                            fontStyle: FontStyle.italic,
+                            shadows: [
+                              Shadow(
+                                color: Colors.black87,
+                                blurRadius: 4,
+                                offset: Offset(0, 1),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
                     // Estat + valoració
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,

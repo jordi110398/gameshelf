@@ -253,7 +253,15 @@ class _HomePageState extends State<HomePage> {
                     ? const Center(
                         child: Text("No hi ha jocs en aquesta categoria"),
                       )
-                    : GameGrid(games: filteredGames, onLibraryChanged: refresh),
+                    : GameGrid(
+                        games: filteredGames,
+                        onLibraryChanged: refresh,
+                        onGameDeleted: (libraryGame) async {
+                          await repository.removeGame(libraryGame.game.igdbId);
+
+                          refresh();
+                        },
+                      ),
               ),
             ],
           );

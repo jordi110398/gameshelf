@@ -14,6 +14,8 @@ class Game {
 
   final String? slug;
 
+  final List<String> genres;
+
   const Game({
     required this.igdbId,
     required this.title,
@@ -24,6 +26,7 @@ class Game {
     this.rating,
     this.ratingCount,
     this.slug,
+    this.genres = const [],
   });
 
   factory Game.fromMap(Map<String, dynamic> map) {
@@ -39,6 +42,9 @@ class Game {
       rating: map["rating"]?.toDouble(),
       ratingCount: map["rating_count"],
       slug: map["slug"],
+      genres: map["genres"] != null
+          ? List<String>.from(map["genres"])
+          : const [],
     );
   }
 
@@ -53,6 +59,7 @@ class Game {
       "rating": rating,
       "rating_count": ratingCount,
       "slug": slug,
+      "genres": genres,
     };
   }
 }

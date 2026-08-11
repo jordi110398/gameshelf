@@ -9,10 +9,15 @@ class GameCard extends StatefulWidget {
   final LibraryGame libraryGame;
   final VoidCallback onLibraryChanged;
 
+  final bool isActive;
+  final VoidCallback onActivate;
+
   const GameCard({
     super.key,
     required this.libraryGame,
     required this.onLibraryChanged,
+    required this.isActive,
+    required this.onActivate,
   });
 
   @override
@@ -22,55 +27,101 @@ class GameCard extends StatefulWidget {
 class _GameCardState extends State<GameCard> {
   bool isHovered = false;
 
+  Future<void> openGameDetail() async {
+    final refresh = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => GameDetailPage(
+          game: widget.libraryGame.game,
+        ),
+      ),
+    );
+
+    if (refresh == true) {
+      widget.onLibraryChanged();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final game = widget.libraryGame.game;
     final status = widget.libraryGame.userGame.status;
+    final statusColor = status.color;
+
+    final isMobile = MediaQuery.of(context).size.width < 600;
+
+    final isActive = isMobile
+        ? widget.isActive
+        : isHovered;
 
     return GestureDetector(
       onTap: () async {
-        final refresh = await Navigator.push<bool>(
-          context,
-          MaterialPageRoute(
-            builder: (_) => GameDetailPage(
-              game: widget.libraryGame.game,
-            ),
-          ),
-        );
+        if (isMobile) {
+          // Primer tap: activar aquesta card
+          if (!widget.isActive) {
+            widget.onActivate();
+            return;
+          }
 
-        if (refresh == true) {
-          widget.onLibraryChanged();
+          // Segon tap: obrir el detall
+          await openGameDetail();
+        } else {
+          // Desktop: clic directe al detall
+          await openGameDetail();
         }
       },
+
       child: MouseRegion(
-        onEnter: (_) => setState(() => isHovered = true),
-        onExit: (_) => setState(() => isHovered = false),
+        onEnter: (_) {
+          if (!isMobile) {
+            setState(() {
+              isHovered = true;
+            });
+          }
+        },
+
+        onExit: (_) {
+          if (!isMobile) {
+            setState(() {
+              isHovered = false;
+            });
+          }
+        },
+
         child: AnimatedScale(
-          scale: isHovered ? 1.03 : 1.0,
+          scale: isActive ? 1.03 : 1.0,
           duration: const Duration(milliseconds: 180),
+
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 180),
+
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16),
-              boxShadow: isHovered
+
+              boxShadow: isActive
                   ? [
                       BoxShadow(
-                        color: status.color.withValues(alpha: 0.55),
+                        color: statusColor.withValues(alpha: 0.55),
                         blurRadius: 16,
                         spreadRadius: 2,
                       ),
                     ]
                   : [],
             ),
+
             child: ClipRRect(
               borderRadius: BorderRadius.circular(16),
+
               child: AspectRatio(
                 aspectRatio: 2 / 3,
+
                 child: Stack(
                   fit: StackFit.expand,
+
                   children: [
                     Hero(
                       tag: game.igdbId,
+
                       child: game.coverUrl != null
                           ? Image.network(
                               game.coverUrl!,
@@ -87,7 +138,7 @@ class _GameCardState extends State<GameCard> {
 
                     GameOverlay(
                       libraryGame: widget.libraryGame,
-                      visible: isHovered,
+                      visible: isActive,
                     ),
                   ],
                 ),
