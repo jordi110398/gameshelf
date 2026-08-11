@@ -3,6 +3,7 @@ class Game {
 
   final String title;
   final String? coverUrl;
+  final String? artworkUrl;
 
   final String? summary;
   final String? storyline;
@@ -20,6 +21,7 @@ class Game {
     required this.igdbId,
     required this.title,
     this.coverUrl,
+    this.artworkUrl,
     this.summary,
     this.storyline,
     this.releaseDate,
@@ -34,6 +36,7 @@ class Game {
       igdbId: map["igdb_id"] as int,
       title: map["title"] as String,
       coverUrl: map["cover_url"],
+      artworkUrl: map["artwork_url"],
       summary: map["summary"],
       storyline: map["storyline"],
       releaseDate: map["release_date"] != null
@@ -53,6 +56,7 @@ class Game {
       "igdb_id": igdbId,
       "title": title,
       "cover_url": coverUrl,
+      "artwork_url": artworkUrl,
       "summary": summary,
       "storyline": storyline,
       "release_date": releaseDate?.toIso8601String(),
