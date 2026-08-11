@@ -1,17 +1,35 @@
 import 'package:flutter/material.dart';
+import 'package:gameshelf/models/game_status.dart';
+import 'package:gameshelf/models/library_game.dart';
 
 class Stats extends StatelessWidget {
-  const Stats({super.key});
+  final List<LibraryGame> games;
+
+  const Stats({
+    super.key,
+    required this.games,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final totalGames = games.length;
+
+    final completedGames = games.where(
+      (game) => game.userGame.status == GameStatus.completed,
+    ).length;
+
+    final totalHours = games.fold<int>(
+      0,
+      (sum, game) => sum + game.userGame.hoursPlayed,
+    );
+
     return Row(
-      children: const [
-        Text("3 jocs"),
-        SizedBox(width: 24),
-        Text("2 completats"),
-        SizedBox(width: 24),
-        Text("Total jugat: 49h"),
+      children: [
+        Text("$totalGames jocs"),
+        const SizedBox(width: 24),
+        Text("$completedGames completats"),
+        const SizedBox(width: 24),
+        Text("Total jugat: ${totalHours}h"),
       ],
     );
   }

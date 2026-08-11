@@ -5,11 +5,11 @@
 - [x] Register
 - [x] Supabase
 - [x] Login amb nickname
-- [ ] Biblioteca d'usuari
-- [ ] Cerca IGDB
-- [ ] Afegir joc
-- [ ] Reviews
-- [ ] Perfil
+- [x] Biblioteca d'usuari
+- [x] Cerca IGDB
+- [x] Afegir joc
+- [x] Reviews
+- [x] Perfil
 
 ## v1.0
 - [ ] Llistes personalitzades

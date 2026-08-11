@@ -1,16 +1,17 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:gameshelf/models/profile.dart';
+import 'package:flutter/foundation.dart';
 
 class ProfileService {
   final _supabase = Supabase.instance.client;
 
   Future<void> createProfile({
+    required String userId,
     required String nickname,
     required String email,
   }) async {
-    final user = _supabase.auth.currentUser!;
-
     await _supabase.from("profiles").insert({
-      "id": user.id,
+      "id": userId,
       "nickname": nickname,
       "email": email,
     });
@@ -29,5 +30,25 @@ class ProfileService {
     }
 
     return response.data["email"] as String?;
+  }
+
+  Future<Profile?> getCurrentProfile() async {
+    final user = _supabase.auth.currentUser;
+
+    debugPrint("USER ID: ${user?.id}");
+
+    if (user == null) return null;
+
+    final response = await _supabase
+        .from("profiles")
+        .select()
+        .eq("id", user.id)
+        .maybeSingle();
+
+    debugPrint("PROFILE RESPONSE: $response");
+
+    if (response == null) return null;
+
+    return Profile.fromMap(response);
   }
 }

@@ -13,6 +13,9 @@ Aquest projecte segueix el format de Keep a Changelog.
 - Login amb nickname mitjançant Edge Function.
 - Registre d'usuaris.
 - Taula `profiles`.
+- Connexió BDD IGDB
+- Videojocs afegibles a la biblioteca.
+- Pantalla per editar els videojocs.
 
 ## [0.1.0] - 2026-07-28
 
