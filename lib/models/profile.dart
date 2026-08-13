@@ -1,25 +1,41 @@
 class Profile {
   final String id;
   final String nickname;
-  final String email;
   final String? avatarUrl;
   final String? bio;
+  final DateTime? createdAt;
+  final String email;
 
   const Profile({
     required this.id,
     required this.nickname,
-    required this.email,
     this.avatarUrl,
     this.bio,
+    this.createdAt,
+    required this.email,
   });
 
   factory Profile.fromMap(Map<String, dynamic> map) {
     return Profile(
-      id: map["id"],
-      nickname: map["nickname"],
-      email: map["email"],
-      avatarUrl: map["avatar_url"],
-      bio: map["bio"],
+      id: map['id'] as String,
+      nickname: map['nickname'] as String,
+      avatarUrl: map['avatar_url'] as String?,
+      bio: map['bio'] as String?,
+      createdAt: map['created_at'] != null
+          ? DateTime.parse(map['created_at'] as String)
+          : null,
+      email: map['email'] as String,
     );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'nickname': nickname,
+      'avatar_url': avatarUrl,
+      'bio': bio,
+      'created_at': createdAt?.toIso8601String(),
+      'email': email,
+    };
   }
 }

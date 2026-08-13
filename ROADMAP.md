@@ -13,6 +13,6 @@
 
 ## v1.0
 - [ ] Llistes personalitzades
-- [ ] Estadístiques
+- [x] Estadístiques
 - [ ] Compartir perfil
-- [ ] Amics
+- [x] Amics
