@@ -4,6 +4,9 @@ import 'package:gameshelf/models/profile.dart';
 import 'package:gameshelf/repositories/profile_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:gameshelf/repositories/friendship_repository.dart';
+import 'package:gameshelf/models/activity_item.dart';
+import 'package:gameshelf/repositories/activity_repository.dart';
+import 'package:gameshelf/features/activity/widgets/activity_card.dart';
 
 class SocialPage extends StatefulWidget {
   const SocialPage({super.key});
@@ -15,6 +18,7 @@ class SocialPage extends StatefulWidget {
 class _SocialPageState extends State<SocialPage> {
   late final ProfileRepository repository;
   late final TextEditingController searchController;
+  late final ActivityRepository activityRepository;
 
   List<Profile> profiles = [];
 
@@ -25,8 +29,12 @@ class _SocialPageState extends State<SocialPage> {
 
   List<Profile> friends = [];
   List<Map<String, dynamic>> pendingRequests = [];
+  List<ActivityItem> activityFeed = [];
 
   bool isSocialLoading = true;
+  bool isRequestsExpanded = true;
+  bool isFriendsExpanded = true;
+  bool isActivityExpanded = true;
 
   @override
   void initState() {
@@ -36,6 +44,7 @@ class _SocialPageState extends State<SocialPage> {
 
     repository = ProfileRepository(Supabase.instance.client);
     friendshipRepository = FriendshipRepository(client);
+    activityRepository = ActivityRepository(client);
 
     searchController = TextEditingController();
 
@@ -100,12 +109,14 @@ class _SocialPageState extends State<SocialPage> {
       final loadedFriends = await repository.getProfilesByIds(friendIds);
 
       final requests = await friendshipRepository.getPendingRequests();
+      final activity = await activityRepository.getFeed(limit: 5);
 
       if (!mounted) return;
 
       setState(() {
         friends = loadedFriends;
         pendingRequests = requests;
+        activityFeed = activity;
         isSocialLoading = false;
       });
     } catch (e) {
@@ -246,25 +257,123 @@ class _SocialPageState extends State<SocialPage> {
         // SOL·LICITUDS
         // ─────────────────────────────
         if (pendingRequests.isNotEmpty) ...[
-          Row(
+          _buildSectionTile(
+            icon: Icons.person_add_outlined,
+            title: 'Sol·licituds',
+            count: pendingRequests.length,
+            isExpanded: isRequestsExpanded,
+            onExpansionChanged: (value) {
+              setState(() => isRequestsExpanded = value);
+            },
+            children: pendingRequests
+                .map(
+                  (request) => Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: _buildPendingRequest(request),
+                  ),
+                )
+                .toList(),
+          ),
+          const SizedBox(height: 20),
+        ],
+
+        // ─────────────────────────────
+        // AMICS
+        // ─────────────────────────────
+        _buildSectionTile(
+          icon: Icons.people_outline,
+          title: 'Amics',
+          count: friends.length,
+          isExpanded: isFriendsExpanded,
+          onExpansionChanged: (value) {
+            setState(() => isFriendsExpanded = value);
+          },
+          children: friends.isEmpty
+              ? [_buildEmptyFriends()]
+              : friends
+                    .map(
+                      (friend) => Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: _ProfileTile(
+                          profile: friend,
+                          onTap: () => openProfile(friend),
+                        ),
+                      ),
+                    )
+                    .toList(),
+        ),
+
+        const SizedBox(height: 20),
+
+        // ─────────────────────────────
+        // ACTIVITAT
+        // ─────────────────────────────
+        if (activityFeed.isNotEmpty)
+          _buildSectionTile(
+            icon: Icons.dynamic_feed_outlined,
+            title: 'Resum activitats',
+            count: activityFeed.length,
+            isExpanded: isActivityExpanded,
+            onExpansionChanged: (value) {
+              setState(() => isActivityExpanded = value);
+            },
+            children: activityFeed
+                .map(
+                  (item) => Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: ActivityCard(item: item),
+                  ),
+                )
+                .toList(),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildSectionTile({
+    required IconData icon,
+    required String title,
+    required int count,
+    required bool isExpanded,
+    required ValueChanged<bool> onExpansionChanged,
+    required List<Widget> children,
+  }) {
+    return Theme(
+      // Treu la línia divisòria per defecte de l'ExpansionTile
+      data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: ExpansionTile(
+          initiallyExpanded: isExpanded,
+          onExpansionChanged: onExpansionChanged,
+          tilePadding: const EdgeInsets.symmetric(horizontal: 14),
+          childrenPadding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
+          iconColor: Theme.of(context).colorScheme.primary,
+          collapsedIconColor: Colors.grey.shade500,
+          title: Row(
             children: [
-              const Icon(Icons.person_add_outlined),
+              Icon(icon, size: 20),
               const SizedBox(width: 8),
               Text(
-                'Sol·licituds',
-                style: Theme.of(
-                  context,
-                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                title,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(width: 8),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.primary,
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
-                  '${pendingRequests.length}',
+                  '$count',
                   style: TextStyle(
                     color: Theme.of(context).colorScheme.onPrimary,
                     fontSize: 12,
@@ -274,55 +383,9 @@ class _SocialPageState extends State<SocialPage> {
               ),
             ],
           ),
-
-          const SizedBox(height: 12),
-
-          ...pendingRequests.map((request) => _buildPendingRequest(request)),
-
-          const SizedBox(height: 28),
-        ],
-
-        // ─────────────────────────────
-        // AMICS
-        // ─────────────────────────────
-        Row(
-          children: [
-            const Icon(Icons.people_outline),
-            const SizedBox(width: 8),
-            Text(
-              'Amics',
-              style: Theme.of(
-                context,
-              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(width: 8),
-            Text(
-              '${friends.length}',
-              style: TextStyle(
-                color: Colors.grey.shade600,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
+          children: children,
         ),
-
-        const SizedBox(height: 12),
-
-        if (friends.isEmpty)
-          _buildEmptyFriends()
-        else
-          ...friends.map(
-            (friend) => Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: _ProfileTile(
-                profile: friend,
-                onTap: () {
-                  openProfile(friend);
-                },
-              ),
-            ),
-          ),
-      ],
+      ),
     );
   }
 
