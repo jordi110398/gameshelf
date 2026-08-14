@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -9,10 +9,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 class EditProfilePage extends StatefulWidget {
   final Profile profile;
 
-  const EditProfilePage({
-    super.key,
-    required this.profile,
-  });
+  const EditProfilePage({super.key, required this.profile});
 
   @override
   State<EditProfilePage> createState() => _EditProfilePageState();
@@ -20,11 +17,10 @@ class EditProfilePage extends StatefulWidget {
 
 class _EditProfilePageState extends State<EditProfilePage> {
   late final ProfileRepository repository;
-
-  late final TextEditingController nicknameController;
   late final TextEditingController bioController;
 
-  File? selectedImage;
+  XFile? selectedImage;
+  Uint8List? selectedImageBytes;
 
   bool isSaving = false;
 
@@ -32,26 +28,20 @@ class _EditProfilePageState extends State<EditProfilePage> {
   void initState() {
     super.initState();
 
-    repository = ProfileRepository(
-      Supabase.instance.client,
-    );
+    repository = ProfileRepository(Supabase.instance.client);
 
-    nicknameController = TextEditingController(
-      text: widget.profile.nickname,
-    );
-
-    bioController = TextEditingController(
-      text: widget.profile.bio ?? '',
-    );
+    bioController = TextEditingController(text: widget.profile.bio ?? '');
   }
 
   @override
   void dispose() {
-    nicknameController.dispose();
     bioController.dispose();
-
     super.dispose();
   }
+
+  // ─────────────────────────────────────────────
+  // SELECCIONAR AVATAR
+  // ─────────────────────────────────────────────
 
   Future<void> pickAvatar() async {
     final picker = ImagePicker();
@@ -63,54 +53,49 @@ class _EditProfilePageState extends State<EditProfilePage> {
       maxHeight: 800,
     );
 
-    if (image == null) return;
+    if (image == null || !mounted) return;
+
+    final bytes = await image.readAsBytes();
 
     setState(() {
-      selectedImage = File(image.path);
+      selectedImage = image;
+      selectedImageBytes = bytes;
     });
   }
 
+  // ─────────────────────────────────────────────
+  // GUARDAR PERFIL
+  // ─────────────────────────────────────────────
+
   Future<void> saveProfile() async {
-    final nickname = nicknameController.text.trim();
     final bio = bioController.text.trim();
-
-    if (nickname.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'El nickname no pot estar buit.',
-          ),
-        ),
-      );
-
-      return;
-    }
 
     setState(() {
       isSaving = true;
     });
 
     try {
-      String? avatarUrl = widget.profile.avatarUrl;
-
-      final user = Supabase.instance.client.auth.currentUser;
+      final client = Supabase.instance.client;
+      final user = client.auth.currentUser;
 
       if (user == null) {
         throw Exception('Usuari no autenticat');
       }
 
-      // ─────────────────────────────
-      // PUJAR AVATAR
-      // ─────────────────────────────
+      String? avatarUrl = widget.profile.avatarUrl;
 
-      if (selectedImage != null) {
+      // ─────────────────────────────────────────
+      // PUJAR AVATAR
+      // ─────────────────────────────────────────
+
+      if (selectedImageBytes != null) {
         final path = '${user.id}/avatar.jpg';
 
-        await Supabase.instance.client.storage
+        await client.storage
             .from('avatars')
-            .upload(
+            .uploadBinary(
               path,
-              selectedImage!,
+              selectedImageBytes!,
               fileOptions: const FileOptions(
                 upsert: true,
                 contentType: 'image/jpeg',
@@ -118,45 +103,47 @@ class _EditProfilePageState extends State<EditProfilePage> {
               ),
             );
 
-        avatarUrl = Supabase.instance.client.storage
-            .from('avatars')
-            .getPublicUrl(path);
+        avatarUrl = client.storage.from('avatars').getPublicUrl(path);
 
-        // Evitem que el navegador/app mantingui
-        // una versió antiga de la imatge.
+        // Evitem que es mostri l'avatar anterior
+        // per culpa de la caché.
         avatarUrl = '$avatarUrl?t=${DateTime.now().millisecondsSinceEpoch}';
       }
 
-      // ─────────────────────────────
+      // ─────────────────────────────────────────
       // ACTUALITZAR PERFIL
-      // ─────────────────────────────
+      // ─────────────────────────────────────────
 
       final updatedProfile = Profile(
         id: widget.profile.id,
-        nickname: nickname,
+
+        // El nickname de moment NO es pot modificar.
+        nickname: widget.profile.nickname,
+
         avatarUrl: avatarUrl,
+
         bio: bio.isEmpty ? null : bio,
+
         createdAt: widget.profile.createdAt,
+
+        // L'email de moment NO es pot modificar.
         email: widget.profile.email,
       );
 
-      await repository.updateMyProfile(
-        updatedProfile,
-      );
+      await repository.updateMyProfile(updatedProfile);
 
       if (!mounted) return;
 
-      Navigator.pop(context, true);
+      // Retornem el perfil actualitzat a UserProfilePage.
+      Navigator.pop(context, updatedProfile);
     } catch (e) {
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'No s\'ha pogut guardar el perfil: $e',
-          ),
-        ),
-      );
+      debugPrint('ERROR COMPLET: $e');
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error: $e')));
 
       setState(() {
         isSaving = false;
@@ -164,12 +151,85 @@ class _EditProfilePageState extends State<EditProfilePage> {
     }
   }
 
+  // ─────────────────────────────────────────────
+  // AVATAR
+  // ─────────────────────────────────────────────
+
+  Widget _buildAvatar() {
+    Widget avatarContent;
+
+    // Nova imatge seleccionada
+    if (selectedImageBytes != null) {
+      avatarContent = Image.memory(
+        selectedImageBytes!,
+        width: 130,
+        height: 130,
+        fit: BoxFit.cover,
+      );
+    }
+    // Avatar actual
+    else if (widget.profile.avatarUrl != null &&
+        widget.profile.avatarUrl!.isNotEmpty) {
+      avatarContent = Image.network(
+        widget.profile.avatarUrl!,
+        width: 130,
+        height: 130,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) {
+          return const Icon(Icons.person, size: 65);
+        },
+      );
+    }
+    // Sense avatar
+    else {
+      avatarContent = const Icon(Icons.person, size: 65);
+    }
+
+    return Center(
+      child: GestureDetector(
+        onTap: isSaving ? null : pickAvatar,
+
+        child: Stack(
+          alignment: Alignment.bottomRight,
+          children: [
+            CircleAvatar(
+              radius: 65,
+              backgroundColor: Theme.of(
+                context,
+              ).colorScheme.surfaceContainerHighest,
+
+              child: ClipOval(child: avatarContent),
+            ),
+
+            // Icona de càmera
+            Container(
+              padding: const EdgeInsets.all(9),
+
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primary,
+                shape: BoxShape.circle,
+              ),
+
+              child: const Icon(
+                Icons.camera_alt,
+                color: Colors.white,
+                size: 20,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ─────────────────────────────────────────────
+  // BUILD
+  // ─────────────────────────────────────────────
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Editar perfil'),
-      ),
+      appBar: AppBar(title: const Text('Editar perfil')),
 
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
@@ -177,116 +237,59 @@ class _EditProfilePageState extends State<EditProfilePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ─────────────────────────────
+            // ───────────────────────────────────
             // AVATAR
-            // ─────────────────────────────
-
-            Center(
-              child: GestureDetector(
-                onTap: isSaving ? null : pickAvatar,
-
-                child: Stack(
-                  alignment: Alignment.bottomRight,
-                  children: [
-                    CircleAvatar(
-                      radius: 65,
-
-                      backgroundImage: selectedImage != null
-                          ? FileImage(selectedImage!)
-                          : widget.profile.avatarUrl != null &&
-                                  widget.profile.avatarUrl!.isNotEmpty
-                              ? NetworkImage(
-                                  widget.profile.avatarUrl!,
-                                )
-                              : null,
-
-                      child: selectedImage == null &&
-                              (widget.profile.avatarUrl == null ||
-                                  widget.profile.avatarUrl!.isEmpty)
-                          ? const Icon(
-                              Icons.person,
-                              size: 65,
-                            )
-                          : null,
-                    ),
-
-                    Container(
-                      padding: const EdgeInsets.all(9),
-
-                      decoration: BoxDecoration(
-                        color: Theme.of(context)
-                            .colorScheme
-                            .primary,
-                        shape: BoxShape.circle,
-                      ),
-
-                      child: const Icon(
-                        Icons.camera_alt,
-                        color: Colors.white,
-                        size: 20,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+            // ───────────────────────────────────
+            _buildAvatar(),
 
             const SizedBox(height: 12),
 
             Center(
               child: TextButton(
                 onPressed: isSaving ? null : pickAvatar,
-                child: const Text(
-                  'Canviar foto',
-                ),
+                child: const Text('Canviar foto'),
               ),
             ),
 
             const SizedBox(height: 28),
 
-            // ─────────────────────────────
+            // ───────────────────────────────────
             // NICKNAME
-            // ─────────────────────────────
-
+            // ───────────────────────────────────
             const Text(
               'Nickname',
-              style: TextStyle(
-                fontSize: 17,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
             ),
 
             const SizedBox(height: 10),
 
             TextFormField(
-              controller: nicknameController,
-              maxLength: 20,
+              initialValue: widget.profile.nickname,
+              readOnly: true,
 
               decoration: const InputDecoration(
                 prefixText: '@ ',
                 border: OutlineInputBorder(),
-                hintText: 'El teu nickname',
+
+                prefixIcon: Icon(Icons.person_outline),
               ),
             ),
 
             const SizedBox(height: 20),
 
-            // ─────────────────────────────
+            // ───────────────────────────────────
             // BIO
-            // ─────────────────────────────
-
+            // ───────────────────────────────────
             const Text(
               'Bio',
-              style: TextStyle(
-                fontSize: 17,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
             ),
 
             const SizedBox(height: 10),
 
             TextFormField(
               controller: bioController,
+
               maxLength: 150,
               minLines: 3,
               maxLines: 5,
@@ -300,16 +303,12 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
             const SizedBox(height: 28),
 
-            // ─────────────────────────────
+            // ───────────────────────────────────
             // EMAIL
-            // ─────────────────────────────
-
+            // ───────────────────────────────────
             const Text(
               'Email',
-              style: TextStyle(
-                fontSize: 17,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
             ),
 
             const SizedBox(height: 10),
@@ -320,43 +319,32 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
               decoration: const InputDecoration(
                 border: OutlineInputBorder(),
-                prefixIcon: Icon(
-                  Icons.email_outlined,
-                ),
+
+                prefixIcon: Icon(Icons.email_outlined),
               ),
             ),
 
             const SizedBox(height: 36),
 
-            // ─────────────────────────────
+            // ───────────────────────────────────
             // GUARDAR
-            // ─────────────────────────────
-
+            // ───────────────────────────────────
             SizedBox(
               width: double.infinity,
 
               child: FilledButton.icon(
-                onPressed: isSaving
-                    ? null
-                    : saveProfile,
+                onPressed: isSaving ? null : saveProfile,
 
                 icon: isSaving
                     ? const SizedBox(
                         width: 18,
                         height: 18,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                        ),
-                      )
-                    : const Icon(
-                        Icons.save,
-                      ),
 
-                label: Text(
-                  isSaving
-                      ? 'Guardant...'
-                      : 'Guardar canvis',
-                ),
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.save),
+
+                label: Text(isSaving ? 'Guardant...' : 'Guardar canvis'),
               ),
             ),
           ],

@@ -63,8 +63,8 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
           onChanged: onSearchChanged,
           decoration: InputDecoration(
             hintText: isMobile
-                ? "Buscar a la biblio..."
-                : "Buscar a la biblioteca...",
+                ? "Buscar a la meva biblio..."
+                : "Buscar a la meva biblioteca...",
             prefixIcon: const Icon(Icons.search, size: 20),
             filled: true,
             fillColor:

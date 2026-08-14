@@ -7,6 +7,10 @@ import 'package:gameshelf/repositories/profile_repository.dart';
 import 'package:gameshelf/repositories/supabase_library_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:gameshelf/core/services/user_tags_service.dart';
+import 'package:gameshelf/features/profile/edit_profile_page.dart';
+import 'package:gameshelf/repositories/friendship_repository.dart';
+import 'package:gameshelf/features/social/social_page.dart';
+import 'package:gameshelf/core/services/auth_service.dart';
 
 class UserProfilePage extends StatefulWidget {
   final Profile profile;
@@ -21,6 +25,12 @@ class _UserProfilePageState extends State<UserProfilePage> {
   late final ProfileRepository profileRepository;
   late final SupabaseLibraryRepository libraryRepository;
   final UserTagsService tagsService = const UserTagsService();
+  late Profile currentProfile;
+  late final FriendshipRepository friendshipRepository;
+
+  Map<String, dynamic>? friendship;
+  bool isFriendshipLoading = true;
+  bool isFriendshipActionLoading = false;
 
   int? activeGameId;
 
@@ -36,12 +46,16 @@ class _UserProfilePageState extends State<UserProfilePage> {
   void initState() {
     super.initState();
 
+    currentProfile = widget.profile;
+
     final client = Supabase.instance.client;
 
     profileRepository = ProfileRepository(client);
     libraryRepository = SupabaseLibraryRepository(client);
+    friendshipRepository = FriendshipRepository(client);
 
     loadProfile();
+    loadFriendship();
   }
 
   // ─────────────────────────────────────────────
@@ -55,18 +69,18 @@ class _UserProfilePageState extends State<UserProfilePage> {
       return false;
     }
 
-    return currentUser.id == widget.profile.id;
+    return currentUser.id == currentProfile.id;
   }
 
   // ─────────────────────────────────────────────
-  // CARREGAR PERFIL
+  // CARREGAR PERFIL + AMISTATS
   // ─────────────────────────────────────────────
 
   Future<void> loadProfile() async {
     try {
       final results = await Future.wait([
         _loadStats(),
-        libraryRepository.getUserLibrary(widget.profile.id),
+        libraryRepository.getUserLibrary(currentProfile.id),
       ]);
 
       if (!mounted) return;
@@ -89,6 +103,277 @@ class _UserProfilePageState extends State<UserProfilePage> {
     }
   }
 
+  Future<void> reloadProfile() async {
+    final profile = await profileRepository.getProfileById(widget.profile.id);
+
+    if (!mounted || profile == null) return;
+
+    setState(() {
+      currentProfile = profile;
+    });
+  }
+
+  Future<void> loadFriendship() async {
+    if (isMyProfile) {
+      setState(() {
+        isFriendshipLoading = false;
+      });
+      return;
+    }
+
+    try {
+      final result = await friendshipRepository.getFriendship(
+        currentProfile.id,
+      );
+
+      if (!mounted) return;
+
+      setState(() {
+        friendship = result;
+        isFriendshipLoading = false;
+      });
+    } catch (e) {
+      debugPrint('Error carregant amistat: $e');
+
+      if (!mounted) return;
+
+      setState(() {
+        isFriendshipLoading = false;
+      });
+    }
+  }
+
+  // --------------------------------------------
+  // ACCIONS AMISTATS
+  // ---------------------------------------------
+  Future<void> sendFriendRequest() async {
+    setState(() {
+      isFriendshipActionLoading = true;
+    });
+
+    try {
+      await friendshipRepository.sendFriendRequest(currentProfile.id);
+
+      await loadFriendship();
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('No s\'ha pogut enviar la sol·licitud: $e')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          isFriendshipActionLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> acceptFriendRequest() async {
+    final friendshipId = friendship?['id'];
+
+    if (friendshipId == null) return;
+
+    setState(() {
+      isFriendshipActionLoading = true;
+    });
+
+    try {
+      await friendshipRepository.acceptFriendRequest(friendshipId);
+
+      await loadFriendship();
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('No s\'ha pogut acceptar la sol·licitud: $e')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          isFriendshipActionLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> rejectFriendRequest() async {
+    final friendshipId = friendship?['id'];
+
+    if (friendshipId == null) return;
+
+    setState(() {
+      isFriendshipActionLoading = true;
+    });
+
+    try {
+      await friendshipRepository.rejectFriendRequest(friendshipId);
+
+      await loadFriendship();
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('No s\'ha pogut rebutjar la sol·licitud: $e')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          isFriendshipActionLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> removeFriend() async {
+    final friendshipId = friendship?['id'];
+
+    if (friendshipId == null) return;
+
+    setState(() {
+      isFriendshipActionLoading = true;
+    });
+
+    try {
+      await friendshipRepository.removeFriend(friendshipId);
+
+      await loadFriendship();
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('No s\'ha pogut eliminar l\'amic: $e')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          isFriendshipActionLoading = false;
+        });
+      }
+    }
+  }
+
+  Widget _buildFriendshipButton() {
+    if (isMyProfile) {
+      return const SizedBox.shrink();
+    }
+
+    if (isFriendshipLoading) {
+      return const SizedBox(
+        height: 42,
+        child: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    final status = friendship?['status'];
+
+    // ─────────────────────────────────────
+    // NO HI HA RELACIÓ
+    // ─────────────────────────────────────
+
+    if (status == null) {
+      return FilledButton.icon(
+        onPressed: isFriendshipActionLoading ? null : sendFriendRequest,
+        icon: isFriendshipActionLoading
+            ? const SizedBox(
+                width: 18,
+                height: 18,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+            : const Icon(Icons.person_add_outlined),
+        label: const Text('Afegir amic'),
+      );
+    }
+
+    // ─────────────────────────────────────
+    // JA SÓN AMICS
+    // ─────────────────────────────────────
+
+    if (status == 'accepted') {
+      return OutlinedButton.icon(
+        onPressed: isFriendshipActionLoading
+            ? null
+            : () async {
+                final confirmed = await showDialog<bool>(
+                  context: context,
+                  builder: (context) {
+                    return AlertDialog(
+                      title: const Text('Eliminar amic?'),
+                      content: Text(
+                        'Vols eliminar @${currentProfile.nickname} dels teus amics?',
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pop(context, false);
+                          },
+                          child: const Text('Cancel·lar'),
+                        ),
+                        FilledButton(
+                          onPressed: () {
+                            Navigator.pop(context, true);
+                          },
+                          child: const Text('Eliminar'),
+                        ),
+                      ],
+                    );
+                  },
+                );
+
+                if (confirmed == true) {
+                  await removeFriend();
+                }
+              },
+        icon: isFriendshipActionLoading
+            ? const SizedBox(
+                width: 18,
+                height: 18,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+            : const Icon(Icons.people_alt_outlined),
+        label: const Text('Amics'),
+      );
+    }
+
+    // ─────────────────────────────────────
+    // SOL·LICITUD PENDENT
+    // ─────────────────────────────────────
+
+    final currentUserId = Supabase.instance.client.auth.currentUser?.id;
+
+    final requesterId = friendship?['requester_id'];
+
+    // Jo he enviat la sol·licitud
+    if (requesterId == currentUserId) {
+      return OutlinedButton.icon(
+        onPressed: null,
+        icon: const Icon(Icons.hourglass_empty),
+        label: const Text('Sol·licitud enviada'),
+      );
+    }
+
+    // L'altre usuari me l'ha enviat
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        FilledButton.icon(
+          onPressed: isFriendshipActionLoading ? null : acceptFriendRequest,
+          icon: const Icon(Icons.check),
+          label: const Text('Acceptar'),
+        ),
+
+        const SizedBox(width: 8),
+
+        OutlinedButton.icon(
+          onPressed: isFriendshipActionLoading ? null : rejectFriendRequest,
+          icon: const Icon(Icons.close),
+          label: const Text('Rebutjar'),
+        ),
+      ],
+    );
+  }
+
   // ─────────────────────────────────────────────
   // ESTADÍSTIQUES
   // ─────────────────────────────────────────────
@@ -99,7 +384,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
     final response = await client
         .from('user_games')
         .select('status, review, hours_played')
-        .eq('user_id', widget.profile.id);
+        .eq('user_id', currentProfile.id);
 
     final userGames = response as List;
 
@@ -192,18 +477,280 @@ class _UserProfilePageState extends State<UserProfilePage> {
     }).toList();
   }
 
+  // REVIEWS
+
+  List<LibraryGame> get reviewedGames {
+    return games.where((libraryGame) {
+      final review = libraryGame.userGame.review;
+
+      return review != null && review.trim().isNotEmpty;
+    }).toList();
+  }
+
+  Widget _buildReviewsSummary() {
+    final reviews = reviewedGames.take(3).toList();
+
+    if (reviews.isEmpty) {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          children: [
+            Icon(
+              Icons.rate_review_outlined,
+              size: 32,
+              color: Colors.grey.shade500,
+            ),
+            const SizedBox(height: 10),
+            Text(
+              'Encara no has escrit cap review.',
+              style: TextStyle(color: Colors.grey.shade600),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Column(
+      children: [
+        ...reviews.map((libraryGame) {
+          final game = libraryGame.game;
+          final userGame = libraryGame.userGame;
+
+          return Container(
+            margin: const EdgeInsets.only(bottom: 12),
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // PORTADA
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: game.coverUrl != null && game.coverUrl!.isNotEmpty
+                      ? Image.network(
+                          game.coverUrl!,
+                          width: 65,
+                          height: 95,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) {
+                            return _buildReviewPlaceholder();
+                          },
+                        )
+                      : _buildReviewPlaceholder(),
+                ),
+
+                const SizedBox(width: 14),
+
+                // INFORMACIÓ
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        game.title,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+
+                      const SizedBox(height: 6),
+
+                      if (userGame.rating != null)
+                        Row(
+                          children: List.generate(5, (index) {
+                            return Icon(
+                              index < userGame.rating!.round()
+                                  ? Icons.star
+                                  : Icons.star_border,
+                              size: 18,
+                              color: Colors.amber,
+                            );
+                          }),
+                        ),
+
+                      const SizedBox(height: 8),
+
+                      Text(
+                        '"${userGame.review!}"',
+                        maxLines: 4,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 13,
+                          height: 1.35,
+                          fontStyle: FontStyle.italic,
+                          color: Colors.grey.shade700,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          );
+        }),
+
+        if (reviewedGames.length > 3)
+          TextButton.icon(
+            onPressed: () {
+              // Més endavant:
+              // obrir pantalla amb totes les reviews.
+            },
+            icon: const Icon(Icons.arrow_forward),
+            label: Text('Veure totes les reviews (${reviewedGames.length})'),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildReviewPlaceholder() {
+    return Container(
+      width: 65,
+      height: 95,
+      color: Colors.grey.shade800,
+      child: const Icon(Icons.videogame_asset, color: Colors.white54),
+    );
+  }
+
   // ─────────────────────────────────────────────
   // BUILD
   // ─────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final isMobile = screenWidth < 600;
     return Scaffold(
-      appBar: AppBar(title: Text('@${widget.profile.nickname}')),
+      appBar: AppBar(
+        title: Text('@${currentProfile.nickname}'),
+        // ACCIONS
+        actions: [
+          // MENÚ DE TRES PUNTS
+          PopupMenuButton<String>(
+            tooltip: "Més opcions",
+
+            onSelected: (value) async {
+              // ─────────────────────────
+              // EL MEU PERFIL
+              // ─────────────────────────
+              if (value == "profile") {
+                final profile = await ProfileRepository(
+                  Supabase.instance.client,
+                ).getMyProfile();
+
+                if (profile == null || !context.mounted) {
+                  return;
+                }
+
+                await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => UserProfilePage(profile: profile),
+                  ),
+                );
+              }
+
+              // ─────────────────────────
+              // SOCIAL
+              // ─────────────────────────
+              if (value == "social") {
+                await Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const SocialPage()),
+                );
+              }
+
+              // ─────────────────────────
+              // TANCAR SESSIÓ
+              // ─────────────────────────
+              if (value == "logout") {
+                await AuthService().signOut();
+              }
+            },
+
+            itemBuilder: (context) => const [
+              PopupMenuItem(
+                value: "profile",
+                child: Row(
+                  children: [
+                    Icon(Icons.person_outline),
+                    SizedBox(width: 12),
+                    Text("El meu perfil"),
+                  ],
+                ),
+              ),
+
+              PopupMenuItem(
+                value: "social",
+                child: Row(
+                  children: [
+                    Icon(Icons.people_outline),
+                    SizedBox(width: 12),
+                    Text("Social"),
+                  ],
+                ),
+              ),
+
+              PopupMenuItem(
+                value: "logout",
+                child: Row(
+                  children: [
+                    Icon(Icons.logout),
+                    SizedBox(width: 12),
+                    Text("Tancar sessió"),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
-          : _buildContent(),
+          : Stack(
+              children: [
+                _buildContent(),
+                if (isMyProfile)
+                  Positioned(
+                    top: 12,
+                    right: 12,
+                    child: IconButton.filled(
+                      icon: const Icon(Icons.edit),
+                      tooltip: 'Editar perfil',
+                      onPressed: _openEditProfile,
+                    ),
+                  ),
+              ],
+            ),
     );
+  }
+
+  // ----------------------------------------------
+  // EDICIÓ PERFIL
+  // ----------------------------------------------
+  Future<void> _openEditProfile() async {
+    final updatedProfile = await Navigator.push<Profile>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => EditProfilePage(profile: currentProfile),
+      ),
+    );
+
+    if (updatedProfile != null && mounted) {
+      setState(() {
+        currentProfile = updatedProfile;
+      });
+    }
   }
 
   // ─────────────────────────────────────────────
@@ -218,19 +765,24 @@ class _UserProfilePageState extends State<UserProfilePage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
+          // -------------------------------------
+          // BOTÓ AMISTAT
+          // -------------------------------------
+          _buildFriendshipButton(),
+          const SizedBox(height: 14),
           // ─────────────────────────────────────
           // AVATAR
           // ─────────────────────────────────────
           CircleAvatar(
             radius: 60,
             backgroundImage:
-                widget.profile.avatarUrl != null &&
-                    widget.profile.avatarUrl!.isNotEmpty
-                ? NetworkImage(widget.profile.avatarUrl!)
+                currentProfile.avatarUrl != null &&
+                    currentProfile.avatarUrl!.isNotEmpty
+                ? NetworkImage(currentProfile.avatarUrl!)
                 : null,
             child:
-                widget.profile.avatarUrl == null ||
-                    widget.profile.avatarUrl!.isEmpty
+                currentProfile.avatarUrl == null ||
+                    currentProfile.avatarUrl!.isEmpty
                 ? const Icon(Icons.person, size: 60)
                 : null,
           ),
@@ -241,7 +793,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
           // NICKNAME
           // ─────────────────────────────────────
           Text(
-            '@${widget.profile.nickname}',
+            '@${currentProfile.nickname}',
             textAlign: TextAlign.center,
             style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
           ),
@@ -257,11 +809,11 @@ class _UserProfilePageState extends State<UserProfilePage> {
           // ─────────────────────────────────────
           // BIO
           // ─────────────────────────────────────
-          if (widget.profile.bio != null &&
-              widget.profile.bio!.trim().isNotEmpty) ...[
+          if (currentProfile.bio != null &&
+              currentProfile.bio!.trim().isNotEmpty) ...[
             const SizedBox(height: 12),
             Text(
-              widget.profile.bio!,
+              currentProfile.bio!,
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 15, color: Colors.grey.shade600),
             ),
@@ -309,6 +861,26 @@ class _UserProfilePageState extends State<UserProfilePage> {
           ),
 
           // ─────────────────────────────────────
+          // RESUM DE REVIEWS
+          // NOMÉS EL MEU PERFIL
+          // ─────────────────────────────────────
+          if (isMyProfile) ...[
+            const SizedBox(height: 36),
+
+            Align(
+              alignment: Alignment.centerLeft,
+              child: const Text(
+                'Les meves reviews',
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              ),
+            ),
+
+            const SizedBox(height: 14),
+
+            _buildReviewsSummary(),
+          ],
+
+          // ─────────────────────────────────────
           // GAMESHELF
           // NOMÉS ALTRES USUARIS
           // ─────────────────────────────────────
@@ -318,7 +890,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                "User's Gameshelf",
+                "${currentProfile.nickname}'s GameShelf",
                 style: const TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
@@ -489,7 +1061,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                 });
               },
 
-              socialNickname: widget.profile.nickname,
+              socialNickname: currentProfile.nickname,
             );
           },
         );

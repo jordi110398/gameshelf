@@ -55,11 +55,7 @@ class ProfileRepository {
         .limit(20);
 
     return (response as List)
-        .map(
-          (item) => Profile.fromMap(
-            item as Map<String, dynamic>,
-          ),
-        )
+        .map((item) => Profile.fromMap(item as Map<String, dynamic>))
         .toList();
   }
 
@@ -139,6 +135,24 @@ class ProfileRepository {
       hours: hours,
     );
   }
+
+  Future<List<Profile>> getProfilesByIds(List<String> ids) async {
+    if (ids.isEmpty) {
+      return [];
+    }
+
+    final profiles = <Profile>[];
+
+    for (final id in ids) {
+      final profile = await getProfileById(id);
+
+      if (profile != null) {
+        profiles.add(profile);
+      }
+    }
+
+    return profiles;
+  }
 }
 
 class ProfileStats {
@@ -154,4 +168,3 @@ class ProfileStats {
     required this.hours,
   });
 }
-
