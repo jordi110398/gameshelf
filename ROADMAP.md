@@ -15,6 +15,7 @@
 - [ ] Llistes personalitzades
 - [x] Estadístiques
 - [ ] Compartir perfil
+- [ ] Sistema de likes
 - [x] Amics
 - [x] Resum de reviews
 - [x] Sistema d'amics

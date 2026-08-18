@@ -7,6 +7,7 @@ import 'package:gameshelf/repositories/friendship_repository.dart';
 import 'package:gameshelf/models/activity_item.dart';
 import 'package:gameshelf/repositories/activity_repository.dart';
 import 'package:gameshelf/features/activity/widgets/activity_card.dart';
+import 'package:gameshelf/features/activity/activity_feed_page.dart';
 
 class SocialPage extends StatefulWidget {
   const SocialPage({super.key});
@@ -109,7 +110,7 @@ class _SocialPageState extends State<SocialPage> {
       final loadedFriends = await repository.getProfilesByIds(friendIds);
 
       final requests = await friendshipRepository.getPendingRequests();
-      final activity = await activityRepository.getFeed(limit: 5);
+      final activity = await activityRepository.getFeed(limit: 15);
 
       if (!mounted) return;
 
@@ -317,14 +318,32 @@ class _SocialPageState extends State<SocialPage> {
             onExpansionChanged: (value) {
               setState(() => isActivityExpanded = value);
             },
-            children: activityFeed
-                .map(
-                  (item) => Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: ActivityCard(item: item),
-                  ),
-                )
-                .toList(),
+            children: [
+              ...activityFeed.map(
+                (item) => Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: ActivityCard(item: item),
+                ),
+              ),
+
+              const SizedBox(height: 4),
+
+              SizedBox(
+                width: double.infinity,
+                child: TextButton.icon(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const ActivityFeedPage(),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.arrow_forward),
+                  label: const Text('Veure més'),
+                ),
+              ),
+            ],
           ),
       ],
     );
