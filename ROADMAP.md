@@ -11,11 +11,8 @@
 - [x] Reviews
 - [x] Perfil
 
-## v1.0
-- [ ] Llistes personalitzades
+## v1.0 Official release
 - [x] Estadístiques
-- [ ] Compartir perfil
-- [ ] Sistema de likes
 - [x] Amics
 - [x] Resum de reviews
 - [x] Sistema d'amics
@@ -23,4 +20,8 @@
 - [x] Generació automàtica de posts 
 - [x] Feed d'amics + amics d'amics 
 - [x] Cards/popups de posts 
-- [ ] Descobrir nous jugadors 
+- [x] Descobrir nous jugadors
+
+## v1.1 Social Update
+- [ ] Compartir perfil
+- [ ] Sistema de likes
