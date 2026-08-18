@@ -23,10 +23,10 @@ class ActivityRepository {
         'feed_before': (before ?? DateTime.now()).toIso8601String(),
       },
     );
-    debugPrint('🔍 rpc response: $response');  // <-- afegit
+    debugPrint('🔍 rpc response: $response'); // <-- afegit
 
     final rows = response as List;
-    debugPrint('🔍 rows.length: ${rows.length}');  // <-- afegit
+    debugPrint('🔍 rows.length: ${rows.length}'); // <-- afegit
 
     // Cal el nickname/avatar de cada actor; el fem en una segona consulta
     // per evitar dependre de com la RPC retorna joins.
@@ -67,5 +67,20 @@ class ActivityRepository {
 
     final latest = DateTime.parse(rows.first['created_at'] as String);
     return latest.isAfter(since);
+  }
+
+  /// Recuperar review
+  Future<String?> getReview({
+    required String userId,
+    required int gameId,
+  }) async {
+    final response = await client
+        .from('user_games')
+        .select('review')
+        .eq('user_id', userId)
+        .eq('igdb_id', gameId)
+        .maybeSingle();
+
+    return response?['review'] as String?;
   }
 }

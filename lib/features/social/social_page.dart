@@ -339,13 +339,10 @@ class _SocialPageState extends State<SocialPage> {
     required List<Widget> children,
   }) {
     return Theme(
-      // Treu la línia divisòria per defecte de l'ExpansionTile
       data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
-      child: Container(
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surfaceContainerHighest,
-          borderRadius: BorderRadius.circular(16),
-        ),
+      child: Material(
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(16),
         clipBehavior: Clip.antiAlias,
         child: ExpansionTile(
           initiallyExpanded: isExpanded,
