@@ -16,6 +16,9 @@ Aquest projecte segueix el format de Keep a Changelog.
 - Connexió BDD IGDB
 - Videojocs afegibles a la biblioteca.
 - Pantalla per editar els videojocs.
+- Efecte joc preferit.
+- Banners i millora interfície.
+- Part social afegida.
 
 ## [0.1.0] - 2026-07-28
 

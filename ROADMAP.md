@@ -11,8 +11,24 @@
 - [x] Reviews
 - [x] Perfil
 
-## v1.0
-- [ ] Llistes personalitzades
-- [ ] Estadístiques
+## v1.0 Official release
+- [x] Estadístiques
+- [x] Amics
+- [x] Resum de reviews
+- [x] Sistema d'amics
+- [x] Model SocialPost 
+- [x] Generació automàtica de posts 
+- [x] Feed d'amics + amics d'amics 
+- [x] Cards/popups de posts 
+- [x] Descobrir nous jugadors
+- [ ] Esborrar compte
+- [ ] Recuperació/canvi password
+- [ ] Política de privacitat/cookies
+- [ ] About
+
+## v1.1 Social Update
 - [ ] Compartir perfil
-- [ ] Amics
+- [ ] Sistema de likes
+- [ ] Notificacions
+- [ ] Themes
+- [ ] Recomanació de jocs/llistes/jugadors

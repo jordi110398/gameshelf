@@ -43,6 +43,14 @@ class _EditGamePageState extends State<EditGamePage> {
     );
   }
 
+  bool get canReview {
+    return status == GameStatus.completed || status == GameStatus.dropped;
+  }
+
+  bool get canFavorite {
+    return status == GameStatus.completed;
+  }
+
   @override
   void dispose() {
     hoursController.dispose();
@@ -60,16 +68,21 @@ class _EditGamePageState extends State<EditGamePage> {
 
       status: status,
 
-      // Si està en Want to Play no té valoració
-      rating: isWantToPlay ? null : rating,
+      // Només Completed o Dropped
+      rating: canReview ? rating : null,
 
-      // Si està en Want to Play no té hores
+      // Want to Play no té hores
       hoursPlayed: isWantToPlay ? 0 : int.tryParse(hoursController.text) ?? 0,
 
-      favorite: favorite,
+      // Només Completed pot ser favorit
+      favorite: canFavorite ? favorite : false,
 
-      // Si està en Want to Play no té review
-      review: isWantToPlay ? null : reviewController.text.trim(),
+      // Només Completed o Dropped poden tenir review
+      review: canReview
+          ? reviewController.text.trim().isEmpty
+                ? null
+                : reviewController.text.trim()
+          : null,
 
       startedAt: widget.userGame.startedAt,
       completedAt: widget.userGame.completedAt,
@@ -85,6 +98,8 @@ class _EditGamePageState extends State<EditGamePage> {
   @override
   Widget build(BuildContext context) {
     final isWantToPlay = status == GameStatus.wantToPlay;
+    final canReview =
+        status == GameStatus.completed || status == GameStatus.dropped;
 
     return Scaffold(
       appBar: AppBar(title: Text("Editar ${widget.game.title}")),
@@ -140,56 +155,67 @@ class _EditGamePageState extends State<EditGamePage> {
             // Només si NO és Want to Play
             // ───────────────────────────
             if (!isWantToPlay) ...[
+              // ───────────────────────────
               // VALORACIÓ
-              const Text(
-                "La meva valoració",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
+              // Només Completed o Dropped
+              // ───────────────────────────
+              if (canReview) ...[
+                const Text(
+                  "La meva valoració",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
 
-              const SizedBox(height: 12),
+                const SizedBox(height: 12),
 
-              Row(
-                children: List.generate(
-                  5,
-                  (index) => IconButton(
-                    onPressed: () {
-                      setState(() {
-                        rating = index + 1;
-                      });
-                    },
-
-                    icon: Icon(
-                      index < rating ? Icons.star : Icons.star_border,
-                      color: Colors.amber,
+                Row(
+                  children: List.generate(
+                    5,
+                    (index) => IconButton(
+                      onPressed: () {
+                        setState(() {
+                          rating = index + 1;
+                        });
+                      },
+                      icon: Icon(
+                        index < rating ? Icons.star : Icons.star_border,
+                        color: Colors.amber,
+                      ),
                     ),
                   ),
                 ),
-              ),
 
-              const SizedBox(height: 24),
+                const SizedBox(height: 24),
+              ],
+
               // ───────────────────────────
               // FAVORIT
               // ───────────────────────────
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
+              if (canFavorite) ...[
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
 
-                value: favorite,
+                  value: favorite,
 
-                title: const Text("Marcar com a favorit"),
+                  title: const Text("Marcar com a favorit"),
 
-                secondary: Icon(
-                  favorite ? Icons.favorite : Icons.favorite_border,
-                  color: favorite ? Colors.red : null,
+                  secondary: Icon(
+                    favorite ? Icons.favorite : Icons.favorite_border,
+                    color: favorite ? Colors.red : null,
+                  ),
+
+                  onChanged: (value) {
+                    setState(() {
+                      favorite = value;
+                    });
+                  },
                 ),
 
-                onChanged: (value) {
-                  setState(() {
-                    favorite = value;
-                  });
-                },
-              ),
-              const SizedBox(height: 24),
+                const SizedBox(height: 24),
+              ],
+
+              // ───────────────────────────
               // HORES
+              // ───────────────────────────
               const Text(
                 "Hores jugades",
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -210,28 +236,33 @@ class _EditGamePageState extends State<EditGamePage> {
 
               const SizedBox(height: 24),
 
+              // ───────────────────────────
               // REVIEW
-              const Text(
-                "La meva review",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-
-              const SizedBox(height: 12),
-
-              TextFormField(
-                controller: reviewController,
-
-                minLines: 5,
-                maxLines: 8,
-
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  hintText: "Escriu la teva opinió...",
-                  alignLabelWithHint: true,
+              // Només Completed o Dropped
+              // ───────────────────────────
+              if (canReview) ...[
+                const Text(
+                  "La meva review",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
-              ),
 
-              const SizedBox(height: 24),
+                const SizedBox(height: 12),
+
+                TextFormField(
+                  controller: reviewController,
+                  minLines: 5,
+                  maxLines: 8,
+                  maxLength: 500,
+
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                    hintText: "Escriu la teva opinió...",
+                    alignLabelWithHint: true,
+                  ),
+                ),
+
+                const SizedBox(height: 24),
+              ],
             ],
 
             // ───────────────────────────

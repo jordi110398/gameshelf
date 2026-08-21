@@ -4,22 +4,24 @@ import 'package:flutter/material.dart';
 import 'package:gameshelf/features/game/pages/game_detail_page.dart';
 import 'package:gameshelf/models/library_game.dart';
 import 'package:gameshelf/models/game_status.dart';
-
+import 'package:gameshelf/features/social/social_game_detail_page.dart';
 import 'game_overlay.dart';
 
 class GameCard extends StatefulWidget {
   final LibraryGame libraryGame;
-  final VoidCallback onLibraryChanged;
+  final VoidCallback? onLibraryChanged;
 
   final bool isActive;
   final VoidCallback onActivate;
+  final String? socialNickname;
 
   const GameCard({
     super.key,
     required this.libraryGame,
-    required this.onLibraryChanged,
+    this.onLibraryChanged,
     required this.isActive,
     required this.onActivate,
+    this.socialNickname,
   });
 
   @override
@@ -50,19 +52,33 @@ class _GameCardState extends State<GameCard>
   }
 
   Future<void> openGameDetail() async {
-    final refresh = await Navigator.push<bool>(
+  if (widget.socialNickname != null) {
+    await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => GameDetailPage(
-          game: widget.libraryGame.game,
+        builder: (_) => SocialGameDetailPage(
+          libraryGame: widget.libraryGame,
+          nickname: widget.socialNickname!,
         ),
       ),
     );
 
-    if (refresh == true) {
-      widget.onLibraryChanged();
-    }
+    return;
   }
+
+  final refresh = await Navigator.push<bool>(
+    context,
+    MaterialPageRoute(
+      builder: (_) => GameDetailPage(
+        game: widget.libraryGame.game,
+      ),
+    ),
+  );
+
+  if (refresh == true) {
+    widget.onLibraryChanged?.call();
+  }
+}
 
   void _maybeTriggerStarBurst(Offset localPosition) {
     final isFavorite = widget.libraryGame.userGame.favorite;
