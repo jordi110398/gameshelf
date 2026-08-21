@@ -153,6 +153,19 @@ class ProfileRepository {
 
     return profiles;
   }
+
+  // -----------------------------------
+  // ESBORRAR COMPTE
+  // -----------------------------------
+  Future<void> deleteAccount() async {
+    final response = await client.functions.invoke('delete-account');
+
+    if (response.status != 200) {
+      throw Exception('No s\'ha pogut eliminar el compte');
+    }
+
+    await client.auth.signOut();
+  }
 }
 
 class ProfileStats {

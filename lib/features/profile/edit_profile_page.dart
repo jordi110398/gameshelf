@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:gameshelf/models/profile.dart';
 import 'package:gameshelf/repositories/profile_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:gameshelf/features/profile/change_password.dart';
 
 class EditProfilePage extends StatefulWidget {
   final Profile profile;
@@ -23,6 +24,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
   Uint8List? selectedImageBytes;
 
   bool isSaving = false;
+  bool isDeletingAccount = false;
 
   @override
   void initState() {
@@ -148,6 +150,64 @@ class _EditProfilePageState extends State<EditProfilePage> {
       setState(() {
         isSaving = false;
       });
+    }
+  }
+
+  // --------------------------------
+  // ESBORRAR COMPTE
+  // --------------------------------
+  Future<void> deleteAccount() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Eliminar compte?'),
+          content: const Text(
+            'Aquesta acció és permanent. '
+            'S\'eliminaran el teu perfil, biblioteca, reviews, '
+            'amistats i activitat.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancel·lar'),
+            ),
+            FilledButton(
+              style: FilledButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+              ),
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Eliminar compte'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed != true || !mounted) return;
+
+    setState(() {
+      isDeletingAccount = true;
+    });
+
+    try {
+      await repository.deleteAccount();
+
+      if (!mounted) return;
+
+      // Tornem a la pantalla inicial/login.
+      Navigator.of(context).popUntil((route) => route.isFirst);
+    } catch (e) {
+      if (!mounted) return;
+
+      setState(() {
+        isDeletingAccount = false;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('No s\'ha pogut eliminar el compte: $e')),
+      );
     }
   }
 
@@ -331,22 +391,99 @@ class _EditProfilePageState extends State<EditProfilePage> {
             // ───────────────────────────────────
             SizedBox(
               width: double.infinity,
-
               child: FilledButton.icon(
-                onPressed: isSaving ? null : saveProfile,
-
+                onPressed: isSaving || isDeletingAccount ? null : saveProfile,
                 icon: isSaving
                     ? const SizedBox(
                         width: 18,
                         height: 18,
-
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
                     : const Icon(Icons.save),
-
                 label: Text(isSaving ? 'Guardant...' : 'Guardar canvis'),
               ),
             ),
+
+            const SizedBox(height: 36),
+
+            // ───────────────────────────────────
+            // SEGURETAT
+            // ───────────────────────────────────
+            const Text(
+              'Seguretat',
+              style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+            ),
+
+            const SizedBox(height: 10),
+
+            Material(
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
+              borderRadius: BorderRadius.circular(14),
+              child: ListTile(
+                leading: const Icon(Icons.lock_outline),
+                title: const Text(
+                  'Canviar contrasenya',
+                  style: TextStyle(fontWeight: FontWeight.w600),
+                ),
+                subtitle: const Text(
+                  'Actualitza la contrasenya del teu compte',
+                ),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: isSaving || isDeletingAccount
+                    ? null
+                    : () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const ChangePasswordPage(),
+                          ),
+                        );
+                      },
+              ),
+            ),
+
+            const SizedBox(height: 32),
+
+            // ───────────────────────────────────
+            // ZONA DE PERILL
+            // ───────────────────────────────────
+            const Text(
+              'Zona de perill',
+              style: TextStyle(
+                fontSize: 17,
+                fontWeight: FontWeight.bold,
+                color: Colors.red,
+              ),
+            ),
+
+            const SizedBox(height: 10),
+
+            Material(
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
+              borderRadius: BorderRadius.circular(14),
+              child: ListTile(
+                leading: isDeletingAccount
+                    ? const SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.delete_outline, color: Colors.red),
+                title: const Text(
+                  'Eliminar compte',
+                  style: TextStyle(
+                    color: Colors.red,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                subtitle: const Text(
+                  'Elimina permanentment el teu compte i les teves dades',
+                ),
+                onTap: isSaving || isDeletingAccount ? null : deleteAccount,
+              ),
+            ),
+
+            const SizedBox(height: 24),
           ],
         ),
       ),
