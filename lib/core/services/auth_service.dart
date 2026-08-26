@@ -5,25 +5,34 @@ class AuthService {
 
   Session? get currentSession => _client.auth.currentSession;
 
-  // Usuari actual
   User? get currentUser => _client.auth.currentUser;
 
-  // Stream de canvis d'autenticació
-  Stream<AuthState> get authStateChanges =>
-      _client.auth.onAuthStateChange;
+  Stream<AuthState> get authStateChanges => _client.auth.onAuthStateChange;
 
-  // Registrar usuari
+  // ─────────────────────────────────────────────
+  // REGISTRAR USUARI
+  // ─────────────────────────────────────────────
+
   Future<AuthResponse> signUp({
     required String email,
     required String password,
+    required String nickname,
+    String? emailRedirectTo,
   }) async {
     return await _client.auth.signUp(
       email: email,
       password: password,
+      emailRedirectTo: emailRedirectTo,
+      data: {
+        'nickname': nickname,
+      },
     );
   }
 
-  // Iniciar sessió
+  // ─────────────────────────────────────────────
+  // INICIAR SESSIÓ
+  // ─────────────────────────────────────────────
+
   Future<AuthResponse> signIn({
     required String email,
     required String password,
@@ -34,9 +43,34 @@ class AuthService {
     );
   }
 
-  // Tancar sessió
+  // ─────────────────────────────────────────────
+  // CANVIAR CONTRASENYA
+  // ─────────────────────────────────────────────
+
+  Future<UserResponse> updatePassword(String newPassword) async {
+    return await _client.auth.updateUser(
+      UserAttributes(
+        password: newPassword,
+      ),
+    );
+  }
+
+  // ─────────────────────────────────────────────
+  // RECUPERAR CONTRASENYA
+  // ─────────────────────────────────────────────
+
+  Future<void> resetPassword(String email) async {
+    await _client.auth.resetPasswordForEmail(
+      email,
+      redirectTo: 'http://localhost:8080/auth/reset-password',
+    );
+  }
+
+  // ─────────────────────────────────────────────
+  // TANCAR SESSIÓ
+  // ─────────────────────────────────────────────
+
   Future<void> signOut() async {
     await _client.auth.signOut();
   }
-  
 }

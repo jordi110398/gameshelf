@@ -1,43 +1,56 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:gameshelf/core/services/auth_service.dart';
 import 'package:gameshelf/features/auth/widgets/auth_text_field.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-class RegisterPage extends StatefulWidget {
-  const RegisterPage({super.key});
+class ResetPasswordPage extends StatefulWidget {
+  const ResetPasswordPage({super.key});
 
   @override
-  State<RegisterPage> createState() => _RegisterPageState();
+  State<ResetPasswordPage> createState() => _ResetPasswordPageState();
 }
 
-class _RegisterPageState extends State<RegisterPage> {
+class _ResetPasswordPageState extends State<ResetPasswordPage> {
   final authService = AuthService();
 
-  final nicknameController = TextEditingController();
-  final emailController = TextEditingController();
   final passwordController = TextEditingController();
+  final confirmPasswordController = TextEditingController();
 
-  bool _isRegistering = false;
+  bool _isSaving = false;
+  bool _recoveryReady = false;
+
+  StreamSubscription<AuthState>? _authSubscription;
 
   @override
   void initState() {
     super.initState();
 
     passwordController.addListener(_onPasswordChanged);
+    confirmPasswordController.addListener(_onPasswordChanged);
+
+    _handleRecovery();
   }
 
   @override
   void dispose() {
-    nicknameController.dispose();
-    emailController.dispose();
+    _authSubscription?.cancel();
+
     passwordController.removeListener(_onPasswordChanged);
+    confirmPasswordController.removeListener(_onPasswordChanged);
+
     passwordController.dispose();
+    confirmPasswordController.dispose();
+
     super.dispose();
   }
 
   void _onPasswordChanged() {
-    setState(() {});
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   // ─────────────────────────────────────────────
@@ -74,68 +87,125 @@ class _RegisterPageState extends State<RegisterPage> {
         _hasSymbol;
   }
 
+  bool get _passwordsMatch {
+    return passwordController.text == confirmPasswordController.text &&
+        confirmPasswordController.text.isNotEmpty;
+  }
+
   // ─────────────────────────────────────────────
-  // REGISTRE
+  // CANVIAR CONTRASENYA
   // ─────────────────────────────────────────────
 
-  Future<void> _register() async {
-    if (!_isPasswordValid) return;
+  Future<void> _handleRecovery() async {
+    try {
+      final uri = Uri.base;
 
-    final nickname = nicknameController.text.trim();
-    final email = emailController.text.trim();
+      debugPrint('RESET PASSWORD URI: $uri');
 
-    if (nickname.isEmpty || email.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Omple tots els camps.')));
+      if (uri.queryParameters.containsKey('code')) {
+        await Supabase.instance.client.auth.getSessionFromUrl(uri);
+
+        debugPrint('Recovery session creada correctament');
+      }
+
+      final session = Supabase.instance.client.auth.currentSession;
+
+      if (session == null) {
+        debugPrint('No hi ha sessió de recovery');
+      } else {
+        debugPrint('Usuari recovery: ${session.user.email}');
+
+        if (mounted) {
+          setState(() {
+            _recoveryReady = true;
+          });
+        }
+      }
+    } catch (e) {
+      debugPrint('ERROR RECOVERY: $e');
+
+      if (mounted) {
+        setState(() {
+          _recoveryReady = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _resetPassword() async {
+    if (!_isPasswordValid || !_passwordsMatch) {
+      return;
+    }
+
+    final session = Supabase.instance.client.auth.currentSession;
+
+    if (session == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'L\'enllaç de recuperació ha caducat. '
+            'Torna a sol·licitar el canvi de contrasenya.',
+          ),
+        ),
+      );
       return;
     }
 
     setState(() {
-      _isRegistering = true;
+      _isSaving = true;
     });
 
     try {
-      final response = await authService.signUp(
-        email: emailController.text.trim(),
-        password: passwordController.text,
-        nickname: nicknameController.text.trim(),
-        emailRedirectTo: 'http://localhost:8080/auth/callback',
+      await authService.updatePassword(passwordController.text);
+
+      if (!mounted) return;
+
+      await Supabase.instance.client.auth.signOut();
+
+      if (!mounted) return;
+
+      await showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (dialogContext) {
+          return AlertDialog(
+            title: const Text('Contrasenya actualitzada'),
+            content: const Text(
+              'La teva contrasenya s\'ha canviat correctament. '
+              'Ara pots iniciar sessió amb la nova contrasenya.',
+            ),
+            actions: [
+              FilledButton(
+                onPressed: () {
+                  Navigator.pop(dialogContext);
+                  context.go('/');
+                },
+                child: const Text('Iniciar sessió'),
+              ),
+            ],
+          );
+        },
       );
-      if (response.user == null) {
-        throw Exception("No s'ha pogut crear l'usuari.");
-      }
-
-      if (!mounted) return;
-
-      // Amb confirmació de correu activada, no intentem entrar
-      // directament a l'aplicació.
-      context.go('/email-confirmation', extra: email);
-    } on AuthException catch (e) {
-      if (!mounted) return;
-
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(e.message)));
-
-      setState(() {
-        _isRegistering = false;
-      });
     } catch (e) {
       if (!mounted) return;
 
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'No s\'ha pogut canviar la contrasenya: '
+            '${e.toString().replaceFirst('Exception: ', '')}',
+          ),
+        ),
+      );
 
       setState(() {
-        _isRegistering = false;
+        _isSaving = false;
       });
     }
   }
 
   // ─────────────────────────────────────────────
-  // INDICADOR DE REQUISIT
+  // REQUISIT
   // ─────────────────────────────────────────────
 
   Widget _buildPasswordRequirement({
@@ -144,7 +214,6 @@ class _RegisterPageState extends State<RegisterPage> {
   }) {
     final password = passwordController.text;
 
-    // Mentre no ha començat a escriure, mostrem els requisits en gris.
     final color = password.isEmpty
         ? Colors.grey.shade500
         : fulfilled
@@ -173,7 +242,11 @@ class _RegisterPageState extends State<RegisterPage> {
 
   @override
   Widget build(BuildContext context) {
+    final showPasswordMismatch =
+        confirmPasswordController.text.isNotEmpty && !_passwordsMatch;
+
     return Scaffold(
+      appBar: AppBar(title: const Text('Restablir contrasenya')),
       body: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 420),
@@ -182,61 +255,41 @@ class _RegisterPageState extends State<RegisterPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.sports_esports, size: 80),
+                const Icon(Icons.lock_reset, size: 80),
 
                 const SizedBox(height: 24),
 
                 const Text(
-                  "GameShelf",
-                  style: TextStyle(fontSize: 34, fontWeight: FontWeight.bold),
+                  'Nova contrasenya',
+                  style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
                 ),
 
-                const SizedBox(height: 40),
+                const SizedBox(height: 12),
 
-                // ─────────────────────────────
-                // NICKNAME
-                // ─────────────────────────────
-                AuthTextField(
-                  controller: nicknameController,
-                  label: "Nickname",
-                  icon: Icons.person,
+                const Text(
+                  'Introdueix una nova contrasenya per al teu compte.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 14),
                 ),
 
-                const SizedBox(height: 20),
+                const SizedBox(height: 32),
 
-                // ─────────────────────────────
-                // EMAIL
-                // ─────────────────────────────
-                AuthTextField(
-                  controller: emailController,
-                  label: "Email",
-                  icon: Icons.email,
-                ),
-
-                const SizedBox(height: 20),
-
-                // ─────────────────────────────
-                // PASSWORD
-                // ─────────────────────────────
                 AuthTextField(
                   controller: passwordController,
-                  label: "Password",
+                  label: 'Nova contrasenya',
                   icon: Icons.lock,
                   obscureText: true,
                 ),
 
                 const SizedBox(height: 12),
 
-                // ─────────────────────────────
-                // REQUISITS
-                // ─────────────────────────────
                 Align(
                   alignment: Alignment.centerLeft,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text(
-                        "La contrasenya ha de tenir:",
+                        'La contrasenya ha de tenir:',
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.bold,
@@ -247,58 +300,79 @@ class _RegisterPageState extends State<RegisterPage> {
 
                       _buildPasswordRequirement(
                         fulfilled: _hasMinLength,
-                        text: "Almenys 8 caràcters",
+                        text: 'Almenys 8 caràcters',
                       ),
 
                       _buildPasswordRequirement(
                         fulfilled: _hasUppercase,
-                        text: "Una lletra majúscula",
+                        text: 'Una lletra majúscula',
                       ),
 
                       _buildPasswordRequirement(
                         fulfilled: _hasLowercase,
-                        text: "Una lletra minúscula",
+                        text: 'Una lletra minúscula',
                       ),
 
                       _buildPasswordRequirement(
                         fulfilled: _hasNumber,
-                        text: "Un número",
+                        text: 'Un número',
                       ),
 
                       _buildPasswordRequirement(
                         fulfilled: _hasSymbol,
-                        text: "Un símbol",
+                        text: 'Un símbol',
                       ),
                     ],
                   ),
                 ),
 
-                const SizedBox(height: 25),
+                const SizedBox(height: 20),
 
-                // ─────────────────────────────
-                // CREAR COMPTE
-                // ─────────────────────────────
+                AuthTextField(
+                  controller: confirmPasswordController,
+                  label: 'Repeteix la contrasenya',
+                  icon: Icons.lock_outline,
+                  obscureText: true,
+                ),
+
+                const SizedBox(height: 8),
+
+                if (showPasswordMismatch)
+                  const Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      'Les contrasenyes no coincideixen.',
+                      style: TextStyle(color: Colors.red, fontSize: 12),
+                    ),
+                  ),
+
+                const SizedBox(height: 28),
+
                 SizedBox(
                   width: double.infinity,
                   child: FilledButton(
-                    onPressed: _isPasswordValid && !_isRegistering
-                        ? _register
+                    onPressed:
+                        _recoveryReady &&
+                            _isPasswordValid &&
+                            _passwordsMatch &&
+                            !_isSaving
+                        ? _resetPassword
                         : null,
-                    child: _isRegistering
+                    child: _isSaving
                         ? const SizedBox(
-                            width: 20,
-                            height: 20,
+                            width: 22,
+                            height: 22,
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
-                        : const Text("Create account"),
+                        : const Text('Canviar contrasenya'),
                   ),
                 ),
 
                 const SizedBox(height: 12),
 
                 TextButton(
-                  onPressed: _isRegistering ? null : () => context.go("/"),
-                  child: const Text("Already have an account? Log in"),
+                  onPressed: _isSaving ? null : () => context.go('/'),
+                  child: const Text('Tornar a iniciar sessió'),
                 ),
               ],
             ),

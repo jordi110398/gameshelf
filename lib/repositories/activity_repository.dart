@@ -1,8 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:gameshelf/models/activity_item.dart';
 import 'package:flutter/foundation.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:gameshelf/models/activity_item.dart';
 
 class ActivityRepository {
   final SupabaseClient client;

@@ -19,6 +19,7 @@ class _LoginPageState extends State<LoginPage> {
   final passwordController = TextEditingController();
 
   bool _loading = false;
+  bool _resettingPassword = false;
 
   @override
   void dispose() {
@@ -26,6 +27,10 @@ class _LoginPageState extends State<LoginPage> {
     passwordController.dispose();
     super.dispose();
   }
+
+  // ─────────────────────────────────────────────
+  // INICIAR SESSIÓ
+  // ─────────────────────────────────────────────
 
   Future<void> _login() async {
     setState(() => _loading = true);
@@ -35,29 +40,105 @@ class _LoginPageState extends State<LoginPage> {
 
       if (!input.contains("@")) {
         input = await profileService.getEmailFromNickname(input) ?? "";
+
+        if (input.isEmpty) {
+          throw Exception("No s'ha trobat cap usuari amb aquest nickname.");
+        }
       }
 
-      await authService.signIn(email: input, password: passwordController.text);
+      await authService.signIn(
+        email: input,
+        password: passwordController.text,
+      );
 
       if (!mounted) return;
 
       context.go("/home");
-
-      // No fem context.go("/home")
-      // El GoRouter detectarà automàticament
-      // que hi ha sessió i redirigirà.
     } catch (e) {
       if (!mounted) return;
 
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(e.toString())));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            e.toString().replaceFirst('Exception: ', ''),
+          ),
+        ),
+      );
     } finally {
       if (mounted) {
         setState(() => _loading = false);
       }
     }
   }
+
+  // ─────────────────────────────────────────────
+  // OBLIDAR CONTRASENYA
+  // ─────────────────────────────────────────────
+
+  Future<void> _forgotPassword() async {
+    final email = emailController.text.trim();
+
+    if (email.isEmpty || !email.contains("@")) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Introdueix el teu email per recuperar la contrasenya.',
+          ),
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      _resettingPassword = true;
+    });
+
+    try {
+      await authService.resetPassword(email);
+
+      if (!mounted) return;
+
+      await showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('Revisa el teu correu'),
+            content: const Text(
+              'T\'hem enviat un enllaç per restablir la contrasenya. '
+              'Revisa la safata d\'entrada i també la carpeta de correu brossa.',
+            ),
+            actions: [
+              FilledButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('D\'acord'),
+              ),
+            ],
+          );
+        },
+      );
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'No s\'ha pogut enviar el correu: '
+            '${e.toString().replaceFirst('Exception: ', '')}',
+          ),
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _resettingPassword = false;
+        });
+      }
+    }
+  }
+
+  // ─────────────────────────────────────────────
+  // BUILD
+  // ─────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context) {
@@ -70,17 +151,24 @@ class _LoginPageState extends State<LoginPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.sports_esports, size: 80),
+                const Icon(
+                  Icons.sports_esports,
+                  size: 80,
+                ),
 
                 const SizedBox(height: 24),
 
                 const Text(
                   "GameShelf",
-                  style: TextStyle(fontSize: 34, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    fontSize: 34,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
 
                 const SizedBox(height: 40),
 
+                // EMAIL / NICKNAME
                 AuthTextField(
                   controller: emailController,
                   label: "Email o usuari",
@@ -89,6 +177,7 @@ class _LoginPageState extends State<LoginPage> {
 
                 const SizedBox(height: 20),
 
+                // CONTRASENYA
                 AuthTextField(
                   controller: passwordController,
                   label: "Contrasenya",
@@ -96,17 +185,45 @@ class _LoginPageState extends State<LoginPage> {
                   obscureText: true,
                 ),
 
-                const SizedBox(height: 30),
+                const SizedBox(height: 8),
 
+                // OBLIDAR CONTRASENYA
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: _loading || _resettingPassword
+                        ? null
+                        : _forgotPassword,
+                    child: _resettingPassword
+                        ? const SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : const Text(
+                            "He oblidat la contrasenya",
+                          ),
+                  ),
+                ),
+
+                const SizedBox(height: 12),
+
+                // INICIAR SESSIÓ
                 SizedBox(
                   width: double.infinity,
                   child: FilledButton(
-                    onPressed: _loading ? null : _login,
+                    onPressed: _loading || _resettingPassword
+                        ? null
+                        : _login,
                     child: _loading
                         ? const SizedBox(
                             width: 22,
                             height: 22,
-                            child: CircularProgressIndicator(strokeWidth: 2),
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                            ),
                           )
                         : const Text("Inicia sessió"),
                   ),
@@ -114,8 +231,11 @@ class _LoginPageState extends State<LoginPage> {
 
                 const SizedBox(height: 12),
 
+                // CREAR COMPTE
                 TextButton(
-                  onPressed: () => context.go("/register"),
+                  onPressed: _loading || _resettingPassword
+                      ? null
+                      : () => context.go("/register"),
                   child: const Text("Crear compte"),
                 ),
               ],
