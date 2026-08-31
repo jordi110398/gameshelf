@@ -11,6 +11,7 @@ import 'package:gameshelf/features/profile/edit_profile_page.dart';
 import 'package:gameshelf/repositories/friendship_repository.dart';
 import 'package:gameshelf/features/social/social_page.dart';
 import 'package:gameshelf/core/services/auth_service.dart';
+import 'package:gameshelf/core/utils/error_messages.dart';
 
 class UserProfilePage extends StatefulWidget {
   final Profile profile;
@@ -98,7 +99,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('No s\'ha pogut carregar el perfil: $e')),
+        SnackBar(content: Text('No s\'ha pogut carregar el perfil: ${friendlyError(e)}')),
       );
     }
   }
@@ -159,7 +160,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('No s\'ha pogut enviar la sol·licitud: $e')),
+        SnackBar(content: Text('No s\'ha pogut enviar la sol·licitud: ${friendlyError(e)}')),
       );
     } finally {
       if (mounted) {
@@ -187,7 +188,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('No s\'ha pogut acceptar la sol·licitud: $e')),
+        SnackBar(content: Text('No s\'ha pogut acceptar la sol·licitud: ${friendlyError(e)}')),
       );
     } finally {
       if (mounted) {
@@ -215,7 +216,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('No s\'ha pogut rebutjar la sol·licitud: $e')),
+        SnackBar(content: Text('No s\'ha pogut rebutjar la sol·licitud: ${friendlyError(e)}')),
       );
     } finally {
       if (mounted) {
@@ -243,7 +244,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('No s\'ha pogut eliminar l\'amic: $e')),
+        SnackBar(content: Text('No s\'ha pogut eliminar l\'amic: ${friendlyError(e)}')),
       );
     } finally {
       if (mounted) {
@@ -540,7 +541,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                           width: 65,
                           height: 95,
                           fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) {
+                          errorBuilder: (_, _, _) {
                             return _buildReviewPlaceholder();
                           },
                         )
@@ -739,10 +740,17 @@ class _UserProfilePageState extends State<UserProfilePage> {
   // EDICIÓ PERFIL
   // ----------------------------------------------
   Future<void> _openEditProfile() async {
+    // currentProfile pot venir de profiles_public (sense email) si hem
+    // arribat aquí per cerca; per editar cal el perfil complet.
+    final profileToEdit =
+        await profileRepository.getMyProfile() ?? currentProfile;
+
+    if (!mounted) return;
+
     final updatedProfile = await Navigator.push<Profile>(
       context,
       MaterialPageRoute(
-        builder: (_) => EditProfilePage(profile: currentProfile),
+        builder: (_) => EditProfilePage(profile: profileToEdit),
       ),
     );
 

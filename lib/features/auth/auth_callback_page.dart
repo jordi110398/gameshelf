@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:gameshelf/core/utils/error_messages.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AuthCallbackPage extends StatefulWidget {
@@ -49,7 +50,7 @@ class _AuthCallbackPageState extends State<AuthCallbackPage> {
 
       setState(() {
         _loading = false;
-        _error = e.toString();
+        _error = friendlyError(e);
       });
     }
   }

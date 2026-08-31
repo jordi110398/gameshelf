@@ -6,6 +6,7 @@ import 'package:gameshelf/models/game_status.dart';
 import 'package:gameshelf/models/user_game.dart';
 import 'package:gameshelf/repositories/supabase_library_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:gameshelf/core/utils/error_messages.dart';
 
 class GameDetailPage extends StatefulWidget {
   final Game game;
@@ -121,11 +122,23 @@ class _GameDetailPageState extends State<GameDetailPage> {
 
     if (status == null) return;
 
-    await repository.addToLibrary(widget.game, status: status);
+    try {
+      await repository.addToLibrary(widget.game, status: status);
 
-    hasChanges = true;
+      hasChanges = true;
 
-    await loadUserGame();
+      await loadUserGame();
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'No s\'ha pogut afegir el joc a la biblioteca: ${friendlyError(e)}',
+          ),
+        ),
+      );
+    }
   }
 
   Widget buildGenreChips(BuildContext context) {

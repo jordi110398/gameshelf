@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:gameshelf/core/services/auth_service.dart';
 import 'package:gameshelf/features/auth/widgets/auth_text_field.dart';
+import 'package:gameshelf/core/utils/error_messages.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ResetPasswordPage extends StatefulWidget {
@@ -192,8 +193,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'No s\'ha pogut canviar la contrasenya: '
-            '${e.toString().replaceFirst('Exception: ', '')}',
+            'No s\'ha pogut canviar la contrasenya: ${friendlyError(e)}',
           ),
         ),
       );

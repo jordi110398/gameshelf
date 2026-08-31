@@ -3,6 +3,7 @@ import 'package:gameshelf/models/profile.dart';
 import 'package:gameshelf/repositories/profile_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:gameshelf/features/profile/edit_profile_page.dart';
+import 'package:gameshelf/core/utils/error_messages.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -50,7 +51,7 @@ class _ProfilePageState extends State<ProfilePage> {
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('No s\'ha pogut carregar el perfil: $e')),
+        SnackBar(content: Text('No s\'ha pogut carregar el perfil: ${friendlyError(e)}')),
       );
     }
   }

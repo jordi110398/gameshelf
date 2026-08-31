@@ -26,9 +26,10 @@ class ProfileRepository {
     return Profile.fromMap(response);
   }
 
+  // Perfil d'un altre usuari: llegim de la vista pública (sense email).
   Future<Profile?> getProfileById(String id) async {
     final response = await client
-        .from('profiles')
+        .from('profiles_public')
         .select()
         .eq('id', id)
         .maybeSingle();
@@ -48,7 +49,7 @@ class ProfileRepository {
     }
 
     final response = await client
-        .from('profiles')
+        .from('profiles_public')
         .select()
         .ilike('nickname', '%$trimmedQuery%')
         .order('nickname')

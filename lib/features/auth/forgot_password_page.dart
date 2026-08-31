@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:gameshelf/core/services/auth_service.dart';
 import 'package:gameshelf/features/auth/widgets/auth_text_field.dart';
+import 'package:gameshelf/core/utils/error_messages.dart';
 
 class ForgotPasswordPage extends StatefulWidget {
   const ForgotPasswordPage({super.key});
@@ -56,7 +57,7 @@ class _ForgotPasswordPageState
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'No s\'ha pogut enviar el correu: $e',
+            'No s\'ha pogut enviar el correu: ${friendlyError(e)}',
           ),
         ),
       );

@@ -6,6 +6,7 @@ import 'package:gameshelf/models/profile.dart';
 import 'package:gameshelf/repositories/profile_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:gameshelf/core/services/auth_service.dart';
+import 'package:gameshelf/core/utils/error_messages.dart';
 
 class EditProfilePage extends StatefulWidget {
   final Profile profile;
@@ -159,7 +160,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Error: $e'),
+          content: Text(friendlyError(e)),
         ),
       );
 
@@ -231,7 +232,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'No s\'ha pogut eliminar el compte: $e',
+            'No s\'ha pogut eliminar el compte: ${friendlyError(e)}',
           ),
         ),
       );
@@ -535,7 +536,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                               SnackBar(
                                 content: Text(
                                   'No s\'ha pogut canviar la '
-                                  'contrasenya: $e',
+                                  'contrasenya: ${friendlyError(e)}',
                                 ),
                               ),
                             );
@@ -588,7 +589,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
         width: 130,
         height: 130,
         fit: BoxFit.cover,
-        errorBuilder: (_, __, ___) {
+        errorBuilder: (_, _, _) {
           return const Icon(
             Icons.person,
             size: 65,

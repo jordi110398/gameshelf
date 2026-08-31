@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:gameshelf/core/services/auth_service.dart';
 import 'package:gameshelf/features/auth/widgets/auth_text_field.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:gameshelf/core/utils/error_messages.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -111,22 +111,12 @@ class _RegisterPageState extends State<RegisterPage> {
       // Amb confirmació de correu activada, no intentem entrar
       // directament a l'aplicació.
       context.go('/email-confirmation', extra: email);
-    } on AuthException catch (e) {
-      if (!mounted) return;
-
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(e.message)));
-
-      setState(() {
-        _isRegistering = false;
-      });
     } catch (e) {
       if (!mounted) return;
 
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('Error: $e')));
+      ).showSnackBar(SnackBar(content: Text(friendlyError(e))));
 
       setState(() {
         _isRegistering = false;

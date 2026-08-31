@@ -4,6 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:gameshelf/models/activity_item.dart';
 import 'package:gameshelf/repositories/activity_repository.dart';
 import 'package:gameshelf/features/activity/widgets/activity_card.dart';
+import 'package:gameshelf/core/utils/error_messages.dart';
 
 class ActivityFeedPage extends StatefulWidget {
   const ActivityFeedPage({super.key});
@@ -77,7 +78,7 @@ class _ActivityFeedPageState extends State<ActivityFeedPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'No s\'ha pogut carregar l\'activitat: $e',
+            'No s\'ha pogut carregar l\'activitat: ${friendlyError(e)}',
           ),
         ),
       );
@@ -138,7 +139,7 @@ class _ActivityFeedPageState extends State<ActivityFeedPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'No s\'han pogut carregar més activitats: $e',
+            'No s\'han pogut carregar més activitats: ${friendlyError(e)}',
           ),
         ),
       );
@@ -198,7 +199,7 @@ class _ActivityFeedPageState extends State<ActivityFeedPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'No s\'ha pogut actualitzar l\'activitat: $e',
+            'No s\'ha pogut actualitzar l\'activitat: ${friendlyError(e)}',
           ),
         ),
       );
@@ -251,7 +252,7 @@ class _ActivityFeedPageState extends State<ActivityFeedPage> {
                           itemCount:
                               _items.length +
                               (_isLoadingMore ? 1 : 0),
-                          separatorBuilder: (_, __) =>
+                          separatorBuilder: (_, _) =>
                               const SizedBox(height: 10),
                           itemBuilder: (context, index) {
                             // Loader del final

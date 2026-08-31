@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:gameshelf/core/services/auth_service.dart';
 import '../widgets/auth_text_field.dart';
 import 'package:gameshelf/core/services/profile_service.dart';
+import 'package:gameshelf/core/utils/error_messages.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -59,9 +60,7 @@ class _LoginPageState extends State<LoginPage> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            e.toString().replaceFirst('Exception: ', ''),
-          ),
+          content: Text(friendlyError(e)),
         ),
       );
     } finally {
@@ -122,8 +121,7 @@ class _LoginPageState extends State<LoginPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'No s\'ha pogut enviar el correu: '
-            '${e.toString().replaceFirst('Exception: ', '')}',
+            'No s\'ha pogut enviar el correu: ${friendlyError(e)}',
           ),
         ),
       );

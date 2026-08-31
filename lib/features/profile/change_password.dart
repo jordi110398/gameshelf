@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gameshelf/core/utils/error_messages.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ChangePasswordPage extends StatefulWidget {
@@ -60,14 +61,6 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
       );
 
       Navigator.pop(context);
-    } on AuthException catch (e) {
-      if (!mounted) return;
-
-      setState(() {
-        isSaving = false;
-      });
-
-      _showError(e.message);
     } catch (e) {
       if (!mounted) return;
 
@@ -75,7 +68,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
         isSaving = false;
       });
 
-      _showError('No s\'ha pogut canviar la contrasenya.');
+      _showError(friendlyError(e));
     }
   }
 

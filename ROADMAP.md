@@ -22,7 +22,7 @@
 - [x] Cards/popups de posts 
 - [x] Descobrir nous jugadors
 - [ ] Esborrar compte
-- [ ] Recuperació/canvi password
+- [x] Recuperació/canvi password
 - [ ] Política de privacitat/cookies
 - [ ] About
 
@@ -35,8 +35,8 @@
 
 
 ## To do before full release
-🔐 Recuperar contrasenya — preparar la pantalla i el flux, sense necessitat d'enviar ara cap email.
-🔑 Canviar contrasenya des d'Editar perfil — UI + updateUser.
+🔐 Recuperar contrasenya — preparar la pantalla i el flux, sense necessitat d'enviar ara cap email. FET
+🔑 Canviar contrasenya des d'Editar perfil — UI + updateUser. FET
 🗑️ Eliminar compte — ja tens l'Edge Function funcionant; podem polir confirmació, loading i logout.
 🛡️ Revisar RLS — molt important abans de publicar, especialment perquè ara tens:
 user_games visibles per qualsevol usuari autenticat.

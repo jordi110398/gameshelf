@@ -82,7 +82,14 @@ class SupabaseLibraryRepository implements LibraryRepository {
   // ─────────────────────────────────────────────
 
   Future<void> saveGame(Game game) async {
-    await client.from('games').upsert(game.toMap(), onConflict: 'igdb_id');
+    final response = await client.functions.invoke(
+      'save-game',
+      body: game.toMap(),
+    );
+
+    if (response.status != 200) {
+      throw Exception('No s\'ha pogut desar el joc');
+    }
   }
 
   // ─────────────────────────────────────────────

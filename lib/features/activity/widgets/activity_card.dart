@@ -6,6 +6,7 @@ import 'package:gameshelf/features/profile/user_profile_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:flutter/gestures.dart';
+import 'package:gameshelf/core/utils/error_messages.dart';
 
 class ActivityCard extends StatelessWidget {
   final ActivityItem item;
@@ -103,7 +104,7 @@ class ActivityCard extends StatelessWidget {
                                 ? Image.network(
                                     item.gameCoverUrl!,
                                     fit: BoxFit.cover,
-                                    errorBuilder: (_, __, ___) {
+                                    errorBuilder: (_, _, _) {
                                       return Container(
                                         color: Theme.of(
                                           context,
@@ -282,7 +283,7 @@ class ActivityCard extends StatelessWidget {
       if (!context.mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('No s\'ha pogut carregar la review: $e')),
+        SnackBar(content: Text('No s\'ha pogut carregar la review: ${friendlyError(e)}')),
       );
     }
   }

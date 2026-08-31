@@ -8,6 +8,7 @@ import 'package:gameshelf/models/activity_item.dart';
 import 'package:gameshelf/repositories/activity_repository.dart';
 import 'package:gameshelf/features/activity/widgets/activity_card.dart';
 import 'package:gameshelf/features/activity/activity_feed_page.dart';
+import 'package:gameshelf/core/utils/error_messages.dart';
 
 class SocialPage extends StatefulWidget {
   const SocialPage({super.key});
@@ -92,7 +93,7 @@ class _SocialPageState extends State<SocialPage> {
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('No s\'han pogut buscar els usuaris: $e')),
+        SnackBar(content: Text('No s\'han pogut buscar els usuaris: ${friendlyError(e)}')),
       );
     }
   }
@@ -129,7 +130,7 @@ class _SocialPageState extends State<SocialPage> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('No s\'han pogut carregar les dades socials: $e'),
+          content: Text('No s\'han pogut carregar les dades socials: ${friendlyError(e)}'),
         ),
       );
     }
@@ -234,7 +235,7 @@ class _SocialPageState extends State<SocialPage> {
     return ListView.separated(
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
       itemCount: profiles.length,
-      separatorBuilder: (_, __) {
+      separatorBuilder: (_, _) {
         return const SizedBox(height: 8);
       },
       itemBuilder: (context, index) {
