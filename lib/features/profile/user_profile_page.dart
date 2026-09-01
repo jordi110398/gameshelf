@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:gameshelf/core/widgets/app_logo.dart';
 import 'package:gameshelf/features/home/widgets/game_card.dart';
 import 'package:gameshelf/models/game_status.dart';
 import 'package:gameshelf/models/library_game.dart';
@@ -730,6 +731,8 @@ class _UserProfilePageState extends State<UserProfilePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leadingWidth: isMyProfile ? AppLogo.width(context) : null,
+        leading: isMyProfile ? const AppLogo() : null,
         title: Text('@${currentProfile.nickname}'),
         // ACCIONS
         actions: [

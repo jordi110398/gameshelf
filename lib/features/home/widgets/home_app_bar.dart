@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:gameshelf/core/widgets/app_logo.dart';
 import 'package:gameshelf/features/notifications/notifications_page.dart';
 import 'package:gameshelf/features/search/search_page.dart';
 import 'package:gameshelf/repositories/notification_repository.dart';
@@ -74,28 +75,8 @@ class _HomeAppBarState extends State<HomeAppBar> {
       centerTitle: true,
 
       // LOGO + NOM
-      leadingWidth: isMobile ? 82 : 150,
-      leading: Padding(
-        padding: const EdgeInsets.only(left: 12),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.sports_esports,
-              color: Colors.deepPurple,
-              size: isMobile ? 22 : 28,
-            ),
-            const SizedBox(width: 6),
-            Text(
-              isMobile ? "GS" : "GameShelf",
-              style: TextStyle(
-                fontSize: isMobile ? 18 : 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-      ),
+      leadingWidth: AppLogo.width(context),
+      leading: const AppLogo(),
 
       // AFEGIR JOC (al mig)
       title: Container(
@@ -126,7 +107,7 @@ class _HomeAppBarState extends State<HomeAppBar> {
         Container(
           width: isMobile ? 38 : 42,
           height: isMobile ? 38 : 42,
-          margin: EdgeInsets.only(right: isMobile ? 2 : 8),
+          margin: EdgeInsets.only(right: isMobile ? 14 : 20),
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.surfaceContainerHighest,
             shape: BoxShape.circle,

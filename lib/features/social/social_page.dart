@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gameshelf/core/widgets/app_logo.dart';
 import 'package:gameshelf/features/profile/user_profile_page.dart';
 import 'package:gameshelf/models/profile.dart';
 import 'package:gameshelf/repositories/profile_repository.dart';
@@ -146,7 +147,11 @@ class _SocialPageState extends State<SocialPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Social')),
+      appBar: AppBar(
+        leadingWidth: AppLogo.width(context),
+        leading: const AppLogo(),
+        title: const Text('Social'),
+      ),
       body: ResponsiveCenter(
         maxWidth: 640,
         child: Column(

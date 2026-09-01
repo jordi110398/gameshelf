@@ -51,68 +51,98 @@ class _MainShellPageState extends State<MainShellPage> {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      body: IndexedStack(
-        index: _currentIndex,
-        children: const [HomePage(), SocialPage(), _ProfileTab()],
-      ),
-
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-        child: Container(
-          height: 66,
-          decoration: BoxDecoration(
-            color: colorScheme.surfaceContainerHigh,
-            borderRadius: BorderRadius.circular(33),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.25),
-                blurRadius: 16,
-                offset: const Offset(0, 6),
-              ),
-            ],
+      body: Stack(
+        children: [
+          IndexedStack(
+            index: _currentIndex,
+            children: const [HomePage(), SocialPage(), _ProfileTab()],
           ),
-          child: Row(
-            children: List.generate(_navItems.length, (index) {
-              final item = _navItems[index];
-              final isSelected = index == _currentIndex;
 
-              return Expanded(
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(33),
-                  onTap: () {
-                    setState(() {
-                      _currentIndex = index;
-                    });
-                  },
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        isSelected ? item.selectedIcon : item.icon,
-                        color: isSelected
-                            ? colorScheme.primary
-                            : colorScheme.onSurfaceVariant,
-                      ),
-                      const SizedBox(height: 3),
-                      Text(
-                        item.label,
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: isSelected
-                              ? FontWeight.bold
-                              : FontWeight.normal,
-                          color: isSelected
-                              ? colorScheme.primary
-                              : colorScheme.onSurfaceVariant,
-                        ),
+          // BARRA DE NAVEGACIÓ FLOTANT
+          Positioned(
+            left: 16,
+            right: 16,
+            bottom: 0,
+            child: SafeArea(
+              top: false,
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: Container(
+                  height: 66,
+                  decoration: BoxDecoration(
+                    color: colorScheme.surfaceContainerHigh,
+                    borderRadius: BorderRadius.circular(33),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.3),
+                        blurRadius: 20,
+                        offset: const Offset(0, 8),
                       ),
                     ],
                   ),
+                  child: Row(
+                    children: List.generate(_navItems.length, (index) {
+                      final item = _navItems[index];
+                      final isSelected = index == _currentIndex;
+
+                      return Expanded(
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(33),
+                          onTap: () {
+                            setState(() {
+                              _currentIndex = index;
+                            });
+                          },
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              AnimatedContainer(
+                                duration: const Duration(milliseconds: 200),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 18,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: isSelected
+                                      ? colorScheme.primary.withValues(
+                                          alpha: 0.18,
+                                        )
+                                      : Colors.transparent,
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                child: Icon(
+                                  isSelected
+                                      ? item.selectedIcon
+                                      : item.icon,
+                                  color: isSelected
+                                      ? colorScheme.primary
+                                      : colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                              const SizedBox(height: 3),
+                              Text(
+                                item.label,
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: isSelected
+                                      ? FontWeight.bold
+                                      : FontWeight.normal,
+                                  color: isSelected
+                                      ? colorScheme.primary
+                                      : colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }),
+                  ),
                 ),
-              );
-            }),
+              ),
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
