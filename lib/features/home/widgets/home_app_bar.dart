@@ -1,13 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:gameshelf/core/services/auth_service.dart';
 import 'package:gameshelf/features/notifications/notifications_page.dart';
 import 'package:gameshelf/features/search/search_page.dart';
-import 'package:gameshelf/features/profile/user_profile_page.dart';
-import 'package:gameshelf/features/social/social_page.dart';
 import 'package:gameshelf/repositories/notification_repository.dart';
-import 'package:gameshelf/repositories/profile_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class HomeAppBar extends StatefulWidget implements PreferredSizeWidget {
@@ -145,85 +141,6 @@ class _HomeAppBarState extends State<HomeAppBar> {
               onPressed: _openNotifications,
             ),
           ),
-        ),
-
-        // MENÚ DE TRES PUNTS
-        PopupMenuButton<String>(
-          tooltip: "Més opcions",
-
-          onSelected: (value) async {
-            // ─────────────────────────
-            // EL MEU PERFIL
-            // ─────────────────────────
-            if (value == "profile") {
-              final profile = await ProfileRepository(
-                Supabase.instance.client,
-              ).getMyProfile();
-
-              if (profile == null || !context.mounted) {
-                return;
-              }
-
-              await Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => UserProfilePage(profile: profile),
-                ),
-              );
-            }
-
-            // ─────────────────────────
-            // SOCIAL
-            // ─────────────────────────
-            if (value == "social") {
-              await Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const SocialPage()),
-              );
-            }
-
-            // ─────────────────────────
-            // TANCAR SESSIÓ
-            // ─────────────────────────
-            if (value == "logout") {
-              await AuthService().signOut();
-            }
-          },
-
-          itemBuilder: (context) => const [
-            PopupMenuItem(
-              value: "profile",
-              child: Row(
-                children: [
-                  Icon(Icons.person_outline),
-                  SizedBox(width: 12),
-                  Text("El meu perfil"),
-                ],
-              ),
-            ),
-
-            PopupMenuItem(
-              value: "social",
-              child: Row(
-                children: [
-                  Icon(Icons.people_outline),
-                  SizedBox(width: 12),
-                  Text("Social"),
-                ],
-              ),
-            ),
-
-            PopupMenuItem(
-              value: "logout",
-              child: Row(
-                children: [
-                  Icon(Icons.logout),
-                  SizedBox(width: 12),
-                  Text("Tancar sessió"),
-                ],
-              ),
-            ),
-          ],
         ),
       ],
     );

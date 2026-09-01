@@ -11,7 +11,6 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:gameshelf/core/services/user_tags_service.dart';
 import 'package:gameshelf/features/profile/edit_profile_page.dart';
 import 'package:gameshelf/repositories/friendship_repository.dart';
-import 'package:gameshelf/features/social/social_page.dart';
 import 'package:gameshelf/core/services/auth_service.dart';
 import 'package:gameshelf/core/utils/error_messages.dart';
 import 'package:gameshelf/features/profile/widgets/user_tags_row.dart';
@@ -729,91 +728,19 @@ class _UserProfilePageState extends State<UserProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.sizeOf(context).width;
-    final isMobile = screenWidth < 600;
     return Scaffold(
       appBar: AppBar(
         title: Text('@${currentProfile.nickname}'),
         // ACCIONS
         actions: [
-          // MENÚ DE TRES PUNTS
-          PopupMenuButton<String>(
-            tooltip: "Més opcions",
-
-            onSelected: (value) async {
-              // ─────────────────────────
-              // EL MEU PERFIL
-              // ─────────────────────────
-              if (value == "profile") {
-                final profile = await ProfileRepository(
-                  Supabase.instance.client,
-                ).getMyProfile();
-
-                if (profile == null || !context.mounted) {
-                  return;
-                }
-
-                await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => UserProfilePage(profile: profile),
-                  ),
-                );
-              }
-
-              // ─────────────────────────
-              // SOCIAL
-              // ─────────────────────────
-              if (value == "social") {
-                await Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const SocialPage()),
-                );
-              }
-
-              // ─────────────────────────
-              // TANCAR SESSIÓ
-              // ─────────────────────────
-              if (value == "logout") {
+          if (isMyProfile)
+            IconButton(
+              tooltip: "Tancar sessió",
+              icon: const Icon(Icons.logout),
+              onPressed: () async {
                 await AuthService().signOut();
-              }
-            },
-
-            itemBuilder: (context) => const [
-              PopupMenuItem(
-                value: "profile",
-                child: Row(
-                  children: [
-                    Icon(Icons.person_outline),
-                    SizedBox(width: 12),
-                    Text("El meu perfil"),
-                  ],
-                ),
-              ),
-
-              PopupMenuItem(
-                value: "social",
-                child: Row(
-                  children: [
-                    Icon(Icons.people_outline),
-                    SizedBox(width: 12),
-                    Text("Social"),
-                  ],
-                ),
-              ),
-
-              PopupMenuItem(
-                value: "logout",
-                child: Row(
-                  children: [
-                    Icon(Icons.logout),
-                    SizedBox(width: 12),
-                    Text("Tancar sessió"),
-                  ],
-                ),
-              ),
-            ],
-          ),
+              },
+            ),
         ],
       ),
       body: isLoading

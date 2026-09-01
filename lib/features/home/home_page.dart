@@ -25,6 +25,7 @@ class _HomePageState extends State<HomePage> {
 
   final searchController = TextEditingController();
   String searchQuery = '';
+  bool isSearchExpanded = false;
   Profile? profile;
   final profileService = ProfileService();
 
@@ -106,57 +107,96 @@ class _HomePageState extends State<HomePage> {
   }
 
   // ─────────────────────────────────────────────
-  // TÍTOL
+  // CAPÇALERA (TÍTOL + CERCA)
   // ─────────────────────────────────────────────
 
-  Widget _buildTitle(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 22, 24, 6),
-      child: Column(
-        children: [
-          Text(
-            "${profile?.nickname ?? "GameShelf"}'s GameShelf",
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-              fontWeight: FontWeight.w800,
-              letterSpacing: -0.8,
-            ),
-          ),
-        ],
-      ),
-    );
+  void _collapseSearch() {
+    searchController.clear();
+    setState(() {
+      searchQuery = '';
+      isSearchExpanded = false;
+    });
   }
 
-  // ─────────────────────────────────────────────
-  // CERCADOR
-  // ─────────────────────────────────────────────
+  Widget _buildHeader(BuildContext context, int totalGames) {
+    final colorScheme = Theme.of(context).colorScheme;
 
-  Widget _buildSearchField(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
-      child: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 500),
-          child: TextField(
-            controller: searchController,
-            onChanged: (value) {
-              setState(() {
-                searchQuery = value;
-              });
-            },
-            decoration: InputDecoration(
-              hintText: "Buscar a la meva biblioteca...",
-              prefixIcon: const Icon(Icons.search, size: 20),
-              filled: true,
-              fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
-              contentPadding: const EdgeInsets.symmetric(vertical: 0),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(14),
-                borderSide: BorderSide.none,
+      padding: const EdgeInsets.fromLTRB(20, 22, 20, 6),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          if (!isSearchExpanded)
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "${profile?.nickname ?? "GameShelf"}'s GameShelf",
+                    style: Theme.of(context).textTheme.headlineSmall
+                        ?.copyWith(
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: -0.6,
+                        ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    '$totalGames jocs',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            )
+          else
+            Expanded(
+              child: TextField(
+                controller: searchController,
+                autofocus: true,
+                onChanged: (value) {
+                  setState(() {
+                    searchQuery = value;
+                  });
+                },
+                decoration: InputDecoration(
+                  hintText: "Buscar a la meva biblioteca...",
+                  prefixIcon: const Icon(Icons.search, size: 20),
+                  filled: true,
+                  fillColor: colorScheme.surfaceContainerHighest,
+                  contentPadding: const EdgeInsets.symmetric(vertical: 0),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+              ),
+            ),
+
+          const SizedBox(width: 10),
+
+          Material(
+            color: colorScheme.surfaceContainerHighest,
+            shape: const CircleBorder(),
+            child: InkWell(
+              customBorder: const CircleBorder(),
+              onTap: isSearchExpanded
+                  ? _collapseSearch
+                  : () {
+                      setState(() {
+                        isSearchExpanded = true;
+                      });
+                    },
+              child: Padding(
+                padding: const EdgeInsets.all(10),
+                child: Icon(
+                  isSearchExpanded ? Icons.close : Icons.search,
+                  size: 22,
+                ),
               ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -431,14 +471,9 @@ class _HomePageState extends State<HomePage> {
           return Column(
             children: [
               // ─────────────────────────────────
-              // TÍTOL
+              // CAPÇALERA (TÍTOL + CERCA)
               // ─────────────────────────────────
-              _buildTitle(context),
-
-              // ─────────────────────────────────
-              // CERCADOR
-              // ─────────────────────────────────
-              _buildSearchField(context),
+              _buildHeader(context, games.length),
 
               // ─────────────────────────────────
               // FILTRES

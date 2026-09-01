@@ -7,7 +7,7 @@ import 'package:gameshelf/features/auth/auth_callback_page.dart';
 import 'package:gameshelf/features/auth/forgot_password_page.dart';
 import 'package:gameshelf/features/auth/reset_password_page.dart';
 
-import 'package:gameshelf/features/home/home_page.dart';
+import 'package:gameshelf/features/shell/main_shell_page.dart';
 import 'package:gameshelf/features/search/search_page.dart';
 import 'package:gameshelf/features/legal/about_page.dart';
 import 'package:gameshelf/features/legal/privacy_policy_page.dart';
@@ -93,7 +93,7 @@ final appRouter = GoRouter(
       builder: (context, state) => const ResetPasswordPage(),
     ),
 
-    GoRoute(path: "/home", builder: (context, state) => const HomePage()),
+    GoRoute(path: "/home", builder: (context, state) => const MainShellPage()),
 
     GoRoute(path: "/search", builder: (context, state) => const SearchPage()),
 
