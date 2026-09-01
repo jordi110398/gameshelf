@@ -8,12 +8,10 @@ class ForgotPasswordPage extends StatefulWidget {
   const ForgotPasswordPage({super.key});
 
   @override
-  State<ForgotPasswordPage> createState() =>
-      _ForgotPasswordPageState();
+  State<ForgotPasswordPage> createState() => _ForgotPasswordPageState();
 }
 
-class _ForgotPasswordPageState
-    extends State<ForgotPasswordPage> {
+class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   final authService = AuthService();
 
   final emailController = TextEditingController();
@@ -31,11 +29,9 @@ class _ForgotPasswordPageState
     final email = emailController.text.trim();
 
     if (email.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Introdueix el teu email.'),
-        ),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Introdueix el teu email.')));
       return;
     }
 
@@ -56,9 +52,7 @@ class _ForgotPasswordPageState
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            'No s\'ha pogut enviar el correu: ${friendlyError(e)}',
-          ),
+          content: Text('No s\'ha pogut enviar el correu: ${friendlyError(e)}'),
         ),
       );
     } finally {
@@ -75,135 +69,111 @@ class _ForgotPasswordPageState
     return Scaffold(
       body: Center(
         child: ConstrainedBox(
-          constraints: const BoxConstraints(
-            maxWidth: 420,
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(32),
-            child: _sent
-                ? Column(
-                    mainAxisAlignment:
-                        MainAxisAlignment.center,
-                    children: [
-                      const Icon(
-                        Icons.mark_email_read_outlined,
-                        size: 80,
-                      ),
+          constraints: const BoxConstraints(maxWidth: 420),
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(32),
+              child: _sent
+                  ? Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.mark_email_read_outlined, size: 80),
 
-                      const SizedBox(height: 24),
+                        const SizedBox(height: 24),
 
-                      const Text(
-                        'Revisa el teu correu',
-                        style: TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
+                        const Text(
+                          'Revisa el teu correu',
+                          style: TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
                         ),
-                        textAlign: TextAlign.center,
-                      ),
 
-                      const SizedBox(height: 16),
+                        const SizedBox(height: 16),
 
-                      Text(
-                        'T\'hem enviat un enllaç per restablir '
-                        'la teva contrasenya a:',
-                        textAlign: TextAlign.center,
-                        style: Theme.of(context)
-                            .textTheme
-                            .bodyLarge,
-                      ),
-
-                      const SizedBox(height: 8),
-
-                      Text(
-                        emailController.text.trim(),
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
+                        Text(
+                          'T\'hem enviat un enllaç per restablir '
+                          'la teva contrasenya a:',
+                          textAlign: TextAlign.center,
+                          style: Theme.of(context).textTheme.bodyLarge,
                         ),
-                      ),
 
-                      const SizedBox(height: 32),
+                        const SizedBox(height: 8),
 
-                      FilledButton(
-                        onPressed: () => context.go('/'),
-                        child: const Text(
-                          'Tornar al login',
+                        Text(
+                          emailController.text.trim(),
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
-                      ),
-                    ],
-                  )
-                : Column(
-                    mainAxisAlignment:
-                        MainAxisAlignment.center,
-                    children: [
-                      const Icon(
-                        Icons.lock_reset,
-                        size: 80,
-                      ),
 
-                      const SizedBox(height: 24),
+                        const SizedBox(height: 32),
 
-                      const Text(
-                        'Recuperar contrasenya',
-                        style: TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
+                        FilledButton(
+                          onPressed: () => context.go('/'),
+                          child: const Text('Tornar al login'),
                         ),
-                        textAlign: TextAlign.center,
-                      ),
+                      ],
+                    )
+                  : Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.lock_reset, size: 80),
 
-                      const SizedBox(height: 16),
+                        const SizedBox(height: 24),
 
-                      const Text(
-                        'Introdueix el teu email i t\'enviarem '
-                        'un enllaç per crear una nova contrasenya.',
-                        textAlign: TextAlign.center,
-                      ),
-
-                      const SizedBox(height: 32),
-
-                      AuthTextField(
-                        controller: emailController,
-                        label: 'Email',
-                        icon: Icons.email,
-                      ),
-
-                      const SizedBox(height: 24),
-
-                      SizedBox(
-                        width: double.infinity,
-                        child: FilledButton(
-                          onPressed:
-                              _loading
-                                  ? null
-                                  : _sendResetEmail,
-                          child: _loading
-                              ? const SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child:
-                                      CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                  ),
-                                )
-                              : const Text(
-                                  'Enviar correu',
-                                ),
+                        const Text(
+                          'Recuperar contrasenya',
+                          style: TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
                         ),
-                      ),
 
-                      const SizedBox(height: 12),
+                        const SizedBox(height: 16),
 
-                      TextButton(
-                        onPressed: _loading
-                            ? null
-                            : () => context.go('/'),
-                        child: const Text(
-                          'Tornar al login',
+                        const Text(
+                          'Introdueix el teu email i t\'enviarem '
+                          'un enllaç per crear una nova contrasenya.',
+                          textAlign: TextAlign.center,
                         ),
-                      ),
-                    ],
-                  ),
+
+                        const SizedBox(height: 32),
+
+                        AuthTextField(
+                          controller: emailController,
+                          label: 'Email',
+                          icon: Icons.email,
+                        ),
+
+                        const SizedBox(height: 24),
+
+                        SizedBox(
+                          width: double.infinity,
+                          child: FilledButton(
+                            onPressed: _loading ? null : _sendResetEmail,
+                            child: _loading
+                                ? const SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : const Text('Enviar correu'),
+                          ),
+                        ),
+
+                        const SizedBox(height: 12),
+
+                        TextButton(
+                          onPressed: _loading ? null : () => context.go('/'),
+                          child: const Text('Tornar al login'),
+                        ),
+                      ],
+                    ),
+            ),
           ),
         ),
       ),

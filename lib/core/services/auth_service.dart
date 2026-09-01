@@ -62,7 +62,10 @@ class AuthService {
   Future<void> resetPassword(String email) async {
     await _client.auth.resetPasswordForEmail(
       email,
-      redirectTo: 'http://localhost:8080/auth/reset-password',
+      // Uri.base és l'origen des d'on s'executa l'app (localhost en
+      // desenvolupament, el domini real un cop desplegada), així que
+      // no cal fixar-lo a mà per a cada entorn.
+      redirectTo: '${Uri.base.origin}/auth/reset-password',
     );
   }
 

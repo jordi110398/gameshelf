@@ -8,8 +8,10 @@ import 'package:gameshelf/features/auth/forgot_password_page.dart';
 import 'package:gameshelf/features/auth/reset_password_page.dart';
 
 import 'package:gameshelf/features/home/home_page.dart';
-import 'package:gameshelf/features/profile/profile_page.dart';
 import 'package:gameshelf/features/search/search_page.dart';
+import 'package:gameshelf/features/legal/about_page.dart';
+import 'package:gameshelf/features/legal/privacy_policy_page.dart';
+import 'package:gameshelf/features/legal/cookies_policy_page.dart';
 
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -19,9 +21,7 @@ final supabase = Supabase.instance.client;
 final appRouter = GoRouter(
   initialLocation: "/",
 
-  refreshListenable: GoRouterRefreshStream(
-    supabase.auth.onAuthStateChange,
-  ),
+  refreshListenable: GoRouterRefreshStream(supabase.auth.onAuthStateChange),
 
   redirect: (context, state) {
     final loggedIn = supabase.auth.currentSession != null;
@@ -33,6 +33,8 @@ final appRouter = GoRouter(
     final isForgotPassword = location == "/forgot-password";
     final isResetPassword = location == "/auth/reset-password";
     final isAuthCallback = location == "/auth/callback";
+    final isAbout = location == "/about";
+    final isLegal = location.startsWith("/legal/");
 
     final isAuthRoute =
         isLogin ||
@@ -40,7 +42,9 @@ final appRouter = GoRouter(
         isEmailConfirmation ||
         isForgotPassword ||
         isResetPassword ||
-        isAuthCallback;
+        isAuthCallback ||
+        isAbout ||
+        isLegal;
 
     // Si no està autenticat, només pot accedir
     // a les rutes d'autenticació.
@@ -58,10 +62,7 @@ final appRouter = GoRouter(
   },
 
   routes: [
-    GoRoute(
-      path: "/",
-      builder: (context, state) => const LoginPage(),
-    ),
+    GoRoute(path: "/", builder: (context, state) => const LoginPage()),
 
     GoRoute(
       path: "/register",
@@ -73,9 +74,7 @@ final appRouter = GoRouter(
       builder: (context, state) {
         final email = state.extra as String;
 
-        return EmailConfirmationPage(
-          email: email,
-        );
+        return EmailConfirmationPage(email: email);
       },
     ),
 
@@ -94,19 +93,20 @@ final appRouter = GoRouter(
       builder: (context, state) => const ResetPasswordPage(),
     ),
 
+    GoRoute(path: "/home", builder: (context, state) => const HomePage()),
+
+    GoRoute(path: "/search", builder: (context, state) => const SearchPage()),
+
+    GoRoute(path: "/about", builder: (context, state) => const AboutPage()),
+
     GoRoute(
-      path: "/home",
-      builder: (context, state) => const HomePage(),
+      path: "/legal/privacy",
+      builder: (context, state) => const PrivacyPolicyPage(),
     ),
 
     GoRoute(
-      path: "/profile",
-      builder: (context, state) => const ProfilePage(),
-    ),
-
-    GoRoute(
-      path: "/search",
-      builder: (context, state) => const SearchPage(),
+      path: "/legal/cookies",
+      builder: (context, state) => const CookiesPolicyPage(),
     ),
   ],
 );

@@ -5,6 +5,7 @@ import 'package:gameshelf/models/activity_item.dart';
 import 'package:gameshelf/repositories/activity_repository.dart';
 import 'package:gameshelf/features/activity/widgets/activity_card.dart';
 import 'package:gameshelf/core/utils/error_messages.dart';
+import 'package:gameshelf/core/widgets/responsive_center.dart';
 
 class ActivityFeedPage extends StatefulWidget {
   const ActivityFeedPage({super.key});
@@ -56,9 +57,7 @@ class _ActivityFeedPageState extends State<ActivityFeedPage> {
 
   Future<void> _loadInitial() async {
     try {
-      final items = await _repository.getFeed(
-        limit: _pageSize,
-      );
+      final items = await _repository.getFeed(limit: _pageSize);
 
       if (!mounted) return;
 
@@ -174,9 +173,7 @@ class _ActivityFeedPageState extends State<ActivityFeedPage> {
 
   Future<void> _refresh() async {
     try {
-      final items = await _repository.getFeed(
-        limit: _pageSize,
-      );
+      final items = await _repository.getFeed(limit: _pageSize);
 
       if (!mounted) return;
 
@@ -213,87 +210,69 @@ class _ActivityFeedPageState extends State<ActivityFeedPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Activitat'),
-      ),
-      body: _isLoading
-          ? const Center(
-              child: CircularProgressIndicator(),
-            )
-          : Stack(
-              alignment: Alignment.topCenter,
-              children: [
-                RefreshIndicator(
-                  onRefresh: _refresh,
-                  child: _items.isEmpty
-                      ? ListView(
-                          controller: _scrollController,
-                          physics: const AlwaysScrollableScrollPhysics(),
-                          children: const [
-                            Padding(
-                              padding: EdgeInsets.only(top: 80),
-                              child: Center(
-                                child: Text(
-                                  'Encara no hi ha activitat.',
+      appBar: AppBar(title: const Text('Activitat')),
+      body: ResponsiveCenter(
+        maxWidth: 640,
+        child: _isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : Stack(
+                alignment: Alignment.topCenter,
+                children: [
+                  RefreshIndicator(
+                    onRefresh: _refresh,
+                    child: _items.isEmpty
+                        ? ListView(
+                            controller: _scrollController,
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            children: const [
+                              Padding(
+                                padding: EdgeInsets.only(top: 80),
+                                child: Center(
+                                  child: Text('Encara no hi ha activitat.'),
                                 ),
                               ),
-                            ),
-                          ],
-                        )
-                      : ListView.separated(
-                          controller: _scrollController,
-                          physics: const AlwaysScrollableScrollPhysics(),
-                          padding: const EdgeInsets.fromLTRB(
-                            16,
-                            16,
-                            16,
-                            24,
+                            ],
+                          )
+                        : ListView.separated(
+                            controller: _scrollController,
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+                            itemCount: _items.length + (_isLoadingMore ? 1 : 0),
+                            separatorBuilder: (_, _) =>
+                                const SizedBox(height: 10),
+                            itemBuilder: (context, index) {
+                              // Loader del final
+                              if (index >= _items.length) {
+                                return const Padding(
+                                  padding: EdgeInsets.all(16),
+                                  child: Center(
+                                    child: CircularProgressIndicator(),
+                                  ),
+                                );
+                              }
+
+                              return ActivityCard(item: _items[index]);
+                            },
                           ),
-                          itemCount:
-                              _items.length +
-                              (_isLoadingMore ? 1 : 0),
-                          separatorBuilder: (_, _) =>
-                              const SizedBox(height: 10),
-                          itemBuilder: (context, index) {
-                            // Loader del final
-                            if (index >= _items.length) {
-                              return const Padding(
-                                padding: EdgeInsets.all(16),
-                                child: Center(
-                                  child: CircularProgressIndicator(),
-                                ),
-                              );
-                            }
+                  ),
 
-                            return ActivityCard(
-                              item: _items[index],
-                            );
-                          },
-                        ),
-                ),
-
-                // ─────────────────────────────
-                // BOTÓ "ACTIVITAT NOVA"
-                // ─────────────────────────────
-
-                if (_hasNewActivity)
-                  Positioned(
-                    top: 12,
-                    child: SafeArea(
-                      child: FilledButton.icon(
-                        onPressed: _refresh,
-                        icon: const Icon(
-                          Icons.arrow_upward,
-                          size: 18,
-                        ),
-                        label: const Text(
-                          'Hi ha activitat nova',
+                  // ─────────────────────────────
+                  // BOTÓ "ACTIVITAT NOVA"
+                  // ─────────────────────────────
+                  if (_hasNewActivity)
+                    Positioned(
+                      top: 12,
+                      child: SafeArea(
+                        child: FilledButton.icon(
+                          onPressed: _refresh,
+                          icon: const Icon(Icons.arrow_upward, size: 18),
+                          label: const Text('Hi ha activitat nova'),
                         ),
                       ),
                     ),
-                  ),
-              ],
-            ),
+                ],
+              ),
+      ),
     );
   }
 }

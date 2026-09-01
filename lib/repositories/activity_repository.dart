@@ -2,6 +2,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:gameshelf/models/activity_item.dart';
 import 'package:flutter/foundation.dart';
 
+typedef ReviewLikes = ({int likeCount, bool likedByMe});
+
 class ActivityRepository {
   final SupabaseClient client;
 
@@ -31,7 +33,7 @@ class ActivityRepository {
     final userIds = rows.map((r) => r['user_id'] as String).toSet().toList();
 
     final profiles = await client
-        .from('profiles')
+        .from('profiles_public')
         .select('id, nickname, avatar_url')
         .inFilter('id', userIds);
 
@@ -80,5 +82,54 @@ class ActivityRepository {
         .maybeSingle();
 
     return response?['review'] as String?;
+  }
+
+  // ─────────────────────────────────────────────
+  // LIKES
+  // ─────────────────────────────────────────────
+
+  /// No s'encadena `.select()`: `activity_likes` no té cap manera de
+  /// tornar la fila igualment, i forçar-ho fa fallar la petició sencera.
+  Future<void> likeActivity(String activityId) async {
+    final userId = client.auth.currentUser?.id;
+    if (userId == null) return;
+
+    await client.from('activity_likes').insert({
+      'activity_id': activityId,
+      'user_id': userId,
+    });
+  }
+
+  Future<void> unlikeActivity(String activityId) async {
+    final userId = client.auth.currentUser?.id;
+    if (userId == null) return;
+
+    await client
+        .from('activity_likes')
+        .delete()
+        .eq('activity_id', activityId)
+        .eq('user_id', userId);
+  }
+
+  /// Likes de les MEVES pròpies reviews, indexats per `igdb_id`. Fa servir
+  /// `get_my_review_likes` perquè `get_activity_feed()` exclou expressament
+  /// les pròpies activitats (només ensenya les dels altres).
+  Future<Map<int, ReviewLikes>> getMyReviewLikes(List<int> gameIds) async {
+    if (gameIds.isEmpty) return {};
+
+    final response = await client.rpc(
+      'get_my_review_likes',
+      params: {'game_ids': gameIds},
+    );
+
+    final rows = response as List;
+
+    return {
+      for (final row in rows)
+        row['game_id'] as int: (
+          likeCount: (row['like_count'] as num).toInt(),
+          likedByMe: row['liked_by_me'] as bool,
+        ),
+    };
   }
 }

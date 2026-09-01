@@ -1,10 +1,4 @@
-enum ActivityType {
-  startedPlaying,
-  completed,
-  dropped,
-  review,
-  addedToLibrary,
-}
+enum ActivityType { startedPlaying, completed, dropped, review, addedToLibrary }
 
 extension ActivityTypeX on ActivityType {
   static ActivityType fromDb(String value) {
@@ -37,6 +31,8 @@ class ActivityItem {
   final double? rating;
   final String? reviewSnippet;
   final DateTime createdAt;
+  final int likeCount;
+  final bool likedByMe;
 
   const ActivityItem({
     required this.id,
@@ -50,6 +46,8 @@ class ActivityItem {
     this.rating,
     this.reviewSnippet,
     required this.createdAt,
+    this.likeCount = 0,
+    this.likedByMe = false,
   });
 
   factory ActivityItem.fromMap(Map<String, dynamic> map) {
@@ -67,6 +65,8 @@ class ActivityItem {
       rating: (map['rating'] as num?)?.toDouble(),
       reviewSnippet: map['review_snippet'] as String?,
       createdAt: DateTime.parse(map['created_at'] as String),
+      likeCount: (map['like_count'] as num?)?.toInt() ?? 0,
+      likedByMe: map['liked_by_me'] as bool? ?? false,
     );
   }
 }

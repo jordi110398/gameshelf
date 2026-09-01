@@ -1,25 +1,72 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:gameshelf/core/services/auth_service.dart';
+import 'package:gameshelf/features/notifications/notifications_page.dart';
 import 'package:gameshelf/features/search/search_page.dart';
 import 'package:gameshelf/features/profile/user_profile_page.dart';
 import 'package:gameshelf/features/social/social_page.dart';
+import 'package:gameshelf/repositories/notification_repository.dart';
 import 'package:gameshelf/repositories/profile_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
-  final TextEditingController searchController;
-  final ValueChanged<String> onSearchChanged;
+class HomeAppBar extends StatefulWidget implements PreferredSizeWidget {
   final VoidCallback onLibraryChanged;
 
-  const HomeAppBar({
-    super.key,
-    required this.searchController,
-    required this.onSearchChanged,
-    required this.onLibraryChanged,
-  });
+  const HomeAppBar({super.key, required this.onLibraryChanged});
 
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+
+  @override
+  State<HomeAppBar> createState() => _HomeAppBarState();
+}
+
+class _HomeAppBarState extends State<HomeAppBar> {
+  final _notificationRepository = NotificationRepository(
+    Supabase.instance.client,
+  );
+
+  int _unreadCount = 0;
+  Timer? _pollTimer;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _refreshUnreadCount();
+
+    // Comprova cada 30s si hi ha notificacions noves.
+    _pollTimer = Timer.periodic(
+      const Duration(seconds: 30),
+      (_) => _refreshUnreadCount(),
+    );
+  }
+
+  @override
+  void dispose() {
+    _pollTimer?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _refreshUnreadCount() async {
+    final count = await _notificationRepository.getUnreadCount();
+
+    if (!mounted) return;
+
+    setState(() {
+      _unreadCount = count;
+    });
+  }
+
+  Future<void> _openNotifications() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const NotificationsPage()),
+    );
+
+    await _refreshUnreadCount();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,76 +101,49 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
         ),
       ),
 
-      // CERCADOR
-      title: SizedBox(
-        width: isMobile ? 200 : 400,
-        height: 40,
-        child: TextField(
-          controller: searchController,
-          onChanged: onSearchChanged,
-          decoration: InputDecoration(
-            hintText: isMobile
-                ? "Buscar a la meva biblio..."
-                : "Buscar a la meva biblioteca...",
-            prefixIcon: const Icon(Icons.search, size: 20),
-            filled: true,
-            fillColor:
-                Theme.of(context).colorScheme.surfaceContainerHighest,
+      // AFEGIR JOC (al mig)
+      title: Container(
+        width: isMobile ? 38 : 42,
+        height: isMobile ? 38 : 42,
+        decoration: const BoxDecoration(
+          color: Colors.deepPurple,
+          shape: BoxShape.circle,
+        ),
+        child: IconButton(
+          padding: EdgeInsets.zero,
+          icon: const Icon(Icons.add, color: Colors.white),
+          tooltip: "Afegir joc",
+          onPressed: () async {
+            await Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const SearchPage()),
+            );
 
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10),
-              borderSide: BorderSide(color: Colors.grey.shade600),
-            ),
-
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10),
-              borderSide: BorderSide(color: Colors.grey.shade600),
-            ),
-
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10),
-              borderSide: BorderSide(
-                color: Theme.of(context).colorScheme.primary,
-                width: 2,
-              ),
-            ),
-
-            contentPadding: const EdgeInsets.symmetric(
-              vertical: 0,
-              horizontal: 8,
-            ),
-          ),
+            widget.onLibraryChanged();
+          },
         ),
       ),
 
       // ACCIONS
       actions: [
-        // AFEGIR JOC
+        // NOTIFICACIONS
         Container(
           width: isMobile ? 38 : 42,
           height: isMobile ? 38 : 42,
           margin: EdgeInsets.only(right: isMobile ? 2 : 8),
-          decoration: const BoxDecoration(
-            color: Colors.deepPurple,
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surfaceContainerHighest,
             shape: BoxShape.circle,
           ),
-          child: IconButton(
-            padding: EdgeInsets.zero,
-            icon: const Icon(
-              Icons.add,
-              color: Colors.white,
+          child: Badge(
+            isLabelVisible: _unreadCount > 0,
+            label: Text('$_unreadCount'),
+            child: IconButton(
+              padding: EdgeInsets.zero,
+              icon: const Icon(Icons.notifications_outlined),
+              tooltip: "Notificacions",
+              onPressed: _openNotifications,
             ),
-            tooltip: "Afegir joc",
-            onPressed: () async {
-              await Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const SearchPage(),
-                ),
-              );
-
-              onLibraryChanged();
-            },
           ),
         ),
 
@@ -147,9 +167,7 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
               await Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => UserProfilePage(
-                    profile: profile,
-                  ),
+                  builder: (_) => UserProfilePage(profile: profile),
                 ),
               );
             }
@@ -160,9 +178,7 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
             if (value == "social") {
               await Navigator.push(
                 context,
-                MaterialPageRoute(
-                  builder: (_) => const SocialPage(),
-                ),
+                MaterialPageRoute(builder: (_) => const SocialPage()),
               );
             }
 

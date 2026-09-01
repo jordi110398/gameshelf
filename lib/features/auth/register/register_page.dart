@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
 import 'package:go_router/go_router.dart';
 import 'package:gameshelf/core/services/auth_service.dart';
 import 'package:gameshelf/features/auth/widgets/auth_text_field.dart';
@@ -100,7 +101,7 @@ class _RegisterPageState extends State<RegisterPage> {
         email: emailController.text.trim(),
         password: passwordController.text,
         nickname: nicknameController.text.trim(),
-        emailRedirectTo: 'http://localhost:8080/auth/callback',
+        emailRedirectTo: '${Uri.base.origin}/auth/callback',
       );
       if (response.user == null) {
         throw Exception("No s'ha pogut crear l'usuari.");
@@ -268,6 +269,46 @@ class _RegisterPageState extends State<RegisterPage> {
                 // ─────────────────────────────
                 // CREAR COMPTE
                 // ─────────────────────────────
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: RichText(
+                    textAlign: TextAlign.center,
+                    text: TextSpan(
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey.shade500,
+                      ),
+                      children: [
+                        const TextSpan(
+                          text: 'En crear un compte, acceptes la ',
+                        ),
+                        TextSpan(
+                          text: 'Política de privacitat',
+                          style: const TextStyle(
+                            decoration: TextDecoration.underline,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () => context.push('/legal/privacy'),
+                        ),
+                        const TextSpan(text: ' i la '),
+                        TextSpan(
+                          text: 'Política de cookies',
+                          style: const TextStyle(
+                            decoration: TextDecoration.underline,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () => context.push('/legal/cookies'),
+                        ),
+                        const TextSpan(text: '.'),
+                      ],
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 16),
+
                 SizedBox(
                   width: double.infinity,
                   child: FilledButton(

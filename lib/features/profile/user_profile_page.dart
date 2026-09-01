@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:gameshelf/features/home/widgets/game_card.dart';
 import 'package:gameshelf/models/game_status.dart';
@@ -12,6 +14,24 @@ import 'package:gameshelf/repositories/friendship_repository.dart';
 import 'package:gameshelf/features/social/social_page.dart';
 import 'package:gameshelf/core/services/auth_service.dart';
 import 'package:gameshelf/core/utils/error_messages.dart';
+import 'package:gameshelf/features/profile/widgets/user_tags_row.dart';
+import 'package:gameshelf/features/game/pages/game_detail_page.dart';
+import 'package:gameshelf/repositories/activity_repository.dart';
+
+const _monthNames = [
+  'Gener',
+  'Febrer',
+  'Març',
+  'Abril',
+  'Maig',
+  'Juny',
+  'Juliol',
+  'Agost',
+  'Setembre',
+  'Octubre',
+  'Novembre',
+  'Desembre',
+];
 
 class UserProfilePage extends StatefulWidget {
   final Profile profile;
@@ -25,6 +45,7 @@ class UserProfilePage extends StatefulWidget {
 class _UserProfilePageState extends State<UserProfilePage> {
   late final ProfileRepository profileRepository;
   late final SupabaseLibraryRepository libraryRepository;
+  late final ActivityRepository activityRepository;
   final UserTagsService tagsService = const UserTagsService();
   late Profile currentProfile;
   late final FriendshipRepository friendshipRepository;
@@ -40,6 +61,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
 
   ProfileStats? stats;
   List<LibraryGame> games = [];
+  Map<int, ReviewLikes> reviewLikes = {};
 
   bool isLoading = true;
 
@@ -54,6 +76,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
     profileRepository = ProfileRepository(client);
     libraryRepository = SupabaseLibraryRepository(client);
     friendshipRepository = FriendshipRepository(client);
+    activityRepository = ActivityRepository(client);
 
     loadProfile();
     loadFriendship();
@@ -86,11 +109,32 @@ class _UserProfilePageState extends State<UserProfilePage> {
 
       if (!mounted) return;
 
+      final loadedGames = results[1] as List<LibraryGame>;
+
       setState(() {
         stats = results[0] as ProfileStats;
-        games = results[1] as List<LibraryGame>;
+        games = loadedGames;
         isLoading = false;
       });
+
+      // Els likes de reviews només es poden consultar per al propi perfil
+      // (get_my_review_likes només retorna les activitats del cridant).
+      if (isMyProfile) {
+        final reviewedGameIds = loadedGames
+            .where((g) => (g.userGame.review ?? '').trim().isNotEmpty)
+            .map((g) => g.game.igdbId)
+            .toList();
+
+        final likes = await activityRepository.getMyReviewLikes(
+          reviewedGameIds,
+        );
+
+        if (!mounted) return;
+
+        setState(() {
+          reviewLikes = likes;
+        });
+      }
     } catch (e) {
       if (!mounted) return;
 
@@ -99,7 +143,11 @@ class _UserProfilePageState extends State<UserProfilePage> {
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('No s\'ha pogut carregar el perfil: ${friendlyError(e)}')),
+        SnackBar(
+          content: Text(
+            'No s\'ha pogut carregar el perfil: ${friendlyError(e)}',
+          ),
+        ),
       );
     }
   }
@@ -160,7 +208,11 @@ class _UserProfilePageState extends State<UserProfilePage> {
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('No s\'ha pogut enviar la sol·licitud: ${friendlyError(e)}')),
+        SnackBar(
+          content: Text(
+            'No s\'ha pogut enviar la sol·licitud: ${friendlyError(e)}',
+          ),
+        ),
       );
     } finally {
       if (mounted) {
@@ -188,7 +240,11 @@ class _UserProfilePageState extends State<UserProfilePage> {
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('No s\'ha pogut acceptar la sol·licitud: ${friendlyError(e)}')),
+        SnackBar(
+          content: Text(
+            'No s\'ha pogut acceptar la sol·licitud: ${friendlyError(e)}',
+          ),
+        ),
       );
     } finally {
       if (mounted) {
@@ -216,7 +272,11 @@ class _UserProfilePageState extends State<UserProfilePage> {
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('No s\'ha pogut rebutjar la sol·licitud: ${friendlyError(e)}')),
+        SnackBar(
+          content: Text(
+            'No s\'ha pogut rebutjar la sol·licitud: ${friendlyError(e)}',
+          ),
+        ),
       );
     } finally {
       if (mounted) {
@@ -244,7 +304,9 @@ class _UserProfilePageState extends State<UserProfilePage> {
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('No s\'ha pogut eliminar l\'amic: ${friendlyError(e)}')),
+        SnackBar(
+          content: Text('No s\'ha pogut eliminar l\'amic: ${friendlyError(e)}'),
+        ),
       );
     } finally {
       if (mounted) {
@@ -255,15 +317,21 @@ class _UserProfilePageState extends State<UserProfilePage> {
     }
   }
 
-  Widget _buildFriendshipButton() {
+  // Botó/es d'amistat compactes, per mostrar a dalt a la dreta del
+  // banner (mateixa posició que el botó d'editar del propi perfil).
+  Widget? _buildFriendshipCornerAction() {
     if (isMyProfile) {
-      return const SizedBox.shrink();
+      return null;
     }
 
     if (isFriendshipLoading) {
-      return const SizedBox(
-        height: 42,
-        child: Center(child: CircularProgressIndicator()),
+      return const Padding(
+        padding: EdgeInsets.all(8),
+        child: SizedBox(
+          width: 24,
+          height: 24,
+          child: CircularProgressIndicator(strokeWidth: 2),
+        ),
       );
     }
 
@@ -274,7 +342,8 @@ class _UserProfilePageState extends State<UserProfilePage> {
     // ─────────────────────────────────────
 
     if (status == null) {
-      return FilledButton.icon(
+      return IconButton.filled(
+        tooltip: 'Afegir amic',
         onPressed: isFriendshipActionLoading ? null : sendFriendRequest,
         icon: isFriendshipActionLoading
             ? const SizedBox(
@@ -283,7 +352,6 @@ class _UserProfilePageState extends State<UserProfilePage> {
                 child: CircularProgressIndicator(strokeWidth: 2),
               )
             : const Icon(Icons.person_add_outlined),
-        label: const Text('Afegir amic'),
       );
     }
 
@@ -292,7 +360,8 @@ class _UserProfilePageState extends State<UserProfilePage> {
     // ─────────────────────────────────────
 
     if (status == 'accepted') {
-      return OutlinedButton.icon(
+      return IconButton.filled(
+        tooltip: 'Amics',
         onPressed: isFriendshipActionLoading
             ? null
             : () async {
@@ -333,7 +402,6 @@ class _UserProfilePageState extends State<UserProfilePage> {
                 child: CircularProgressIndicator(strokeWidth: 2),
               )
             : const Icon(Icons.people_alt_outlined),
-        label: const Text('Amics'),
       );
     }
 
@@ -347,10 +415,10 @@ class _UserProfilePageState extends State<UserProfilePage> {
 
     // Jo he enviat la sol·licitud
     if (requesterId == currentUserId) {
-      return OutlinedButton.icon(
+      return IconButton.filled(
+        tooltip: 'Sol·licitud enviada',
         onPressed: null,
         icon: const Icon(Icons.hourglass_empty),
-        label: const Text('Sol·licitud enviada'),
       );
     }
 
@@ -358,18 +426,24 @@ class _UserProfilePageState extends State<UserProfilePage> {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        FilledButton.icon(
-          onPressed: isFriendshipActionLoading ? null : acceptFriendRequest,
-          icon: const Icon(Icons.check),
-          label: const Text('Acceptar'),
+        IconButton.filled(
+          tooltip: 'Rebutjar',
+          onPressed: isFriendshipActionLoading ? null : rejectFriendRequest,
+          icon: const Icon(Icons.close),
         ),
 
         const SizedBox(width: 8),
 
-        OutlinedButton.icon(
-          onPressed: isFriendshipActionLoading ? null : rejectFriendRequest,
-          icon: const Icon(Icons.close),
-          label: const Text('Rebutjar'),
+        IconButton.filled(
+          tooltip: 'Acceptar',
+          onPressed: isFriendshipActionLoading ? null : acceptFriendRequest,
+          icon: isFriendshipActionLoading
+              ? const SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : const Icon(Icons.check),
         ),
       ],
     );
@@ -420,39 +494,42 @@ class _UserProfilePageState extends State<UserProfilePage> {
   // ─────────────────────────────────────────────
 
   List<String> get userTags => tagsService.tagsFromGames(games);
-  Widget _buildUserTags() {
-    return Wrap(
-      alignment: WrapAlignment.center,
-      spacing: 8,
-      runSpacing: 8,
-      children: userTags.map((tag) {
-        final style = tagsService.styleForTag(tag);
 
-        return Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          decoration: BoxDecoration(
-            color: style.color.withValues(alpha: 0.15),
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: style.color.withValues(alpha: 0.35)),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(style.icon, size: 14, color: style.color),
-              const SizedBox(width: 5),
-              Text(
-                tag,
-                style: TextStyle(
-                  color: style.color,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
-        );
-      }).toList(),
-    );
+  // ─────────────────────────────────────────────
+  // PREFERITS
+  // ─────────────────────────────────────────────
+
+  List<LibraryGame> get favoriteGames =>
+      games.where((g) => g.userGame.favorite).toList();
+
+  // ─────────────────────────────────────────────
+  // COMPLETATS AGRUPATS PER MES (NOMÉS PERFIL PROPI)
+  // ─────────────────────────────────────────────
+
+  Map<String, List<LibraryGame>> get completedByMonth {
+    final completed =
+        games
+            .where(
+              (g) =>
+                  g.userGame.status == GameStatus.completed &&
+                  g.userGame.completedAt != null,
+            )
+            .toList()
+          ..sort(
+            (a, b) =>
+                b.userGame.completedAt!.compareTo(a.userGame.completedAt!),
+          );
+
+    final grouped = <String, List<LibraryGame>>{};
+
+    for (final libraryGame in completed) {
+      final date = libraryGame.userGame.completedAt!;
+      final key = '${_monthNames[date.month - 1]} ${date.year}';
+
+      grouped.putIfAbsent(key, () => []).add(libraryGame);
+    }
+
+    return grouped;
   }
 
   // ─────────────────────────────────────────────
@@ -521,6 +598,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
         ...reviews.map((libraryGame) {
           final game = libraryGame.game;
           final userGame = libraryGame.userGame;
+          final likes = reviewLikes[game.igdbId];
 
           return Container(
             margin: const EdgeInsets.only(bottom: 12),
@@ -593,6 +671,28 @@ class _UserProfilePageState extends State<UserProfilePage> {
                           color: Colors.grey.shade700,
                         ),
                       ),
+
+                      if (likes != null && likes.likeCount > 0) ...[
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            Icon(
+                              likes.likedByMe ? Icons.star : Icons.star_border,
+                              size: 15,
+                              color: Colors.amber,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              '${likes.likeCount}',
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.amber,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ],
                   ),
                 ),
@@ -730,7 +830,9 @@ class _UserProfilePageState extends State<UserProfilePage> {
                       tooltip: 'Editar perfil',
                       onPressed: _openEditProfile,
                     ),
-                  ),
+                  )
+                else if (_buildFriendshipCornerAction() case final action?)
+                  Positioned(top: 12, right: 12, child: action),
               ],
             ),
     );
@@ -769,167 +871,445 @@ class _UserProfilePageState extends State<UserProfilePage> {
     final currentStats = stats!;
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(24),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // -------------------------------------
-          // BOTÓ AMISTAT
-          // -------------------------------------
-          _buildFriendshipButton(),
-          const SizedBox(height: 14),
           // ─────────────────────────────────────
-          // AVATAR
+          // CAPÇALERA (degradat + avatar flotant)
           // ─────────────────────────────────────
-          CircleAvatar(
-            radius: 60,
-            backgroundImage:
-                currentProfile.avatarUrl != null &&
-                    currentProfile.avatarUrl!.isNotEmpty
-                ? NetworkImage(currentProfile.avatarUrl!)
-                : null,
-            child:
-                currentProfile.avatarUrl == null ||
-                    currentProfile.avatarUrl!.isEmpty
-                ? const Icon(Icons.person, size: 60)
-                : null,
-          ),
+          _buildHeader(context),
 
-          const SizedBox(height: 18),
-
-          // ─────────────────────────────────────
-          // NICKNAME
-          // ─────────────────────────────────────
-          Text(
-            '@${currentProfile.nickname}',
-            textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
-          ),
-
-          // ─────────────────────────────────────
-          // TAGS
-          // ─────────────────────────────────────
-          if (userTags.isNotEmpty) ...[
-            const SizedBox(height: 10),
-            _buildUserTags(),
-          ],
-
-          // ─────────────────────────────────────
-          // BIO
-          // ─────────────────────────────────────
-          if (currentProfile.bio != null &&
-              currentProfile.bio!.trim().isNotEmpty) ...[
-            const SizedBox(height: 12),
-            Text(
-              currentProfile.bio!,
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 15, color: Colors.grey.shade600),
-            ),
-          ],
-
-          const SizedBox(height: 30),
-
-          // ─────────────────────────────────────
-          // ESTADÍSTIQUES
-          // ─────────────────────────────────────
-          Container(
-            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 8),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Row(
+          Padding(
+            padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Expanded(
-                  child: _ProfileStat(
-                    value: currentStats.games.toString(),
-                    label: 'Jocs',
+                const SizedBox(height: 12),
+
+                // ─────────────────────────────────────
+                // NICKNAME
+                // ─────────────────────────────────────
+                Text(
+                  '@${currentProfile.nickname}',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
-                Expanded(
-                  child: _ProfileStat(
-                    value: currentStats.completed.toString(),
-                    label: 'Completats',
+
+                // ─────────────────────────────────────
+                // TAGS
+                // ─────────────────────────────────────
+                if (userTags.isNotEmpty) ...[
+                  const SizedBox(height: 10),
+                  UserTagsRow(games: games),
+                ],
+
+                // ─────────────────────────────────────
+                // BIO
+                // ─────────────────────────────────────
+                if (currentProfile.bio != null &&
+                    currentProfile.bio!.trim().isNotEmpty) ...[
+                  const SizedBox(height: 12),
+                  Text(
+                    currentProfile.bio!,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 15, color: Colors.grey.shade600),
+                  ),
+                ],
+
+                const SizedBox(height: 26),
+
+                // ─────────────────────────────────────
+                // ESTADÍSTIQUES
+                // ─────────────────────────────────────
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 20,
+                    horizontal: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.surfaceContainerHighest,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: _ProfileStat(
+                          value: currentStats.games.toString(),
+                          label: 'Jocs',
+                        ),
+                      ),
+                      _statDivider(context),
+                      Expanded(
+                        child: _ProfileStat(
+                          value: currentStats.completed.toString(),
+                          label: 'Completats',
+                        ),
+                      ),
+                      _statDivider(context),
+                      Expanded(
+                        child: _ProfileStat(
+                          value: currentStats.reviews.toString(),
+                          label: 'Reviews',
+                        ),
+                      ),
+                      _statDivider(context),
+                      Expanded(
+                        child: _ProfileStat(
+                          value: '${currentStats.hours}h',
+                          label: 'Hores',
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                Expanded(
-                  child: _ProfileStat(
-                    value: currentStats.reviews.toString(),
-                    label: 'Reviews',
+
+                // ─────────────────────────────────────
+                // PREFERITS
+                // ─────────────────────────────────────
+                if (favoriteGames.isNotEmpty) ...[
+                  const SizedBox(height: 28),
+                  _buildFavoritesShelf(),
+                ],
+
+                // ─────────────────────────────────────
+                // RESUM DE REVIEWS
+                // NOMÉS EL MEU PERFIL
+                // ─────────────────────────────────────
+                if (isMyProfile) ...[
+                  const SizedBox(height: 36),
+
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: const Text(
+                      'Les meves reviews',
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
-                ),
-                Expanded(
-                  child: _ProfileStat(
-                    value: '${currentStats.hours}h',
-                    label: 'Hores',
+
+                  const SizedBox(height: 14),
+
+                  _buildReviewsSummary(),
+
+                  // ─────────────────────────────────────
+                  // COMPLETATS AGRUPATS PER MES
+                  // ─────────────────────────────────────
+                  if (completedByMonth.isNotEmpty) ...[
+                    const SizedBox(height: 32),
+                    _buildCompletedByMonth(),
+                  ],
+                ],
+
+                // ─────────────────────────────────────
+                // GAMESHELF
+                // NOMÉS ALTRES USUARIS
+                // ─────────────────────────────────────
+                if (!isMyProfile) ...[
+                  const SizedBox(height: 36),
+
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      "${currentProfile.nickname}'s GameShelf",
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
-                ),
+
+                  const SizedBox(height: 14),
+
+                  // FILTRES
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: _buildStatusFilters(),
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  // JOCS
+                  if (filteredGames.isEmpty)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 30),
+                      child: Text(
+                        _emptyGamesText(),
+                        style: TextStyle(color: Colors.grey.shade600),
+                      ),
+                    )
+                  else
+                    _buildGameGrid(),
+                ],
               ],
             ),
           ),
-
-          // ─────────────────────────────────────
-          // RESUM DE REVIEWS
-          // NOMÉS EL MEU PERFIL
-          // ─────────────────────────────────────
-          if (isMyProfile) ...[
-            const SizedBox(height: 36),
-
-            Align(
-              alignment: Alignment.centerLeft,
-              child: const Text(
-                'Les meves reviews',
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-              ),
-            ),
-
-            const SizedBox(height: 14),
-
-            _buildReviewsSummary(),
-          ],
-
-          // ─────────────────────────────────────
-          // GAMESHELF
-          // NOMÉS ALTRES USUARIS
-          // ─────────────────────────────────────
-          if (!isMyProfile) ...[
-            const SizedBox(height: 36),
-
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                "${currentProfile.nickname}'s GameShelf",
-                style: const TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 14),
-
-            // FILTRES
-            Align(
-              alignment: Alignment.centerLeft,
-              child: _buildStatusFilters(),
-            ),
-
-            const SizedBox(height: 20),
-
-            // JOCS
-            if (filteredGames.isEmpty)
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 30),
-                child: Text(
-                  _emptyGamesText(),
-                  style: TextStyle(color: Colors.grey.shade600),
-                ),
-              )
-            else
-              _buildGameGrid(),
-          ],
         ],
       ),
+    );
+  }
+
+  Widget _statDivider(BuildContext context) {
+    return Container(
+      width: 1,
+      height: 30,
+      color: Theme.of(context).colorScheme.outlineVariant,
+    );
+  }
+
+  // ─────────────────────────────────────────────
+  // BANNER GENERATIU (a partir dels colors dels tags)
+  // ─────────────────────────────────────────────
+
+  /// Colors base del banner: un per tag (fins a 4), o un parell de
+  /// colors neutres si encara no hi ha tags. És determinista: els
+  /// mateixos tags sempre generen el mateix banner.
+  List<Color> _bannerColors(BuildContext context) {
+    final tagColors = userTags
+        .map((tag) => tagsService.styleForTag(tag).color)
+        .toList();
+
+    if (tagColors.isEmpty) {
+      return [
+        Theme.of(context).colorScheme.primary,
+        Colors.deepOrange.shade400,
+      ];
+    }
+
+    return tagColors;
+  }
+
+  static const _blobLayout = [
+    (
+      top: -70.0,
+      left: -50.0,
+      right: null,
+      bottom: null,
+      size: 220.0,
+      opacity: 0.55,
+    ),
+    (
+      top: -30.0,
+      left: null,
+      right: -60.0,
+      bottom: null,
+      size: 200.0,
+      opacity: 0.50,
+    ),
+    (
+      top: null,
+      left: 60.0,
+      right: null,
+      bottom: -90.0,
+      size: 190.0,
+      opacity: 0.45,
+    ),
+    (
+      top: null,
+      left: null,
+      right: 30.0,
+      bottom: -60.0,
+      size: 170.0,
+      opacity: 0.40,
+    ),
+  ];
+
+  Widget _buildBanner(BuildContext context) {
+    final colors = _bannerColors(context);
+
+    return ClipRect(
+      child: ImageFiltered(
+        imageFilter: ImageFilter.blur(sigmaX: 46, sigmaY: 46),
+        child: Stack(
+          children: [
+            Container(color: const Color(0xFF14101C)),
+            for (var i = 0; i < _blobLayout.length; i++)
+              Positioned(
+                top: _blobLayout[i].top,
+                left: _blobLayout[i].left,
+                right: _blobLayout[i].right,
+                bottom: _blobLayout[i].bottom,
+                child: Container(
+                  width: _blobLayout[i].size,
+                  height: _blobLayout[i].size,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: colors[i % colors.length].withValues(
+                      alpha: _blobLayout[i].opacity,
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ─────────────────────────────────────────────
+  // CAPÇALERA (banner + avatar flotant)
+  // ─────────────────────────────────────────────
+
+  Widget _buildHeader(BuildContext context) {
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        SizedBox(
+          height: 152,
+          width: double.infinity,
+          child: _buildBanner(context),
+        ),
+
+        Positioned(
+          top: 96,
+          left: 0,
+          right: 0,
+          child: Center(
+            child: Container(
+              width: 96,
+              height: 96,
+              padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                color: Theme.of(context).scaffoldBackgroundColor,
+                borderRadius: BorderRadius.circular(22),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(18),
+                child:
+                    currentProfile.avatarUrl != null &&
+                        currentProfile.avatarUrl!.isNotEmpty
+                    ? Image.network(
+                        currentProfile.avatarUrl!,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, _, _) => _avatarPlaceholder(context),
+                      )
+                    : _avatarPlaceholder(context),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _avatarPlaceholder(BuildContext context) {
+    return Container(
+      color: Theme.of(context).colorScheme.surfaceContainerHighest,
+      child: const Icon(Icons.person, size: 44),
+    );
+  }
+
+  // ─────────────────────────────────────────────
+  // PREFERITS
+  // ─────────────────────────────────────────────
+
+  Widget _buildFavoritesShelf() {
+    final favorites = favoriteGames;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.star, size: 16, color: Colors.amber),
+              const SizedBox(width: 6),
+              const Text(
+                'Preferits',
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 12),
+
+          SizedBox(
+            height: 120,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: favorites.length,
+              separatorBuilder: (_, _) => const SizedBox(width: 10),
+              itemBuilder: (context, index) {
+                return _GameCoverTile(
+                  libraryGame: favorites[index],
+                  width: 88,
+                  onOpened: loadProfile,
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ─────────────────────────────────────────────
+  // COMPLETATS AGRUPATS PER MES
+  // ─────────────────────────────────────────────
+
+  Widget _buildCompletedByMonth() {
+    final grouped = completedByMonth;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Align(
+          alignment: Alignment.centerLeft,
+          child: const Text(
+            'Completats',
+            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+          ),
+        ),
+
+        const SizedBox(height: 18),
+
+        for (final entry in grouped.entries) ...[
+          Text(
+            entry.key.toUpperCase(),
+            style: TextStyle(
+              fontSize: 12.5,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 0.4,
+              color: Colors.grey.shade500,
+            ),
+          ),
+
+          const SizedBox(height: 10),
+
+          GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: entry.value.length,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 4,
+              crossAxisSpacing: 10,
+              mainAxisSpacing: 10,
+              childAspectRatio: 3 / 4,
+            ),
+            itemBuilder: (context, index) {
+              return _GameCoverTile(
+                libraryGame: entry.value[index],
+                onOpened: loadProfile,
+              );
+            },
+          ),
+
+          const SizedBox(height: 22),
+        ],
+      ],
     );
   }
 
@@ -1106,5 +1486,65 @@ class _ProfileStat extends StatelessWidget {
         ),
       ],
     );
+  }
+}
+
+// ─────────────────────────────────────────────
+// PORTADA DE JOC (preferits / completats per mes)
+// ─────────────────────────────────────────────
+
+class _GameCoverTile extends StatelessWidget {
+  final LibraryGame libraryGame;
+  final Future<void> Function() onOpened;
+  final double? width;
+
+  const _GameCoverTile({
+    required this.libraryGame,
+    required this.onOpened,
+    this.width,
+  });
+
+  Future<void> _open(BuildContext context) async {
+    final refresh = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(builder: (_) => GameDetailPage(game: libraryGame.game)),
+    );
+
+    if (refresh == true) {
+      await onOpened();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final game = libraryGame.game;
+
+    final cover = ClipRRect(
+      borderRadius: BorderRadius.circular(12),
+      child: AspectRatio(
+        aspectRatio: 3 / 4,
+        child: game.coverUrl != null && game.coverUrl!.isNotEmpty
+            ? Image.network(
+                game.coverUrl!,
+                fit: BoxFit.cover,
+                errorBuilder: (_, _, _) => Container(
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                  child: const Icon(Icons.videogame_asset),
+                ),
+              )
+            : Container(
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                child: const Icon(Icons.videogame_asset),
+              ),
+      ),
+    );
+
+    final tile = InkWell(
+      borderRadius: BorderRadius.circular(12),
+      onTap: () => _open(context),
+      child: cover,
+    );
+
+    return width != null ? SizedBox(width: width, child: tile) : tile;
   }
 }

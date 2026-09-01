@@ -5,6 +5,7 @@ import 'package:gameshelf/models/game.dart';
 import 'package:gameshelf/repositories/igdb_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:gameshelf/features/game/pages/game_detail_page.dart';
+import 'package:gameshelf/core/widgets/responsive_center.dart';
 
 class SearchPage extends StatefulWidget {
   const SearchPage({super.key});
@@ -45,19 +46,16 @@ class _SearchPageState extends State<SearchPage> {
       loading = true;
     });
 
-    _debounce = Timer(
-      const Duration(milliseconds: 400),
-      () async {
-        final results = await repository.searchGames(value.trim());
+    _debounce = Timer(const Duration(milliseconds: 400), () async {
+      final results = await repository.searchGames(value.trim());
 
-        if (!mounted) return;
+      if (!mounted) return;
 
-        setState(() {
-          games = results;
-          loading = false;
-        });
-      },
-    );
+      setState(() {
+        games = results;
+        loading = false;
+      });
+    });
   }
 
   @override
@@ -79,27 +77,18 @@ class _SearchPageState extends State<SearchPage> {
             onChanged: onSearchChanged,
             decoration: InputDecoration(
               hintText: "Buscar jocs...",
-              prefixIcon: const Icon(
-                Icons.search,
-                size: 20,
-              ),
+              prefixIcon: const Icon(Icons.search, size: 20),
               filled: true,
-              fillColor: Theme.of(context)
-                  .colorScheme
-                  .surfaceContainerHighest,
+              fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
 
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
-                borderSide: BorderSide(
-                  color: Colors.grey.shade600,
-                ),
+                borderSide: BorderSide(color: Colors.grey.shade600),
               ),
 
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
-                borderSide: BorderSide(
-                  color: Colors.grey.shade600,
-                ),
+                borderSide: BorderSide(color: Colors.grey.shade600),
               ),
 
               focusedBorder: OutlineInputBorder(
@@ -119,68 +108,56 @@ class _SearchPageState extends State<SearchPage> {
         ),
       ),
 
-      body: loading
-          ? const Center(
-              child: CircularProgressIndicator(),
-            )
-          : games.isEmpty
-              ? const Center(
-                  child: Text(
-                    "Busca un joc per començar",
-                  ),
-                )
-              : ListView.builder(
-                  itemCount: games.length,
-                  itemBuilder: (_, i) {
-                    final game = games[i];
+      body: ResponsiveCenter(
+        maxWidth: 640,
+        child: loading
+            ? const Center(child: CircularProgressIndicator())
+            : games.isEmpty
+            ? const Center(child: Text("Busca un joc per començar"))
+            : ListView.builder(
+                itemCount: games.length,
+                itemBuilder: (_, i) {
+                  final game = games[i];
 
-                    return ListTile(
-                      leading: game.coverUrl != null
-                          ? ClipRRect(
-                              borderRadius: BorderRadius.circular(6),
-                              child: Image.network(
-                                game.coverUrl!,
-                                width: 50,
-                                height: 70,
-                                fit: BoxFit.cover,
-                              ),
-                            )
-                          : const SizedBox(
+                  return ListTile(
+                    leading: game.coverUrl != null
+                        ? ClipRRect(
+                            borderRadius: BorderRadius.circular(6),
+                            child: Image.network(
+                              game.coverUrl!,
                               width: 50,
                               height: 70,
-                              child: ColoredBox(
-                                color: Colors.grey,
-                              ),
+                              fit: BoxFit.cover,
                             ),
-
-                      title: Text(game.title),
-
-                      subtitle: Text(
-                        game.releaseDate?.year.toString() ?? "",
-                      ),
-
-                      trailing: const Icon(
-                        Icons.chevron_right,
-                      ),
-
-                      onTap: () async {
-                        final refresh =
-                            await Navigator.push<bool>(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) =>
-                                GameDetailPage(game: game),
+                          )
+                        : const SizedBox(
+                            width: 50,
+                            height: 70,
+                            child: ColoredBox(color: Colors.grey),
                           ),
-                        );
 
-                        if (refresh == true && context.mounted) {
-                          Navigator.pop(context, true);
-                        }
-                      },
-                    );
-                  },
-                ),
+                    title: Text(game.title),
+
+                    subtitle: Text(game.releaseDate?.year.toString() ?? ""),
+
+                    trailing: const Icon(Icons.chevron_right),
+
+                    onTap: () async {
+                      final refresh = await Navigator.push<bool>(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => GameDetailPage(game: game),
+                        ),
+                      );
+
+                      if (refresh == true && context.mounted) {
+                        Navigator.pop(context, true);
+                      }
+                    },
+                  );
+                },
+              ),
+      ),
     );
   }
 }
-

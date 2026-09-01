@@ -9,6 +9,7 @@ import 'package:gameshelf/repositories/activity_repository.dart';
 import 'package:gameshelf/features/activity/widgets/activity_card.dart';
 import 'package:gameshelf/features/activity/activity_feed_page.dart';
 import 'package:gameshelf/core/utils/error_messages.dart';
+import 'package:gameshelf/core/widgets/responsive_center.dart';
 
 class SocialPage extends StatefulWidget {
   const SocialPage({super.key});
@@ -93,7 +94,11 @@ class _SocialPageState extends State<SocialPage> {
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('No s\'han pogut buscar els usuaris: ${friendlyError(e)}')),
+        SnackBar(
+          content: Text(
+            'No s\'han pogut buscar els usuaris: ${friendlyError(e)}',
+          ),
+        ),
       );
     }
   }
@@ -130,7 +135,9 @@ class _SocialPageState extends State<SocialPage> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('No s\'han pogut carregar les dades socials: ${friendlyError(e)}'),
+          content: Text(
+            'No s\'han pogut carregar les dades socials: ${friendlyError(e)}',
+          ),
         ),
       );
     }
@@ -140,43 +147,46 @@ class _SocialPageState extends State<SocialPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Social')),
-      body: Column(
-        children: [
-          // ─────────────────────────────
-          // CERCADOR
-          // ─────────────────────────────
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
-            child: TextField(
-              controller: searchController,
-              textInputAction: TextInputAction.search,
-              onSubmitted: (_) {
-                searchProfiles();
-              },
-              decoration: InputDecoration(
-                hintText: 'Buscar usuaris...',
-                prefixIcon: const Icon(Icons.search),
-                suffixIcon: IconButton(
-                  icon: const Icon(Icons.arrow_forward),
-                  onPressed: searchProfiles,
-                ),
-                filled: true,
-                fillColor: Theme.of(
-                  context,
-                ).colorScheme.surfaceContainerHighest,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(14),
-                  borderSide: BorderSide.none,
+      body: ResponsiveCenter(
+        maxWidth: 640,
+        child: Column(
+          children: [
+            // ─────────────────────────────
+            // CERCADOR
+            // ─────────────────────────────
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
+              child: TextField(
+                controller: searchController,
+                textInputAction: TextInputAction.search,
+                onSubmitted: (_) {
+                  searchProfiles();
+                },
+                decoration: InputDecoration(
+                  hintText: 'Buscar usuaris...',
+                  prefixIcon: const Icon(Icons.search),
+                  suffixIcon: IconButton(
+                    icon: const Icon(Icons.arrow_forward),
+                    onPressed: searchProfiles,
+                  ),
+                  filled: true,
+                  fillColor: Theme.of(
+                    context,
+                  ).colorScheme.surfaceContainerHighest,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide: BorderSide.none,
+                  ),
                 ),
               ),
             ),
-          ),
 
-          // ─────────────────────────────
-          // RESULTATS
-          // ─────────────────────────────
-          Expanded(child: _buildResults()),
-        ],
+            // ─────────────────────────────
+            // RESULTATS
+            // ─────────────────────────────
+            Expanded(child: _buildResults()),
+          ],
+        ),
       ),
     );
   }

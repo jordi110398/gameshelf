@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gameshelf/core/utils/error_messages.dart';
+import 'package:gameshelf/core/widgets/responsive_center.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ChangePasswordPage extends StatefulWidget {
@@ -55,9 +56,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Contrasenya actualitzada correctament.'),
-        ),
+        const SnackBar(content: Text('Contrasenya actualitzada correctament.')),
       );
 
       Navigator.pop(context);
@@ -73,124 +72,112 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
   }
 
   void _showError(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Canviar contrasenya'),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Nova contrasenya',
-              style: TextStyle(
-                fontSize: 17,
-                fontWeight: FontWeight.bold,
+      appBar: AppBar(title: const Text('Canviar contrasenya')),
+      body: ResponsiveCenter(
+        maxWidth: 420,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Nova contrasenya',
+                style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
               ),
-            ),
 
-            const SizedBox(height: 10),
+              const SizedBox(height: 10),
 
-            TextField(
-              controller: newPasswordController,
-              obscureText: obscureNewPassword,
-              enabled: !isSaving,
-              textInputAction: TextInputAction.next,
-              decoration: InputDecoration(
-                border: const OutlineInputBorder(),
-                prefixIcon: const Icon(Icons.lock_outline),
-                suffixIcon: IconButton(
-                  onPressed: () {
-                    setState(() {
-                      obscureNewPassword = !obscureNewPassword;
-                    });
-                  },
-                  icon: Icon(
-                    obscureNewPassword
-                        ? Icons.visibility_outlined
-                        : Icons.visibility_off_outlined,
+              TextField(
+                controller: newPasswordController,
+                obscureText: obscureNewPassword,
+                enabled: !isSaving,
+                textInputAction: TextInputAction.next,
+                decoration: InputDecoration(
+                  border: const OutlineInputBorder(),
+                  prefixIcon: const Icon(Icons.lock_outline),
+                  suffixIcon: IconButton(
+                    onPressed: () {
+                      setState(() {
+                        obscureNewPassword = !obscureNewPassword;
+                      });
+                    },
+                    icon: Icon(
+                      obscureNewPassword
+                          ? Icons.visibility_outlined
+                          : Icons.visibility_off_outlined,
+                    ),
                   ),
                 ),
               ),
-            ),
 
-            const SizedBox(height: 24),
+              const SizedBox(height: 24),
 
-            const Text(
-              'Repetir contrasenya',
-              style: TextStyle(
-                fontSize: 17,
-                fontWeight: FontWeight.bold,
+              const Text(
+                'Repetir contrasenya',
+                style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
               ),
-            ),
 
-            const SizedBox(height: 10),
+              const SizedBox(height: 10),
 
-            TextField(
-              controller: confirmPasswordController,
-              obscureText: obscureConfirmPassword,
-              enabled: !isSaving,
-              textInputAction: TextInputAction.done,
-              onSubmitted: (_) => changePassword(),
-              decoration: InputDecoration(
-                border: const OutlineInputBorder(),
-                prefixIcon: const Icon(Icons.lock_outline),
-                suffixIcon: IconButton(
-                  onPressed: () {
-                    setState(() {
-                      obscureConfirmPassword = !obscureConfirmPassword;
-                    });
-                  },
-                  icon: Icon(
-                    obscureConfirmPassword
-                        ? Icons.visibility_outlined
-                        : Icons.visibility_off_outlined,
+              TextField(
+                controller: confirmPasswordController,
+                obscureText: obscureConfirmPassword,
+                enabled: !isSaving,
+                textInputAction: TextInputAction.done,
+                onSubmitted: (_) => changePassword(),
+                decoration: InputDecoration(
+                  border: const OutlineInputBorder(),
+                  prefixIcon: const Icon(Icons.lock_outline),
+                  suffixIcon: IconButton(
+                    onPressed: () {
+                      setState(() {
+                        obscureConfirmPassword = !obscureConfirmPassword;
+                      });
+                    },
+                    icon: Icon(
+                      obscureConfirmPassword
+                          ? Icons.visibility_outlined
+                          : Icons.visibility_off_outlined,
+                    ),
                   ),
                 ),
               ),
-            ),
 
-            const SizedBox(height: 12),
+              const SizedBox(height: 12),
 
-            Text(
-              'La contrasenya ha de tenir almenys 6 caràcters.',
-              style: TextStyle(
-                fontSize: 13,
-                color: Colors.grey.shade600,
+              Text(
+                'La contrasenya ha de tenir almenys 6 caràcters.',
+                style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
               ),
-            ),
 
-            const SizedBox(height: 36),
+              const SizedBox(height: 36),
 
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton.icon(
-                onPressed: isSaving ? null : changePassword,
-                icon: isSaving
-                    ? const SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                        ),
-                      )
-                    : const Icon(Icons.lock_reset),
-                label: Text(
-                  isSaving
-                      ? 'Actualitzant...'
-                      : 'Canviar contrasenya',
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton.icon(
+                  onPressed: isSaving ? null : changePassword,
+                  icon: isSaving
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.lock_reset),
+                  label: Text(
+                    isSaving ? 'Actualitzant...' : 'Canviar contrasenya',
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

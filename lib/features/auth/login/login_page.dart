@@ -47,10 +47,7 @@ class _LoginPageState extends State<LoginPage> {
         }
       }
 
-      await authService.signIn(
-        email: input,
-        password: passwordController.text,
-      );
+      await authService.signIn(email: input, password: passwordController.text);
 
       if (!mounted) return;
 
@@ -58,11 +55,9 @@ class _LoginPageState extends State<LoginPage> {
     } catch (e) {
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(friendlyError(e)),
-        ),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(friendlyError(e))));
     } finally {
       if (mounted) {
         setState(() => _loading = false);
@@ -120,9 +115,7 @@ class _LoginPageState extends State<LoginPage> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            'No s\'ha pogut enviar el correu: ${friendlyError(e)}',
-          ),
+          content: Text('No s\'ha pogut enviar el correu: ${friendlyError(e)}'),
         ),
       );
     } finally {
@@ -144,99 +137,100 @@ class _LoginPageState extends State<LoginPage> {
       body: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 420),
-          child: Padding(
-            padding: const EdgeInsets.all(32),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(
-                  Icons.sports_esports,
-                  size: 80,
-                ),
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(32),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.sports_esports, size: 80),
 
-                const SizedBox(height: 24),
+                  const SizedBox(height: 24),
 
-                const Text(
-                  "GameShelf",
-                  style: TextStyle(
-                    fontSize: 34,
-                    fontWeight: FontWeight.bold,
+                  const Text(
+                    "GameShelf",
+                    style: TextStyle(fontSize: 34, fontWeight: FontWeight.bold),
                   ),
-                ),
 
-                const SizedBox(height: 40),
+                  const SizedBox(height: 40),
 
-                // EMAIL / NICKNAME
-                AuthTextField(
-                  controller: emailController,
-                  label: "Email o usuari",
-                  icon: Icons.email,
-                ),
+                  // EMAIL / NICKNAME
+                  AuthTextField(
+                    controller: emailController,
+                    label: "Email o usuari",
+                    icon: Icons.email,
+                  ),
 
-                const SizedBox(height: 20),
+                  const SizedBox(height: 20),
 
-                // CONTRASENYA
-                AuthTextField(
-                  controller: passwordController,
-                  label: "Contrasenya",
-                  icon: Icons.lock,
-                  obscureText: true,
-                ),
+                  // CONTRASENYA
+                  AuthTextField(
+                    controller: passwordController,
+                    label: "Contrasenya",
+                    icon: Icons.lock,
+                    obscureText: true,
+                  ),
 
-                const SizedBox(height: 8),
+                  const SizedBox(height: 8),
 
-                // OBLIDAR CONTRASENYA
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton(
+                  // OBLIDAR CONTRASENYA
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: _loading || _resettingPassword
+                          ? null
+                          : _forgotPassword,
+                      child: _resettingPassword
+                          ? const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Text("He oblidat la contrasenya"),
+                    ),
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  // INICIAR SESSIÓ
+                  SizedBox(
+                    width: double.infinity,
+                    child: FilledButton(
+                      onPressed: _loading || _resettingPassword ? null : _login,
+                      child: _loading
+                          ? const SizedBox(
+                              width: 22,
+                              height: 22,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Text("Inicia sessió"),
+                    ),
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  // CREAR COMPTE
+                  TextButton(
                     onPressed: _loading || _resettingPassword
                         ? null
-                        : _forgotPassword,
-                    child: _resettingPassword
-                        ? const SizedBox(
-                            width: 18,
-                            height: 18,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                            ),
-                          )
-                        : const Text(
-                            "He oblidat la contrasenya",
-                          ),
+                        : () => context.go("/register"),
+                    child: const Text("Crear compte"),
                   ),
-                ),
 
-                const SizedBox(height: 12),
+                  const SizedBox(height: 8),
 
-                // INICIAR SESSIÓ
-                SizedBox(
-                  width: double.infinity,
-                  child: FilledButton(
-                    onPressed: _loading || _resettingPassword
-                        ? null
-                        : _login,
-                    child: _loading
-                        ? const SizedBox(
-                            width: 22,
-                            height: 22,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                            ),
-                          )
-                        : const Text("Inicia sessió"),
+                  TextButton(
+                    onPressed: () => context.push('/about'),
+                    style: TextButton.styleFrom(
+                      foregroundColor: Colors.grey.shade600,
+                    ),
+                    child: const Text(
+                      'Sobre GameShelf',
+                      style: TextStyle(fontSize: 12),
+                    ),
                   ),
-                ),
-
-                const SizedBox(height: 12),
-
-                // CREAR COMPTE
-                TextButton(
-                  onPressed: _loading || _resettingPassword
-                      ? null
-                      : () => context.go("/register"),
-                  child: const Text("Crear compte"),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

@@ -128,6 +128,40 @@ class _HomePageState extends State<HomePage> {
   }
 
   // ─────────────────────────────────────────────
+  // CERCADOR
+  // ─────────────────────────────────────────────
+
+  Widget _buildSearchField(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 500),
+          child: TextField(
+            controller: searchController,
+            onChanged: (value) {
+              setState(() {
+                searchQuery = value;
+              });
+            },
+            decoration: InputDecoration(
+              hintText: "Buscar a la meva biblioteca...",
+              prefixIcon: const Icon(Icons.search, size: 20),
+              filled: true,
+              fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+              contentPadding: const EdgeInsets.symmetric(vertical: 0),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(14),
+                borderSide: BorderSide.none,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ─────────────────────────────────────────────
   // FILTRES
   // ─────────────────────────────────────────────
 
@@ -176,98 +210,108 @@ class _HomePageState extends State<HomePage> {
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
-      child: SizedBox(
-        width: double.infinity,
-        child: SegmentedButton<LibraryFilter>(
-          showSelectedIcon: false,
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 500),
+          child: SizedBox(
+            width: double.infinity,
+            child: SegmentedButton<LibraryFilter>(
+              showSelectedIcon: false,
 
-          style: ButtonStyle(
-            backgroundColor: WidgetStateProperty.resolveWith((states) {
-              if (states.contains(WidgetState.selected)) {
-                return colorScheme.primary;
-              }
+              style: ButtonStyle(
+                backgroundColor: WidgetStateProperty.resolveWith((states) {
+                  if (states.contains(WidgetState.selected)) {
+                    return colorScheme.primary;
+                  }
 
-              return colorScheme.surfaceContainer;
-            }),
+                  return colorScheme.surfaceContainer;
+                }),
 
-            foregroundColor: WidgetStateProperty.resolveWith((states) {
-              if (states.contains(WidgetState.selected)) {
-                return colorScheme.onPrimary;
-              }
+                foregroundColor: WidgetStateProperty.resolveWith((states) {
+                  if (states.contains(WidgetState.selected)) {
+                    return colorScheme.onPrimary;
+                  }
 
-              return colorScheme.onSurface;
-            }),
+                  return colorScheme.onSurface;
+                }),
 
-            side: WidgetStatePropertyAll(
-              BorderSide(color: colorScheme.outlineVariant),
-            ),
+                side: WidgetStatePropertyAll(
+                  BorderSide(color: colorScheme.outlineVariant),
+                ),
 
-            shape: WidgetStatePropertyAll(
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-            ),
+                shape: WidgetStatePropertyAll(
+                  RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
 
-            padding: const WidgetStatePropertyAll(
-              EdgeInsets.symmetric(horizontal: 4, vertical: 10),
+                padding: const WidgetStatePropertyAll(
+                  EdgeInsets.symmetric(horizontal: 4, vertical: 10),
+                ),
+              ),
+
+              segments: [
+                ButtonSegment<LibraryFilter>(
+                  value: LibraryFilter.library,
+                  icon: const Icon(Icons.library_books_outlined, size: 19),
+                  label: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Flexible(
+                        child: Text(
+                          'Biblioteca',
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      _buildCountBadge(context, libraryCount),
+                    ],
+                  ),
+                ),
+
+                ButtonSegment<LibraryFilter>(
+                  value: LibraryFilter.dropped,
+                  icon: const Icon(Icons.cancel_outlined, size: 19),
+                  label: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Flexible(
+                        child: Text('Dropped', overflow: TextOverflow.ellipsis),
+                      ),
+                      const SizedBox(width: 4),
+                      _buildCountBadge(context, droppedCount),
+                    ],
+                  ),
+                ),
+
+                ButtonSegment<LibraryFilter>(
+                  value: LibraryFilter.wantToPlay,
+                  icon: const Icon(Icons.bookmark_outline, size: 19),
+                  label: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Flexible(
+                        child: Text(
+                          'Want to Play',
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      _buildCountBadge(context, wantToPlayCount),
+                    ],
+                  ),
+                ),
+              ],
+
+              selected: {selectedFilter},
+
+              onSelectionChanged: (selection) {
+                setState(() {
+                  selectedFilter = selection.first;
+                });
+              },
             ),
           ),
-
-          segments: [
-            ButtonSegment<LibraryFilter>(
-              value: LibraryFilter.library,
-              icon: const Icon(Icons.library_books_outlined, size: 19),
-              label: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Flexible(
-                    child: Text('Biblioteca', overflow: TextOverflow.ellipsis),
-                  ),
-                  const SizedBox(width: 4),
-                  _buildCountBadge(context, libraryCount),
-                ],
-              ),
-            ),
-
-            ButtonSegment<LibraryFilter>(
-              value: LibraryFilter.dropped,
-              icon: const Icon(Icons.cancel_outlined, size: 19),
-              label: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Flexible(
-                    child: Text('Dropped', overflow: TextOverflow.ellipsis),
-                  ),
-                  const SizedBox(width: 4),
-                  _buildCountBadge(context, droppedCount),
-                ],
-              ),
-            ),
-
-            ButtonSegment<LibraryFilter>(
-              value: LibraryFilter.wantToPlay,
-              icon: const Icon(Icons.bookmark_outline, size: 19),
-              label: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Flexible(
-                    child: Text(
-                      'Want to Play',
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  _buildCountBadge(context, wantToPlayCount),
-                ],
-              ),
-            ),
-          ],
-
-          selected: {selectedFilter},
-
-          onSelectionChanged: (selection) {
-            setState(() {
-              selectedFilter = selection.first;
-            });
-          },
         ),
       ),
     );
@@ -362,15 +406,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: HomeAppBar(
-        searchController: searchController,
-        onSearchChanged: (value) {
-          setState(() {
-            searchQuery = value;
-          });
-        },
-        onLibraryChanged: refresh,
-      ),
+      appBar: HomeAppBar(onLibraryChanged: refresh),
 
       body: FutureBuilder<List<LibraryGame>>(
         future: libraryFuture,
@@ -398,6 +434,11 @@ class _HomePageState extends State<HomePage> {
               // TÍTOL
               // ─────────────────────────────────
               _buildTitle(context),
+
+              // ─────────────────────────────────
+              // CERCADOR
+              // ─────────────────────────────────
+              _buildSearchField(context),
 
               // ─────────────────────────────────
               // FILTRES
