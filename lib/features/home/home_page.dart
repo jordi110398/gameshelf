@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gameshelf/features/home/widgets/games_grid.dart';
 import 'package:gameshelf/core/widgets/bookshelf_background.dart';
+import 'package:gameshelf/core/widgets/floating_pill.dart';
 import 'package:gameshelf/models/game_status.dart';
 import 'package:gameshelf/models/library_game.dart';
 import 'package:gameshelf/repositories/supabase_library_repository.dart';
@@ -54,6 +55,9 @@ class HomePageState extends State<HomePage> {
 
   LibraryFilter selectedFilter = LibraryFilter.library;
   LibrarySort selectedSort = LibrarySort.dateAdded;
+  // false = ordre per defecte de cada camp (data: més recent primer, hores:
+  // més hores primer, estat/títol: ordre natural). true = ordre invertit.
+  bool sortAscending = false;
 
   final searchController = TextEditingController();
   String searchQuery = '';
@@ -137,28 +141,40 @@ class HomePageState extends State<HomePage> {
 
     // Ordenar
     filteredGames.sort((a, b) {
+      int cmp;
+
       switch (selectedSort) {
         case LibrarySort.dateAdded:
           final aDate = a.userGame.createdAt;
           final bDate = b.userGame.createdAt;
 
-          if (aDate == null && bDate == null) return 0;
-          if (aDate == null) return 1;
-          if (bDate == null) return -1;
-
-          return bDate.compareTo(aDate);
+          if (aDate == null && bDate == null) {
+            cmp = 0;
+          } else if (aDate == null) {
+            cmp = 1;
+          } else if (bDate == null) {
+            cmp = -1;
+          } else {
+            cmp = bDate.compareTo(aDate);
+          }
+          break;
 
         case LibrarySort.hoursPlayed:
-          return b.userGame.hoursPlayed.compareTo(a.userGame.hoursPlayed);
+          cmp = b.userGame.hoursPlayed.compareTo(a.userGame.hoursPlayed);
+          break;
 
         case LibrarySort.status:
-          return a.userGame.status.index.compareTo(b.userGame.status.index);
+          cmp = a.userGame.status.index.compareTo(b.userGame.status.index);
+          break;
 
         case LibrarySort.title:
-          return a.game.title.toLowerCase().compareTo(
+          cmp = a.game.title.toLowerCase().compareTo(
             b.game.title.toLowerCase(),
           );
+          break;
       }
+
+      return sortAscending ? -cmp : cmp;
     });
 
     return filteredGames;
@@ -213,7 +229,9 @@ class HomePageState extends State<HomePage> {
     bool selected = false,
   }) {
     final colorScheme = Theme.of(context).colorScheme;
-    final baseColor = selected ? colorScheme.onPrimary : colorScheme.onSurface;
+    final baseColor = selected
+        ? colorScheme.primary
+        : colorScheme.onSurfaceVariant;
 
     return Container(
       width: 20,
@@ -263,12 +281,33 @@ class HomePageState extends State<HomePage> {
           ),
         );
       }).toList(),
-      child: Material(
-        color: colorScheme.surfaceContainerHighest,
-        shape: const CircleBorder(),
-        child: Padding(
-          padding: const EdgeInsets.all(10),
-          child: Icon(Icons.sort, size: 22, color: colorScheme.onSurface),
+      child: Padding(
+        padding: const EdgeInsets.all(10),
+        child: Icon(
+          selectedSort.icon,
+          size: 20,
+          color: colorScheme.onSurfaceVariant,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSortDirectionButton(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return InkWell(
+      borderRadius: BorderRadius.circular(20),
+      onTap: () {
+        setState(() {
+          sortAscending = !sortAscending;
+        });
+      },
+      child: Padding(
+        padding: const EdgeInsets.all(10),
+        child: Icon(
+          sortAscending ? Icons.arrow_upward : Icons.arrow_downward,
+          size: 20,
+          color: colorScheme.onSurfaceVariant,
         ),
       ),
     );
@@ -277,19 +316,19 @@ class HomePageState extends State<HomePage> {
   Widget _buildSearchToggle(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    return Material(
-      color: colorScheme.surfaceContainerHighest,
-      shape: const CircleBorder(),
-      child: InkWell(
-        customBorder: const CircleBorder(),
-        onTap: () {
-          setState(() {
-            isSearchExpanded = true;
-          });
-        },
-        child: const Padding(
-          padding: EdgeInsets.all(10),
-          child: Icon(Icons.search, size: 22),
+    return InkWell(
+      borderRadius: BorderRadius.circular(20),
+      onTap: () {
+        setState(() {
+          isSearchExpanded = true;
+        });
+      },
+      child: Padding(
+        padding: const EdgeInsets.all(10),
+        child: Icon(
+          Icons.search,
+          size: 20,
+          color: colorScheme.onSurfaceVariant,
         ),
       ),
     );
@@ -305,38 +344,41 @@ class HomePageState extends State<HomePage> {
   }) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    return Material(
-      color: selected
-          ? colorScheme.primary
-          : colorScheme.surfaceContainerHighest,
-      borderRadius: BorderRadius.circular(20),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(20),
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                icon,
-                size: 18,
-                color: selected ? colorScheme.onPrimary : colorScheme.onSurface,
+    return InkWell(
+      borderRadius: BorderRadius.circular(16),
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 10),
+        decoration: BoxDecoration(
+          color: selected
+              ? colorScheme.primary.withValues(alpha: 0.18)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: 18,
+              color: selected
+                  ? colorScheme.primary
+                  : colorScheme.onSurfaceVariant,
+            ),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: TextStyle(
+                color: selected
+                    ? colorScheme.primary
+                    : colorScheme.onSurfaceVariant,
+                fontWeight: selected ? FontWeight.bold : FontWeight.normal,
               ),
-              const SizedBox(width: 6),
-              Text(
-                label,
-                style: TextStyle(
-                  color: selected
-                      ? colorScheme.onPrimary
-                      : colorScheme.onSurface,
-                  fontWeight: selected ? FontWeight.bold : FontWeight.normal,
-                ),
-              ),
-              const SizedBox(width: 6),
-              _buildCountBadge(context, count, selected: selected),
-            ],
-          ),
+            ),
+            const SizedBox(width: 6),
+            _buildCountBadge(context, count, selected: selected),
+          ],
         ),
       ),
     );
@@ -394,63 +436,94 @@ class HomePageState extends State<HomePage> {
       return game.userGame.status == GameStatus.wantToPlay;
     }).length;
 
-    if (isSearchExpanded) {
-      return Padding(
-        padding: const EdgeInsets.fromLTRB(20, 4, 20, 18),
-        child: Row(children: [_buildSearchField(context)]),
-      );
-    }
-
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 4, 20, 18),
-      child: Row(
-        children: [
-          _buildSortButton(context),
-          const SizedBox(width: 8),
-          _buildSearchToggle(context),
-          const SizedBox(width: 10),
-          Expanded(
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  _buildFilterButton(
-                    context: context,
-                    icon: Icons.library_books_outlined,
-                    label: 'Biblioteca',
-                    count: libraryCount,
-                    selected: selectedFilter == LibraryFilter.library,
-                    onTap: () {
-                      setState(() => selectedFilter = LibraryFilter.library);
-                    },
-                  ),
-                  const SizedBox(width: 8),
-                  _buildFilterButton(
-                    context: context,
-                    icon: Icons.cancel_outlined,
-                    label: 'Dropped',
-                    count: droppedCount,
-                    selected: selectedFilter == LibraryFilter.dropped,
-                    onTap: () {
-                      setState(() => selectedFilter = LibraryFilter.dropped);
-                    },
-                  ),
-                  const SizedBox(width: 8),
-                  _buildFilterButton(
-                    context: context,
-                    icon: Icons.bookmark_outline,
-                    label: 'Want to Play',
-                    count: wantToPlayCount,
-                    selected: selectedFilter == LibraryFilter.wantToPlay,
-                    onTap: () {
-                      setState(() => selectedFilter = LibraryFilter.wantToPlay);
-                    },
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
+      child: FloatingPill(
+        height: 58,
+        borderRadius: 29,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          child: isSearchExpanded
+              ? Row(children: [_buildSearchField(context)])
+              : Row(
+                  children: [
+                    _buildSortButton(context),
+                    _buildSortDirectionButton(context),
+                    const SizedBox(width: 4),
+                    _buildSearchToggle(context),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: ShaderMask(
+                        blendMode: BlendMode.dstIn,
+                        shaderCallback: (rect) {
+                          return const LinearGradient(
+                            colors: [
+                              Colors.black,
+                              Colors.black,
+                              Colors.transparent,
+                            ],
+                            stops: [0, 0.88, 1],
+                          ).createShader(rect);
+                        },
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Row(
+                            children: [
+                              _buildFilterButton(
+                                context: context,
+                                icon: Icons.library_books_outlined,
+                                label: 'Biblioteca',
+                                count: libraryCount,
+                                selected:
+                                    selectedFilter == LibraryFilter.library,
+                                onTap: () {
+                                  setState(
+                                    () =>
+                                        selectedFilter = LibraryFilter.library,
+                                  );
+                                },
+                              ),
+                              const SizedBox(width: 6),
+                              _buildFilterButton(
+                                context: context,
+                                icon: Icons.cancel_outlined,
+                                label: 'Dropped',
+                                count: droppedCount,
+                                selected:
+                                    selectedFilter == LibraryFilter.dropped,
+                                onTap: () {
+                                  setState(
+                                    () =>
+                                        selectedFilter = LibraryFilter.dropped,
+                                  );
+                                },
+                              ),
+                              const SizedBox(width: 6),
+                              _buildFilterButton(
+                                context: context,
+                                icon: Icons.bookmark_outline,
+                                label: 'Wishlist',
+                                count: wantToPlayCount,
+                                selected:
+                                    selectedFilter == LibraryFilter.wantToPlay,
+                                onTap: () {
+                                  setState(
+                                    () => selectedFilter =
+                                        LibraryFilter.wantToPlay,
+                                  );
+                                },
+                              ),
+                              // Marge final perquè el desvaniment no talli
+                              // el darrer botó quan sí que està a la vista.
+                              const SizedBox(width: 12),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+        ),
       ),
     );
   }

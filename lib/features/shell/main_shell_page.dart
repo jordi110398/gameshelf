@@ -130,18 +130,17 @@ class _FloatingNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 5 caselles simètriques: [Llamp (inactiu, de moment)] [Inici] [+]
+    // 5 caselles simètriques: [Inici] [Llamp (inactiu, de moment)] [+]
     // [Social] [Perfil]. Amb el mateix nombre de caselles a cada costat,
     // el botó '+' ja queda centrat sense necessitat de cap truc de `Stack`.
     //
     // La pestanya de recomanacions (llamp) encara no fa res: és un avançament
-    // visual de la futura funcionalitat, al costat d'Inici tal com es va
-    // acordar.
+    // visual de la futura funcionalitat, entre Inici i el botó '+'.
     return FloatingPill(
       child: Row(
         children: [
-          Expanded(child: _buildInertTab(context)),
           Expanded(child: _navTab(context, 0)),
+          Expanded(child: _buildInertTab(context)),
           Expanded(child: _AddGameButton(onTap: onAddGame)),
           Expanded(child: _navTab(context, 1)),
           Expanded(child: _navTab(context, 2)),
