@@ -2,6 +2,11 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:gameshelf/core/widgets/app_logo.dart';
+import 'package:gameshelf/core/widgets/bookshelf_background.dart';
+import 'package:gameshelf/core/widgets/shelf_ledge.dart';
+import 'package:gameshelf/core/widgets/shelf_led_strip.dart';
+import 'package:gameshelf/core/widgets/shelf_list.dart';
+import 'package:gameshelf/core/widgets/wood_drawer_container.dart';
 import 'package:gameshelf/features/home/widgets/game_card.dart';
 import 'package:gameshelf/models/game_status.dart';
 import 'package:gameshelf/models/library_game.dart';
@@ -569,24 +574,19 @@ class _UserProfilePageState extends State<UserProfilePage> {
     final reviews = reviewedGames.take(3).toList();
 
     if (reviews.isEmpty) {
-      return Container(
-        width: double.infinity,
+      return WoodDrawerContainer(
         padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surfaceContainerHighest,
-          borderRadius: BorderRadius.circular(16),
-        ),
         child: Column(
           children: [
             Icon(
               Icons.rate_review_outlined,
               size: 32,
-              color: Colors.grey.shade500,
+              color: Colors.grey.shade400,
             ),
             const SizedBox(height: 10),
             Text(
               'Encara no has escrit cap review.',
-              style: TextStyle(color: Colors.grey.shade600),
+              style: TextStyle(color: Colors.grey.shade300),
             ),
           ],
         ),
@@ -600,14 +600,11 @@ class _UserProfilePageState extends State<UserProfilePage> {
           final userGame = libraryGame.userGame;
           final likes = reviewLikes[game.igdbId];
 
-          return Container(
-            margin: const EdgeInsets.only(bottom: 12),
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: Row(
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: WoodDrawerContainer(
+              padding: const EdgeInsets.all(12),
+              child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // PORTADA
@@ -698,7 +695,8 @@ class _UserProfilePageState extends State<UserProfilePage> {
                 ),
               ],
             ),
-          );
+          ),
+        );
         }),
 
         if (reviewedGames.length > 3)
@@ -854,16 +852,10 @@ class _UserProfilePageState extends State<UserProfilePage> {
                 // ─────────────────────────────────────
                 // ESTADÍSTIQUES
                 // ─────────────────────────────────────
-                Container(
+                WoodDrawerContainer(
                   padding: const EdgeInsets.symmetric(
-                    vertical: 20,
+                    vertical: 12,
                     horizontal: 8,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.surfaceContainerHighest,
-                    borderRadius: BorderRadius.circular(16),
                   ),
                   child: Row(
                     children: [
@@ -1142,43 +1134,60 @@ class _UserProfilePageState extends State<UserProfilePage> {
   Widget _buildFavoritesShelf() {
     final favorites = favoriteGames;
 
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.05),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(18),
+      child: Stack(
         children: [
-          Row(
-            children: [
-              const Icon(Icons.star, size: 16, color: Colors.amber),
-              const SizedBox(width: 6),
-              const Text(
-                'Preferits',
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-              ),
-            ],
-          ),
+          const Positioned.fill(child: BookshelfBackground()),
 
-          const SizedBox(height: 12),
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    const Icon(Icons.star, size: 16, color: Colors.amber),
+                    const SizedBox(width: 6),
+                    const Text(
+                      'Preferits',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
 
-          SizedBox(
-            height: 120,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              itemCount: favorites.length,
-              separatorBuilder: (_, _) => const SizedBox(width: 10),
-              itemBuilder: (context, index) {
-                return _GameCoverTile(
-                  libraryGame: favorites[index],
-                  width: 88,
-                  onOpened: loadProfile,
-                );
-              },
+                const SizedBox(height: 12),
+
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    return ShelfLedStrip(width: constraints.maxWidth);
+                  },
+                ),
+
+                const SizedBox(height: 4),
+
+                SizedBox(
+                  height: 120,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: favorites.length,
+                    separatorBuilder: (_, _) => const SizedBox(width: 10),
+                    itemBuilder: (context, index) {
+                      return _GameCoverTile(
+                        libraryGame: favorites[index],
+                        width: 88,
+                        onOpened: loadProfile,
+                      );
+                    },
+                  ),
+                ),
+
+                const SizedBox(height: 10),
+                const ShelfLedge(),
+              ],
             ),
           ),
         ],
@@ -1219,22 +1228,25 @@ class _UserProfilePageState extends State<UserProfilePage> {
 
           const SizedBox(height: 10),
 
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: entry.value.length,
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 4,
-              crossAxisSpacing: 10,
-              mainAxisSpacing: 10,
-              childAspectRatio: 3 / 4,
+          ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: Stack(
+              children: [
+                const Positioned.fill(child: BookshelfBackground()),
+                ShelfList<LibraryGame>(
+                  items: entry.value,
+                  scrollable: false,
+                  minItemWidth: 90,
+                  minColumns: 4,
+                  itemAspectRatio: 3 / 4,
+                  padding: const EdgeInsets.all(14),
+                  itemBuilder: (context, libraryGame) => _GameCoverTile(
+                    libraryGame: libraryGame,
+                    onOpened: loadProfile,
+                  ),
+                ),
+              ],
             ),
-            itemBuilder: (context, index) {
-              return _GameCoverTile(
-                libraryGame: entry.value[index],
-                onOpened: loadProfile,
-              );
-            },
           ),
 
           const SizedBox(height: 22),
@@ -1336,54 +1348,38 @@ class _UserProfilePageState extends State<UserProfilePage> {
   // ─────────────────────────────────────────────
 
   Widget _buildGameGrid() {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final width = constraints.maxWidth;
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(16),
+      child: Stack(
+        children: [
+          const Positioned.fill(child: BookshelfBackground()),
+          ShelfList<LibraryGame>(
+            items: filteredGames,
+            scrollable: false,
+            minItemWidth: 100,
+            minColumns: 3,
+            itemAspectRatio: 2 / 3,
+            padding: const EdgeInsets.all(14),
+            itemBuilder: (context, libraryGame) {
+              final gameId = libraryGame.game.igdbId;
 
-        int crossAxisCount;
+              return GameCard(
+                libraryGame: libraryGame,
 
-        if (width < 500) {
-          crossAxisCount = 3;
-        } else if (width < 800) {
-          crossAxisCount = 4;
-        } else if (width < 1100) {
-          crossAxisCount = 5;
-        } else {
-          crossAxisCount = 6;
-        }
+                isActive: activeGameId == gameId,
 
-        return GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: filteredGames.length,
+                onActivate: () {
+                  setState(() {
+                    activeGameId = gameId;
+                  });
+                },
 
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: crossAxisCount,
-            crossAxisSpacing: 10,
-            mainAxisSpacing: 14,
-            childAspectRatio: 2 / 3,
+                socialNickname: currentProfile.nickname,
+              );
+            },
           ),
-
-          itemBuilder: (context, index) {
-            final libraryGame = filteredGames[index];
-            final gameId = libraryGame.game.igdbId;
-
-            return GameCard(
-              libraryGame: libraryGame,
-
-              isActive: activeGameId == gameId,
-
-              onActivate: () {
-                setState(() {
-                  activeGameId = gameId;
-                });
-              },
-
-              socialNickname: currentProfile.nickname,
-            );
-          },
-        );
-      },
+        ],
+      ),
     );
   }
 }

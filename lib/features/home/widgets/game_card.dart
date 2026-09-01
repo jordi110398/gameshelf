@@ -164,6 +164,38 @@ class _GameCardState extends State<GameCard> {
                         libraryGame: widget.libraryGame,
                         visible: isActive,
                       ),
+
+                      // Insígnia d'estat sempre visible, sense necessitat de
+                      // tap/hover, per identificar-lo d'una ullada. Es
+                      // desactiva quan la card és activa, ja que llavors
+                      // l'estat ja es mostra dins de l'overlay.
+                      Positioned(
+                        top: 8,
+                        left: 8,
+                        child: AnimatedOpacity(
+                          opacity: isActive ? 0 : 1,
+                          duration: const Duration(milliseconds: 200),
+                          child: Container(
+                            width: 26,
+                            height: 26,
+                            decoration: BoxDecoration(
+                              color: statusColor,
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.4),
+                                  blurRadius: 4,
+                                ),
+                              ],
+                            ),
+                            child: Icon(
+                              status.icon,
+                              color: Colors.white,
+                              size: 15,
+                            ),
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gameshelf/features/home/widgets/games_grid.dart';
+import 'package:gameshelf/core/widgets/bookshelf_background.dart';
 import 'package:gameshelf/models/game_status.dart';
 import 'package:gameshelf/models/library_game.dart';
 import 'package:gameshelf/repositories/supabase_library_repository.dart';
@@ -10,18 +11,49 @@ import 'package:gameshelf/models/profile.dart';
 
 enum LibraryFilter { library, dropped, wantToPlay }
 
+enum LibrarySort { dateAdded, hoursPlayed, status, title }
+
+extension on LibrarySort {
+  String get label {
+    switch (this) {
+      case LibrarySort.dateAdded:
+        return "Data d'addició";
+      case LibrarySort.hoursPlayed:
+        return 'Hores jugades';
+      case LibrarySort.status:
+        return 'Estat';
+      case LibrarySort.title:
+        return 'Títol (A-Z)';
+    }
+  }
+
+  IconData get icon {
+    switch (this) {
+      case LibrarySort.dateAdded:
+        return Icons.calendar_today_outlined;
+      case LibrarySort.hoursPlayed:
+        return Icons.schedule;
+      case LibrarySort.status:
+        return Icons.flag_outlined;
+      case LibrarySort.title:
+        return Icons.sort_by_alpha;
+    }
+  }
+}
+
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<HomePage> createState() => HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class HomePageState extends State<HomePage> {
   late final SupabaseLibraryRepository repository;
   late Future<List<LibraryGame>> libraryFuture;
 
   LibraryFilter selectedFilter = LibraryFilter.library;
+  LibrarySort selectedSort = LibrarySort.dateAdded;
 
   final searchController = TextEditingController();
   String searchQuery = '';
@@ -103,11 +135,37 @@ class _HomePageState extends State<HomePage> {
       }).toList();
     }
 
+    // Ordenar
+    filteredGames.sort((a, b) {
+      switch (selectedSort) {
+        case LibrarySort.dateAdded:
+          final aDate = a.userGame.createdAt;
+          final bDate = b.userGame.createdAt;
+
+          if (aDate == null && bDate == null) return 0;
+          if (aDate == null) return 1;
+          if (bDate == null) return -1;
+
+          return bDate.compareTo(aDate);
+
+        case LibrarySort.hoursPlayed:
+          return b.userGame.hoursPlayed.compareTo(a.userGame.hoursPlayed);
+
+        case LibrarySort.status:
+          return a.userGame.status.index.compareTo(b.userGame.status.index);
+
+        case LibrarySort.title:
+          return a.game.title.toLowerCase().compareTo(
+            b.game.title.toLowerCase(),
+          );
+      }
+    });
+
     return filteredGames;
   }
 
   // ─────────────────────────────────────────────
-  // CAPÇALERA (TÍTOL + CERCA)
+  // CAPÇALERA (TÍTOL)
   // ─────────────────────────────────────────────
 
   void _collapseSearch() {
@@ -123,77 +181,21 @@ class _HomePageState extends State<HomePage> {
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 22, 20, 6),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (!isSearchExpanded)
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "${profile?.nickname ?? "GameShelf"}'s GameShelf",
-                    style: Theme.of(context).textTheme.headlineSmall
-                        ?.copyWith(
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: -0.6,
-                        ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    '$totalGames jocs',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
-            )
-          else
-            Expanded(
-              child: TextField(
-                controller: searchController,
-                autofocus: true,
-                onChanged: (value) {
-                  setState(() {
-                    searchQuery = value;
-                  });
-                },
-                decoration: InputDecoration(
-                  hintText: "Buscar a la meva biblioteca...",
-                  prefixIcon: const Icon(Icons.search, size: 20),
-                  filled: true,
-                  fillColor: colorScheme.surfaceContainerHighest,
-                  contentPadding: const EdgeInsets.symmetric(vertical: 0),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(14),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
-              ),
+          Text(
+            "${profile?.nickname ?? "GameShelf"}'s GameShelf",
+            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.8,
             ),
-
-          const SizedBox(width: 10),
-
-          Material(
-            color: colorScheme.surfaceContainerHighest,
-            shape: const CircleBorder(),
-            child: InkWell(
-              customBorder: const CircleBorder(),
-              onTap: isSearchExpanded
-                  ? _collapseSearch
-                  : () {
-                      setState(() {
-                        isSearchExpanded = true;
-                      });
-                    },
-              child: Padding(
-                padding: const EdgeInsets.all(10),
-                child: Icon(
-                  isSearchExpanded ? Icons.close : Icons.search,
-                  size: 22,
-                ),
-              ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            '$totalGames jocs',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: colorScheme.onSurfaceVariant,
             ),
           ),
         ],
@@ -205,15 +207,20 @@ class _HomePageState extends State<HomePage> {
   // FILTRES
   // ─────────────────────────────────────────────
 
-  Widget _buildCountBadge(BuildContext context, int count) {
+  Widget _buildCountBadge(
+    BuildContext context,
+    int count, {
+    bool selected = false,
+  }) {
     final colorScheme = Theme.of(context).colorScheme;
+    final baseColor = selected ? colorScheme.onPrimary : colorScheme.onSurface;
 
     return Container(
       width: 20,
       height: 20,
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: colorScheme.onSurface.withValues(alpha: 0.12),
+        color: baseColor.withValues(alpha: 0.18),
         shape: BoxShape.circle,
       ),
       child: Text(
@@ -221,14 +228,153 @@ class _HomePageState extends State<HomePage> {
         style: Theme.of(context).textTheme.labelSmall?.copyWith(
           fontSize: 9,
           fontWeight: FontWeight.bold,
+          color: baseColor,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSortButton(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return PopupMenuButton<LibrarySort>(
+      tooltip: 'Ordenar',
+      initialValue: selectedSort,
+      onSelected: (value) {
+        setState(() {
+          selectedSort = value;
+        });
+      },
+      itemBuilder: (context) => LibrarySort.values.map((sort) {
+        final isSelected = sort == selectedSort;
+
+        return PopupMenuItem(
+          value: sort,
+          child: Row(
+            children: [
+              Icon(sort.icon, size: 18),
+              const SizedBox(width: 10),
+              Text(sort.label),
+              if (isSelected) ...[
+                const Spacer(),
+                Icon(Icons.check, size: 18, color: colorScheme.primary),
+              ],
+            ],
+          ),
+        );
+      }).toList(),
+      child: Material(
+        color: colorScheme.surfaceContainerHighest,
+        shape: const CircleBorder(),
+        child: Padding(
+          padding: const EdgeInsets.all(10),
+          child: Icon(Icons.sort, size: 22, color: colorScheme.onSurface),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSearchToggle(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Material(
+      color: colorScheme.surfaceContainerHighest,
+      shape: const CircleBorder(),
+      child: InkWell(
+        customBorder: const CircleBorder(),
+        onTap: () {
+          setState(() {
+            isSearchExpanded = true;
+          });
+        },
+        child: const Padding(
+          padding: EdgeInsets.all(10),
+          child: Icon(Icons.search, size: 22),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFilterButton({
+    required BuildContext context,
+    required IconData icon,
+    required String label,
+    required int count,
+    required bool selected,
+    required VoidCallback onTap,
+  }) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Material(
+      color: selected
+          ? colorScheme.primary
+          : colorScheme.surfaceContainerHighest,
+      borderRadius: BorderRadius.circular(20),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(20),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                icon,
+                size: 18,
+                color: selected ? colorScheme.onPrimary : colorScheme.onSurface,
+              ),
+              const SizedBox(width: 6),
+              Text(
+                label,
+                style: TextStyle(
+                  color: selected
+                      ? colorScheme.onPrimary
+                      : colorScheme.onSurface,
+                  fontWeight: selected ? FontWeight.bold : FontWeight.normal,
+                ),
+              ),
+              const SizedBox(width: 6),
+              _buildCountBadge(context, count, selected: selected),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSearchField(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Expanded(
+      child: TextField(
+        controller: searchController,
+        autofocus: true,
+        onChanged: (value) {
+          setState(() {
+            searchQuery = value;
+          });
+        },
+        decoration: InputDecoration(
+          hintText: "Buscar a la meva biblioteca...",
+          prefixIcon: const Icon(Icons.search, size: 20),
+          suffixIcon: IconButton(
+            icon: const Icon(Icons.close, size: 20),
+            tooltip: 'Tancar cerca',
+            onPressed: _collapseSearch,
+          ),
+          filled: true,
+          fillColor: colorScheme.surfaceContainerHighest,
+          contentPadding: const EdgeInsets.symmetric(vertical: 0),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14),
+            borderSide: BorderSide.none,
+          ),
         ),
       ),
     );
   }
 
   Widget _buildFilters(BuildContext context, List<LibraryGame> games) {
-    final colorScheme = Theme.of(context).colorScheme;
-
     // ─────────────────────────────────────────────
     // COMPTADORS
     // ─────────────────────────────────────────────
@@ -248,111 +394,63 @@ class _HomePageState extends State<HomePage> {
       return game.userGame.status == GameStatus.wantToPlay;
     }).length;
 
+    if (isSearchExpanded) {
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(20, 4, 20, 18),
+        child: Row(children: [_buildSearchField(context)]),
+      );
+    }
+
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
-      child: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 500),
-          child: SizedBox(
-            width: double.infinity,
-            child: SegmentedButton<LibraryFilter>(
-              showSelectedIcon: false,
-
-              style: ButtonStyle(
-                backgroundColor: WidgetStateProperty.resolveWith((states) {
-                  if (states.contains(WidgetState.selected)) {
-                    return colorScheme.primary;
-                  }
-
-                  return colorScheme.surfaceContainer;
-                }),
-
-                foregroundColor: WidgetStateProperty.resolveWith((states) {
-                  if (states.contains(WidgetState.selected)) {
-                    return colorScheme.onPrimary;
-                  }
-
-                  return colorScheme.onSurface;
-                }),
-
-                side: WidgetStatePropertyAll(
-                  BorderSide(color: colorScheme.outlineVariant),
-                ),
-
-                shape: WidgetStatePropertyAll(
-                  RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
+      padding: const EdgeInsets.fromLTRB(20, 4, 20, 18),
+      child: Row(
+        children: [
+          _buildSortButton(context),
+          const SizedBox(width: 8),
+          _buildSearchToggle(context),
+          const SizedBox(width: 10),
+          Expanded(
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  _buildFilterButton(
+                    context: context,
+                    icon: Icons.library_books_outlined,
+                    label: 'Biblioteca',
+                    count: libraryCount,
+                    selected: selectedFilter == LibraryFilter.library,
+                    onTap: () {
+                      setState(() => selectedFilter = LibraryFilter.library);
+                    },
                   ),
-                ),
-
-                padding: const WidgetStatePropertyAll(
-                  EdgeInsets.symmetric(horizontal: 4, vertical: 10),
-                ),
+                  const SizedBox(width: 8),
+                  _buildFilterButton(
+                    context: context,
+                    icon: Icons.cancel_outlined,
+                    label: 'Dropped',
+                    count: droppedCount,
+                    selected: selectedFilter == LibraryFilter.dropped,
+                    onTap: () {
+                      setState(() => selectedFilter = LibraryFilter.dropped);
+                    },
+                  ),
+                  const SizedBox(width: 8),
+                  _buildFilterButton(
+                    context: context,
+                    icon: Icons.bookmark_outline,
+                    label: 'Want to Play',
+                    count: wantToPlayCount,
+                    selected: selectedFilter == LibraryFilter.wantToPlay,
+                    onTap: () {
+                      setState(() => selectedFilter = LibraryFilter.wantToPlay);
+                    },
+                  ),
+                ],
               ),
-
-              segments: [
-                ButtonSegment<LibraryFilter>(
-                  value: LibraryFilter.library,
-                  icon: const Icon(Icons.library_books_outlined, size: 19),
-                  label: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Flexible(
-                        child: Text(
-                          'Biblioteca',
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      _buildCountBadge(context, libraryCount),
-                    ],
-                  ),
-                ),
-
-                ButtonSegment<LibraryFilter>(
-                  value: LibraryFilter.dropped,
-                  icon: const Icon(Icons.cancel_outlined, size: 19),
-                  label: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Flexible(
-                        child: Text('Dropped', overflow: TextOverflow.ellipsis),
-                      ),
-                      const SizedBox(width: 4),
-                      _buildCountBadge(context, droppedCount),
-                    ],
-                  ),
-                ),
-
-                ButtonSegment<LibraryFilter>(
-                  value: LibraryFilter.wantToPlay,
-                  icon: const Icon(Icons.bookmark_outline, size: 19),
-                  label: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Flexible(
-                        child: Text(
-                          'Want to Play',
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      _buildCountBadge(context, wantToPlayCount),
-                    ],
-                  ),
-                ),
-              ],
-
-              selected: {selectedFilter},
-
-              onSelectionChanged: (selection) {
-                setState(() {
-                  selectedFilter = selection.first;
-                });
-              },
             ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -468,33 +566,42 @@ class _HomePageState extends State<HomePage> {
 
           final filteredGames = _filterGames(games);
 
-          return Column(
+          return Stack(
             children: [
-              // ─────────────────────────────────
-              // CAPÇALERA (TÍTOL + CERCA)
-              // ─────────────────────────────────
-              _buildHeader(context, games.length),
+              const Positioned.fill(child: BookshelfBackground()),
 
-              // ─────────────────────────────────
-              // FILTRES
-              // ─────────────────────────────────
-              _buildFilters(context, games),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // ─────────────────────────────────
+                  // CAPÇALERA (TÍTOL + CERCA)
+                  // ─────────────────────────────────
+                  _buildHeader(context, games.length),
 
-              // ─────────────────────────────────
-              // GRID
-              // ─────────────────────────────────
-              Expanded(
-                child: filteredGames.isEmpty
-                    ? _buildEmptyState(context)
-                    : GameGrid(
-                        games: filteredGames,
-                        onLibraryChanged: refresh,
-                        onGameDeleted: (libraryGame) async {
-                          await repository.removeGame(libraryGame.game.igdbId);
+                  // ─────────────────────────────────
+                  // FILTRES
+                  // ─────────────────────────────────
+                  _buildFilters(context, games),
 
-                          refresh();
-                        },
-                      ),
+                  // ─────────────────────────────────
+                  // GRID
+                  // ─────────────────────────────────
+                  Expanded(
+                    child: filteredGames.isEmpty
+                        ? _buildEmptyState(context)
+                        : GameGrid(
+                            games: filteredGames,
+                            onLibraryChanged: refresh,
+                            onGameDeleted: (libraryGame) async {
+                              await repository.removeGame(
+                                libraryGame.game.igdbId,
+                              );
+
+                              refresh();
+                            },
+                          ),
+                  ),
+                ],
               ),
             ],
           );

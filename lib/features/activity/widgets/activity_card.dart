@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gameshelf/core/widgets/star_burst.dart';
+import 'package:gameshelf/core/widgets/wood_drawer_container.dart';
 import 'package:gameshelf/models/activity_item.dart';
 import 'package:gameshelf/repositories/profile_repository.dart';
 import 'package:gameshelf/repositories/activity_repository.dart';
@@ -361,8 +362,7 @@ class _ActivityCardState extends State<ActivityCard> {
         key: _starBurstKey,
         child: Container(
           padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surfaceContainerHighest,
+          decoration: woodDrawerDecoration(
             borderRadius: BorderRadius.circular(14),
           ),
           child: Row(

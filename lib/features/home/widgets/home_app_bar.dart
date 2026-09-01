@@ -3,8 +3,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:gameshelf/core/widgets/app_logo.dart';
 import 'package:gameshelf/features/notifications/notifications_page.dart';
+import 'package:gameshelf/features/notifications/widgets/notification_banner.dart';
+import 'package:gameshelf/features/profile/user_profile_page.dart';
 import 'package:gameshelf/features/search/search_page.dart';
+import 'package:gameshelf/models/notification_item.dart';
 import 'package:gameshelf/repositories/notification_repository.dart';
+import 'package:gameshelf/repositories/profile_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class HomeAppBar extends StatefulWidget implements PreferredSizeWidget {
@@ -19,7 +23,8 @@ class HomeAppBar extends StatefulWidget implements PreferredSizeWidget {
   State<HomeAppBar> createState() => _HomeAppBarState();
 }
 
-class _HomeAppBarState extends State<HomeAppBar> {
+class _HomeAppBarState extends State<HomeAppBar>
+    with SingleTickerProviderStateMixin {
   final _notificationRepository = NotificationRepository(
     Supabase.instance.client,
   );
@@ -27,26 +32,39 @@ class _HomeAppBarState extends State<HomeAppBar> {
   int _unreadCount = 0;
   Timer? _pollTimer;
 
+  // Evita mostrar el banner de notificacions que ja existien abans d'obrir
+  // l'app: només avisem de les que arriben de nou durant la sessió.
+  bool _initialCheckDone = false;
+  String? _lastSeenNotificationId;
+
+  late final AnimationController _pulseController;
+
   @override
   void initState() {
     super.initState();
 
-    _refreshUnreadCount();
+    _pulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 350),
+    );
+
+    _checkForNotifications();
 
     // Comprova cada 30s si hi ha notificacions noves.
     _pollTimer = Timer.periodic(
       const Duration(seconds: 30),
-      (_) => _refreshUnreadCount(),
+      (_) => _checkForNotifications(),
     );
   }
 
   @override
   void dispose() {
     _pollTimer?.cancel();
+    _pulseController.dispose();
     super.dispose();
   }
 
-  Future<void> _refreshUnreadCount() async {
+  Future<void> _checkForNotifications() async {
     final count = await _notificationRepository.getUnreadCount();
 
     if (!mounted) return;
@@ -54,6 +72,57 @@ class _HomeAppBarState extends State<HomeAppBar> {
     setState(() {
       _unreadCount = count;
     });
+
+    if (count == 0) return;
+
+    final latest = await _notificationRepository.getNotifications(limit: 1);
+
+    if (!mounted || latest.isEmpty) return;
+
+    final newest = latest.first;
+
+    if (!_initialCheckDone) {
+      // Primer cop que comprovem: no és "nova", ja existia.
+      _initialCheckDone = true;
+      _lastSeenNotificationId = newest.id;
+      return;
+    }
+
+    if (newest.id != _lastSeenNotificationId) {
+      _lastSeenNotificationId = newest.id;
+      _pulseStar();
+      _showBanner(newest);
+    }
+  }
+
+  Future<void> _pulseStar() async {
+    for (var i = 0; i < 3; i++) {
+      if (!mounted) return;
+      await _pulseController.forward();
+      if (!mounted) return;
+      await _pulseController.reverse();
+    }
+  }
+
+  void _showBanner(NotificationItem notification) {
+    showNotificationBanner(
+      context,
+      notification,
+      onTap: () async {
+        final profile = await ProfileRepository(
+          Supabase.instance.client,
+        ).getProfileById(notification.actorId);
+
+        if (profile == null || !mounted) return;
+
+        await Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => UserProfilePage(profile: profile)),
+        );
+
+        await _checkForNotifications();
+      },
+    );
   }
 
   Future<void> _openNotifications() async {
@@ -62,7 +131,7 @@ class _HomeAppBarState extends State<HomeAppBar> {
       MaterialPageRoute(builder: (_) => const NotificationsPage()),
     );
 
-    await _refreshUnreadCount();
+    await _checkForNotifications();
   }
 
   @override
@@ -117,7 +186,26 @@ class _HomeAppBarState extends State<HomeAppBar> {
             label: Text('$_unreadCount'),
             child: IconButton(
               padding: EdgeInsets.zero,
-              icon: const Icon(Icons.notifications_outlined),
+              icon: AnimatedBuilder(
+                animation: _pulseController,
+                builder: (context, child) {
+                  final t = _pulseController.value;
+
+                  final baseColor = _unreadCount > 0
+                      ? Colors.amber
+                      : Theme.of(context).colorScheme.onSurface;
+
+                  final color = Color.lerp(baseColor, Colors.deepPurple, t);
+
+                  return Transform.scale(
+                    scale: 1 + (t * 0.4),
+                    child: Icon(
+                      _unreadCount > 0 ? Icons.star : Icons.star_outline,
+                      color: color,
+                    ),
+                  );
+                },
+              ),
               tooltip: "Notificacions",
               onPressed: _openNotifications,
             ),

@@ -9,6 +9,7 @@ class UserGame {
   final String? review;
   final DateTime? startedAt;
   final DateTime? completedAt;
+  final DateTime? createdAt;
 
   const UserGame({
     required this.igdbId,
@@ -19,6 +20,7 @@ class UserGame {
     this.review,
     this.startedAt,
     this.completedAt,
+    this.createdAt,
   });
 
   factory UserGame.fromMap(Map<String, dynamic> map) {
@@ -65,6 +67,9 @@ class UserGame {
           : null,
       completedAt: map["completed_at"] != null
           ? DateTime.parse(map["completed_at"])
+          : null,
+      createdAt: map["created_at"] != null
+          ? DateTime.parse(map["created_at"])
           : null,
     );
   }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gameshelf/core/widgets/shelf_list.dart';
 import 'package:gameshelf/models/library_game.dart';
 import 'game_card.dart';
 
@@ -41,108 +42,88 @@ class _GameGridState extends State<GameGrid> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        int columns = (constraints.maxWidth / 190).floor();
+  Widget _buildCard(LibraryGame libraryGame) {
+    final gameId = libraryGame.game.igdbId;
 
-        if (columns < 2) {
-          columns = 2;
-        }
+    return Dismissible(
+      key: ValueKey(gameId),
 
-        return GridView.builder(
-          padding: const EdgeInsets.all(24),
-          itemCount: widget.games.length,
+      direction: DismissDirection.endToStart,
 
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: columns,
-            crossAxisSpacing: 20,
-            mainAxisSpacing: 20,
-            childAspectRatio: 2 / 3,
-          ),
+      background: Container(
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.only(right: 24),
+        decoration: BoxDecoration(
+          color: Colors.red,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: const Icon(Icons.delete, color: Colors.white, size: 28),
+      ),
 
-          itemBuilder: (context, index) {
-            final libraryGame = widget.games[index];
-            final gameId = libraryGame.game.igdbId;
-
-            return Dismissible(
-              key: ValueKey(gameId),
-
-              direction: DismissDirection.endToStart,
-
-              background: Container(
-                alignment: Alignment.centerRight,
-                padding: const EdgeInsets.only(right: 24),
-                decoration: BoxDecoration(
-                  color: Colors.red,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: const Icon(
-                  Icons.delete,
-                  color: Colors.white,
-                  size: 28,
-                ),
+      confirmDismiss: (_) async {
+        return await showDialog<bool>(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: const Text("Eliminar joc"),
+              content: Text(
+                "Vols eliminar "
+                "${libraryGame.game.title} "
+                "de la biblioteca?",
               ),
-
-              confirmDismiss: (_) async {
-                return await showDialog<bool>(
-                  context: context,
-                  builder: (context) {
-                    return AlertDialog(
-                      title: const Text("Eliminar joc"),
-                      content: Text(
-                        "Vols eliminar "
-                        "${libraryGame.game.title} "
-                        "de la biblioteca?",
-                      ),
-                      actions: [
-                        TextButton(
-                          onPressed: () {
-                            Navigator.pop(context, false);
-                          },
-                          child: const Text("Cancel·lar"),
-                        ),
-                        FilledButton(
-                          style: FilledButton.styleFrom(
-                            backgroundColor: Colors.red,
-                          ),
-                          onPressed: () {
-                            Navigator.pop(context, true);
-                          },
-                          child: const Text("Eliminar"),
-                        ),
-                      ],
-                    );
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context, false);
                   },
-                );
-              },
-
-              onDismissed: (_) async {
-                if (activeGameId == gameId) {
-                  setState(() {
-                    activeGameId = null;
-                  });
-                }
-
-                await widget.onGameDeleted(libraryGame);
-              },
-
-              child: GameCard(
-                libraryGame: libraryGame,
-                onLibraryChanged: widget.onLibraryChanged,
-
-                isActive: activeGameId == gameId,
-
-                onActivate: () {
-                  activateGame(gameId);
-                },
-              ),
+                  child: const Text("Cancel·lar"),
+                ),
+                FilledButton(
+                  style: FilledButton.styleFrom(backgroundColor: Colors.red),
+                  onPressed: () {
+                    Navigator.pop(context, true);
+                  },
+                  child: const Text("Eliminar"),
+                ),
+              ],
             );
           },
         );
       },
+
+      onDismissed: (_) async {
+        if (activeGameId == gameId) {
+          setState(() {
+            activeGameId = null;
+          });
+        }
+
+        await widget.onGameDeleted(libraryGame);
+      },
+
+      child: GameCard(
+        libraryGame: libraryGame,
+        onLibraryChanged: widget.onLibraryChanged,
+
+        isActive: activeGameId == gameId,
+
+        onActivate: () {
+          activateGame(gameId);
+        },
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ShelfList<LibraryGame>(
+      items: widget.games,
+      minItemWidth: 130,
+      minColumns: 3,
+      itemAspectRatio: 2 / 3,
+      horizontalGap: 12,
+      padding: const EdgeInsets.fromLTRB(20, 28, 20, 24),
+      itemBuilder: (context, libraryGame) => _buildCard(libraryGame),
     );
   }
 }
-
