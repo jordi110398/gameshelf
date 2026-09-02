@@ -41,8 +41,9 @@ const _monthNames = [
 
 class UserProfilePage extends StatefulWidget {
   final Profile profile;
+  final VoidCallback? onLogoTap;
 
-  const UserProfilePage({super.key, required this.profile});
+  const UserProfilePage({super.key, required this.profile, this.onLogoTap});
 
   @override
   State<UserProfilePage> createState() => _UserProfilePageState();
@@ -737,7 +738,12 @@ class _UserProfilePageState extends State<UserProfilePage> {
     return Scaffold(
       appBar: AppBar(
         leadingWidth: isMyProfile ? AppLogo.width(context) : null,
-        leading: isMyProfile ? const AppLogo() : null,
+        leading: isMyProfile
+            ? AppLogo(onTap: widget.onLogoTap)
+            : IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () => Navigator.maybePop(context),
+              ),
         title: Text('@${currentProfile.nickname}'),
         // ACCIONS
         actions: [

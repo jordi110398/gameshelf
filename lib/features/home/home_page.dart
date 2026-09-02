@@ -46,7 +46,9 @@ extension on LibrarySort {
 }
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  final VoidCallback? onLogoTap;
+
+  const HomePage({super.key, this.onLogoTap});
 
   @override
   State<HomePage> createState() => HomePageState();
@@ -618,7 +620,10 @@ class HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: HomeAppBar(onLibraryChanged: refresh),
+      appBar: HomeAppBar(
+        onLibraryChanged: refresh,
+        onLogoTap: widget.onLogoTap,
+      ),
 
       body: FutureBuilder<List<LibraryGame>>(
         future: libraryFuture,

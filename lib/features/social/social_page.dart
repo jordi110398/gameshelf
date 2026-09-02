@@ -20,7 +20,9 @@ import 'package:gameshelf/core/utils/error_messages.dart';
 import 'package:gameshelf/core/widgets/responsive_center.dart';
 
 class SocialPage extends StatefulWidget {
-  const SocialPage({super.key});
+  final VoidCallback? onLogoTap;
+
+  const SocialPage({super.key, this.onLogoTap});
 
   @override
   State<SocialPage> createState() => SocialPageState();
@@ -153,7 +155,7 @@ class SocialPageState extends State<SocialPage> {
     return Scaffold(
       appBar: AppBar(
         leadingWidth: AppLogo.width(context),
-        leading: const AppLogo(),
+        leading: AppLogo(onTap: widget.onLogoTap),
         title: const Text(SocialStrings.appBarTitle),
       ),
       body: Stack(

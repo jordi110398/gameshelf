@@ -89,9 +89,9 @@ class _MainShellPageState extends State<MainShellPage> {
           IndexedStack(
             index: _currentIndex,
             children: [
-              HomePage(key: _homeKey),
-              SocialPage(key: _socialKey),
-              ProfileTab(key: _profileKey),
+              HomePage(key: _homeKey, onLogoTap: () => _selectTab(0)),
+              SocialPage(key: _socialKey, onLogoTap: () => _selectTab(0)),
+              ProfileTab(key: _profileKey, onLogoTap: () => _selectTab(0)),
             ],
           ),
 
@@ -248,7 +248,9 @@ class _AddGameButton extends StatelessWidget {
 /// carregat. Exposa [refresh] perquè el shell la pugui refrescar en tornar
 /// a la pestanya, o després d'afegir un joc des de la barra inferior.
 class ProfileTab extends StatefulWidget {
-  const ProfileTab({super.key});
+  final VoidCallback? onLogoTap;
+
+  const ProfileTab({super.key, this.onLogoTap});
 
   @override
   State<ProfileTab> createState() => ProfileTabState();
@@ -306,7 +308,11 @@ class ProfileTabState extends State<ProfileTab> {
       );
     }
 
-    return UserProfilePage(key: ValueKey(_refreshToken), profile: profile!);
+    return UserProfilePage(
+      key: ValueKey(_refreshToken),
+      profile: profile!,
+      onLogoTap: widget.onLogoTap,
+    );
   }
 }
 

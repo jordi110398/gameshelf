@@ -17,8 +17,13 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 class HomeAppBar extends StatefulWidget implements PreferredSizeWidget {
   final VoidCallback onLibraryChanged;
+  final VoidCallback? onLogoTap;
 
-  const HomeAppBar({super.key, required this.onLibraryChanged});
+  const HomeAppBar({
+    super.key,
+    required this.onLibraryChanged,
+    this.onLogoTap,
+  });
 
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
@@ -144,7 +149,7 @@ class _HomeAppBarState extends State<HomeAppBar>
 
       // LOGO + NOM
       leadingWidth: AppLogo.width(context),
-      leading: const AppLogo(),
+      leading: AppLogo(onTap: widget.onLogoTap),
 
       // AFEGIR JOC (al mig)
       title: Container(

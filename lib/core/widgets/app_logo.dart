@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 /// (Inici, Social, Perfil), consistent amb el que ja hi havia a l'AppBar
 /// d'Inici.
 class AppLogo extends StatelessWidget {
-  const AppLogo({super.key});
+  final VoidCallback? onTap;
+
+  const AppLogo({super.key, this.onTap});
 
   static double width(BuildContext context) {
     final isMobile = MediaQuery.sizeOf(context).width < 600;
@@ -17,7 +19,7 @@ class AppLogo extends StatelessWidget {
 
     final logoSize = isMobile ? 26.0 : 32.0;
 
-    return Padding(
+    final content = Padding(
       padding: const EdgeInsets.only(left: 12),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -34,5 +36,9 @@ class AppLogo extends StatelessWidget {
         ],
       ),
     );
+
+    if (onTap == null) return content;
+
+    return GestureDetector(onTap: onTap, child: content);
   }
 }
