@@ -2,7 +2,9 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:gameshelf/core/navigation/page_transitions.dart';
+import 'package:gameshelf/core/services/pwa_install_service.dart';
 import 'package:gameshelf/core/strings/home_strings.dart';
+import 'package:gameshelf/core/strings/legal_strings.dart';
 import 'package:gameshelf/core/widgets/app_logo.dart';
 import 'package:gameshelf/features/notifications/notifications_page.dart';
 import 'package:gameshelf/features/notifications/widgets/notification_banner.dart';
@@ -30,6 +32,7 @@ class _HomeAppBarState extends State<HomeAppBar>
   final _notificationRepository = NotificationRepository(
     Supabase.instance.client,
   );
+  final _installService = const PwaInstallService();
 
   int _unreadCount = 0;
   Timer? _pollTimer;
@@ -165,6 +168,25 @@ class _HomeAppBarState extends State<HomeAppBar>
 
       // ACCIONS
       actions: [
+        // INSTAL·LAR L'APP
+        if (!_installService.isStandalone)
+          Container(
+            width: isMobile ? 38 : 42,
+            height: isMobile ? 38 : 42,
+            margin: EdgeInsets.only(right: isMobile ? 10 : 14),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
+              shape: BoxShape.circle,
+            ),
+            child: IconButton(
+              padding: EdgeInsets.zero,
+              icon: const Icon(Icons.install_mobile_outlined),
+              tooltip: LegalStrings.installAppTitle,
+              onPressed: () =>
+                  _installService.promptOrShowInstallInstructions(context),
+            ),
+          ),
+
         // NOTIFICACIONS
         Container(
           width: isMobile ? 38 : 42,
