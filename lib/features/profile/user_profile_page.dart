@@ -1,6 +1,7 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
+import 'package:gameshelf/core/navigation/page_transitions.dart';
+import 'package:gameshelf/core/strings/app_strings.dart';
+import 'package:gameshelf/core/strings/profile_strings.dart';
 import 'package:gameshelf/core/widgets/app_logo.dart';
 import 'package:gameshelf/core/widgets/bookshelf_background.dart';
 import 'package:gameshelf/core/widgets/shelf_ledge.dart';
@@ -150,7 +151,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'No s\'ha pogut carregar el perfil: ${friendlyError(e)}',
+            '${ProfileStrings.loadFailedPrefix}${friendlyError(e)}',
           ),
         ),
       );
@@ -215,7 +216,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'No s\'ha pogut enviar la sol·licitud: ${friendlyError(e)}',
+            '${ProfileStrings.sendRequestFailedPrefix}${friendlyError(e)}',
           ),
         ),
       );
@@ -247,7 +248,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'No s\'ha pogut acceptar la sol·licitud: ${friendlyError(e)}',
+            '${ProfileStrings.acceptRequestFailedPrefix}${friendlyError(e)}',
           ),
         ),
       );
@@ -279,7 +280,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'No s\'ha pogut rebutjar la sol·licitud: ${friendlyError(e)}',
+            '${ProfileStrings.rejectRequestFailedPrefix}${friendlyError(e)}',
           ),
         ),
       );
@@ -310,7 +311,9 @@ class _UserProfilePageState extends State<UserProfilePage> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('No s\'ha pogut eliminar l\'amic: ${friendlyError(e)}'),
+          content: Text(
+            '${ProfileStrings.removeFriendFailedPrefix}${friendlyError(e)}',
+          ),
         ),
       );
     } finally {
@@ -348,7 +351,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
 
     if (status == null) {
       return IconButton.filled(
-        tooltip: 'Afegir amic',
+        tooltip: AppStrings.friendshipAdd,
         onPressed: isFriendshipActionLoading ? null : sendFriendRequest,
         icon: isFriendshipActionLoading
             ? const SizedBox(
@@ -366,7 +369,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
 
     if (status == 'accepted') {
       return IconButton.filled(
-        tooltip: 'Amics',
+        tooltip: AppStrings.friendshipFriends,
         onPressed: isFriendshipActionLoading
             ? null
             : () async {
@@ -374,22 +377,24 @@ class _UserProfilePageState extends State<UserProfilePage> {
                   context: context,
                   builder: (context) {
                     return AlertDialog(
-                      title: const Text('Eliminar amic?'),
+                      title: const Text(ProfileStrings.removeFriendTitle),
                       content: Text(
-                        'Vols eliminar @${currentProfile.nickname} dels teus amics?',
+                        ProfileStrings.removeFriendBody(
+                          currentProfile.nickname,
+                        ),
                       ),
                       actions: [
                         TextButton(
                           onPressed: () {
                             Navigator.pop(context, false);
                           },
-                          child: const Text('Cancel·lar'),
+                          child: const Text(AppStrings.actionCancel),
                         ),
                         FilledButton(
                           onPressed: () {
                             Navigator.pop(context, true);
                           },
-                          child: const Text('Eliminar'),
+                          child: const Text(AppStrings.actionDelete),
                         ),
                       ],
                     );
@@ -421,7 +426,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
     // Jo he enviat la sol·licitud
     if (requesterId == currentUserId) {
       return IconButton.filled(
-        tooltip: 'Sol·licitud enviada',
+        tooltip: AppStrings.friendshipRequestSent,
         onPressed: null,
         icon: const Icon(Icons.hourglass_empty),
       );
@@ -432,7 +437,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
       mainAxisSize: MainAxisSize.min,
       children: [
         IconButton.filled(
-          tooltip: 'Rebutjar',
+          tooltip: AppStrings.actionReject,
           onPressed: isFriendshipActionLoading ? null : rejectFriendRequest,
           icon: const Icon(Icons.close),
         ),
@@ -440,7 +445,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
         const SizedBox(width: 8),
 
         IconButton.filled(
-          tooltip: 'Acceptar',
+          tooltip: AppStrings.actionAccept,
           onPressed: isFriendshipActionLoading ? null : acceptFriendRequest,
           icon: isFriendshipActionLoading
               ? const SizedBox(
@@ -585,7 +590,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
             ),
             const SizedBox(height: 10),
             Text(
-              'Encara no has escrit cap review.',
+              ProfileStrings.noReviewsYet,
               style: TextStyle(color: Colors.grey.shade300),
             ),
           ],
@@ -605,98 +610,100 @@ class _UserProfilePageState extends State<UserProfilePage> {
             child: WoodDrawerContainer(
               padding: const EdgeInsets.all(12),
               child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // PORTADA
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: game.coverUrl != null && game.coverUrl!.isNotEmpty
-                      ? Image.network(
-                          game.coverUrl!,
-                          width: 65,
-                          height: 95,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, _, _) {
-                            return _buildReviewPlaceholder();
-                          },
-                        )
-                      : _buildReviewPlaceholder(),
-                ),
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // PORTADA
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: game.coverUrl != null && game.coverUrl!.isNotEmpty
+                        ? Image.network(
+                            game.coverUrl!,
+                            width: 65,
+                            height: 95,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, _, _) {
+                              return _buildReviewPlaceholder();
+                            },
+                          )
+                        : _buildReviewPlaceholder(),
+                  ),
 
-                const SizedBox(width: 14),
+                  const SizedBox(width: 14),
 
-                // INFORMACIÓ
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        game.title,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-
-                      const SizedBox(height: 6),
-
-                      if (userGame.rating != null)
-                        Row(
-                          children: List.generate(5, (index) {
-                            return Icon(
-                              index < userGame.rating!.round()
-                                  ? Icons.star
-                                  : Icons.star_border,
-                              size: 18,
-                              color: Colors.amber,
-                            );
-                          }),
+                  // INFORMACIÓ
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          game.title,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
 
-                      const SizedBox(height: 8),
+                        const SizedBox(height: 6),
 
-                      Text(
-                        '"${userGame.review!}"',
-                        maxLines: 4,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 13,
-                          height: 1.35,
-                          fontStyle: FontStyle.italic,
-                          color: Colors.grey.shade700,
-                        ),
-                      ),
+                        if (userGame.rating != null)
+                          Row(
+                            children: List.generate(5, (index) {
+                              return Icon(
+                                index < userGame.rating!.round()
+                                    ? Icons.star
+                                    : Icons.star_border,
+                                size: 18,
+                                color: Colors.amber,
+                              );
+                            }),
+                          ),
 
-                      if (likes != null && likes.likeCount > 0) ...[
                         const SizedBox(height: 8),
-                        Row(
-                          children: [
-                            Icon(
-                              likes.likedByMe ? Icons.star : Icons.star_border,
-                              size: 15,
-                              color: Colors.amber,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              '${likes.likeCount}',
-                              style: const TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
+
+                        Text(
+                          '"${userGame.review!}"',
+                          maxLines: 4,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 13,
+                            height: 1.35,
+                            fontStyle: FontStyle.italic,
+                            color: Colors.grey.shade700,
+                          ),
+                        ),
+
+                        if (likes != null && likes.likeCount > 0) ...[
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              Icon(
+                                likes.likedByMe
+                                    ? Icons.star
+                                    : Icons.star_border,
+                                size: 15,
                                 color: Colors.amber,
                               ),
-                            ),
-                          ],
-                        ),
+                              const SizedBox(width: 4),
+                              Text(
+                                '${likes.likeCount}',
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.amber,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ],
-                    ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        );
+          );
         }),
 
         if (reviewedGames.length > 3)
@@ -706,7 +713,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
               // obrir pantalla amb totes les reviews.
             },
             icon: const Icon(Icons.arrow_forward),
-            label: Text('Veure totes les reviews (${reviewedGames.length})'),
+            label: Text(ProfileStrings.seeAllReviews(reviewedGames.length)),
           ),
       ],
     );
@@ -736,7 +743,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
         actions: [
           if (isMyProfile)
             IconButton(
-              tooltip: "Tancar sessió",
+              tooltip: ProfileStrings.logoutTooltip,
               icon: const Icon(Icons.logout),
               onPressed: () async {
                 await AuthService().signOut();
@@ -755,7 +762,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                     right: 12,
                     child: IconButton.filled(
                       icon: const Icon(Icons.edit),
-                      tooltip: 'Editar perfil',
+                      tooltip: ProfileStrings.editProfileTooltip,
                       onPressed: _openEditProfile,
                     ),
                   )
@@ -777,11 +784,9 @@ class _UserProfilePageState extends State<UserProfilePage> {
 
     if (!mounted) return;
 
-    final updatedProfile = await Navigator.push<Profile>(
+    final updatedProfile = await pushFade<Profile>(
       context,
-      MaterialPageRoute(
-        builder: (_) => EditProfilePage(profile: profileToEdit),
-      ),
+      (_) => EditProfilePage(profile: profileToEdit),
     );
 
     if (updatedProfile != null && mounted) {
@@ -862,28 +867,28 @@ class _UserProfilePageState extends State<UserProfilePage> {
                       Expanded(
                         child: _ProfileStat(
                           value: currentStats.games.toString(),
-                          label: 'Jocs',
+                          label: ProfileStrings.statGames,
                         ),
                       ),
                       _statDivider(context),
                       Expanded(
                         child: _ProfileStat(
                           value: currentStats.completed.toString(),
-                          label: 'Completats',
+                          label: ProfileStrings.statCompleted,
                         ),
                       ),
                       _statDivider(context),
                       Expanded(
                         child: _ProfileStat(
                           value: currentStats.reviews.toString(),
-                          label: 'Reviews',
+                          label: ProfileStrings.statReviews,
                         ),
                       ),
                       _statDivider(context),
                       Expanded(
                         child: _ProfileStat(
                           value: '${currentStats.hours}h',
-                          label: 'Hores',
+                          label: ProfileStrings.statHours,
                         ),
                       ),
                     ],
@@ -908,7 +913,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                   Align(
                     alignment: Alignment.centerLeft,
                     child: const Text(
-                      'Les meves reviews',
+                      ProfileStrings.myReviewsTitle,
                       style: TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
@@ -939,7 +944,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                   Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
-                      "${currentProfile.nickname}'s GameShelf",
+                      ProfileStrings.gameshelfOf(currentProfile.nickname),
                       style: const TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
@@ -1007,70 +1012,12 @@ class _UserProfilePageState extends State<UserProfilePage> {
     return tagColors;
   }
 
-  static const _blobLayout = [
-    (
-      top: -70.0,
-      left: -50.0,
-      right: null,
-      bottom: null,
-      size: 220.0,
-      opacity: 0.55,
-    ),
-    (
-      top: -30.0,
-      left: null,
-      right: -60.0,
-      bottom: null,
-      size: 200.0,
-      opacity: 0.50,
-    ),
-    (
-      top: null,
-      left: 60.0,
-      right: null,
-      bottom: -90.0,
-      size: 190.0,
-      opacity: 0.45,
-    ),
-    (
-      top: null,
-      left: null,
-      right: 30.0,
-      bottom: -60.0,
-      size: 170.0,
-      opacity: 0.40,
-    ),
-  ];
-
   Widget _buildBanner(BuildContext context) {
     final colors = _bannerColors(context);
 
-    return ClipRect(
-      child: ImageFiltered(
-        imageFilter: ImageFilter.blur(sigmaX: 46, sigmaY: 46),
-        child: Stack(
-          children: [
-            Container(color: const Color(0xFF14101C)),
-            for (var i = 0; i < _blobLayout.length; i++)
-              Positioned(
-                top: _blobLayout[i].top,
-                left: _blobLayout[i].left,
-                right: _blobLayout[i].right,
-                bottom: _blobLayout[i].bottom,
-                child: Container(
-                  width: _blobLayout[i].size,
-                  height: _blobLayout[i].size,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: colors[i % colors.length].withValues(
-                      alpha: _blobLayout[i].opacity,
-                    ),
-                  ),
-                ),
-              ),
-          ],
-        ),
-      ),
+    return CustomPaint(
+      size: Size.infinite,
+      painter: _DitherBannerPainter(colors),
     );
   }
 
@@ -1150,7 +1097,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                     const Icon(Icons.star, size: 16, color: Colors.amber),
                     const SizedBox(width: 6),
                     const Text(
-                      'Preferits',
+                      ProfileStrings.favoritesTitle,
                       style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.bold,
@@ -1208,7 +1155,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
         Align(
           alignment: Alignment.centerLeft,
           child: const Text(
-            'Completats',
+            ProfileStrings.completedTitle,
             style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
           ),
         ),
@@ -1264,16 +1211,19 @@ class _UserProfilePageState extends State<UserProfilePage> {
       scrollDirection: Axis.horizontal,
       child: Row(
         children: [
-          _buildFilterChip(label: 'Library', status: null),
-
-          const SizedBox(width: 8),
-
-          _buildFilterChip(label: 'Dropped', status: GameStatus.dropped),
+          _buildFilterChip(label: ProfileStrings.filterLibrary, status: null),
 
           const SizedBox(width: 8),
 
           _buildFilterChip(
-            label: 'Want to play',
+            label: ProfileStrings.filterDropped,
+            status: GameStatus.dropped,
+          ),
+
+          const SizedBox(width: 8),
+
+          _buildFilterChip(
+            label: ProfileStrings.filterWantToPlay,
             status: GameStatus.wantToPlay,
           ),
         ],
@@ -1324,22 +1274,22 @@ class _UserProfilePageState extends State<UserProfilePage> {
   String _emptyGamesText() {
     switch (selectedStatus) {
       case GameStatus.dropped:
-        return 'Aquest usuari no té jocs abandonats.';
+        return ProfileStrings.emptyGamesDropped;
 
       case GameStatus.wantToPlay:
-        return 'Aquest usuari no té jocs pendents.';
+        return ProfileStrings.emptyGamesWantToPlay;
 
       case GameStatus.playing:
-        return 'Aquest usuari no té jocs en curs.';
+        return ProfileStrings.emptyGamesPlaying;
 
       case GameStatus.completed:
-        return 'Aquest usuari no té jocs completats.';
+        return ProfileStrings.emptyGamesCompleted;
 
       case GameStatus.paused:
-        return 'Aquest usuari no té jocs pausats.';
+        return ProfileStrings.emptyGamesPaused;
 
       case null:
-        return 'Aquest usuari encara no té jocs.';
+        return ProfileStrings.emptyGamesAny;
     }
   }
 
@@ -1431,9 +1381,9 @@ class _GameCoverTile extends StatelessWidget {
   });
 
   Future<void> _open(BuildContext context) async {
-    final refresh = await Navigator.push<bool>(
+    final refresh = await pushFade<bool>(
       context,
-      MaterialPageRoute(builder: (_) => GameDetailPage(game: libraryGame.game)),
+      (_) => GameDetailPage(game: libraryGame.game),
     );
 
     if (refresh == true) {
@@ -1472,5 +1422,82 @@ class _GameCoverTile extends StatelessWidget {
     );
 
     return width != null ? SizedBox(width: width, child: tile) : tile;
+  }
+}
+
+// ─────────────────────────────────────────────
+// BANNER AMB DITHERING (ESTIL GBA)
+// ─────────────────────────────────────────────
+
+/// Matriu Bayer 4x4 estàndard, per decidir píxel a píxel quin dels dos
+/// colors "reals" toca dibuixar en una transició -- la tècnica autèntica
+/// de dithering ordenat que feien servir les pantalles de GBA en lloc
+/// d'un degradat suau (que necessitaria més colors dels que la pantalla
+/// podia mostrar).
+const _bayer4x4 = [
+  [0, 8, 2, 10],
+  [12, 4, 14, 6],
+  [3, 11, 1, 9],
+  [15, 7, 13, 5],
+];
+
+class _DitherBannerPainter extends CustomPainter {
+  final List<Color> colors;
+
+  static const double _pixelSize = 6;
+  static const Color _shadowColor = Color(0xFF14101C);
+
+  const _DitherBannerPainter(this.colors);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final palette = colors.isEmpty
+        ? const [Color(0xFF8B5CF6), Color(0xFF6D28D9)]
+        : colors;
+
+    final cols = (size.width / _pixelSize).ceil();
+    final rows = (size.height / _pixelSize).ceil();
+
+    final paint = Paint()..style = PaintingStyle.fill;
+
+    for (var row = 0; row < rows; row++) {
+      for (var col = 0; col < cols; col++) {
+        final threshold = _bayer4x4[row % 4][col % 4] / 16.0;
+
+        // Transició horitzontal entre els colors de la paleta.
+        final hProgress = palette.length == 1
+            ? 0.0
+            : (col / cols) * (palette.length - 1);
+        final colorA = palette[hProgress.floor().clamp(0, palette.length - 1)];
+        final colorB =
+            palette[(hProgress.floor() + 1).clamp(0, palette.length - 1)];
+        final hLocal = hProgress - hProgress.floor();
+
+        var pixelColor = hLocal > threshold ? colorB : colorA;
+
+        // Ombreig vertical cap avall (dithered, no degradat suau).
+        final vProgress = ((row / rows) - 0.3) / 0.7;
+        if (vProgress > 0 && vProgress.clamp(0.0, 1.0) > threshold) {
+          pixelColor = _shadowColor;
+        }
+
+        paint.color = pixelColor;
+
+        canvas.drawRect(
+          Rect.fromLTWH(
+            col * _pixelSize,
+            row * _pixelSize,
+            _pixelSize,
+            _pixelSize,
+          ),
+          paint,
+        );
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _DitherBannerPainter oldDelegate) {
+    return oldDelegate.colors != colors;
   }
 }

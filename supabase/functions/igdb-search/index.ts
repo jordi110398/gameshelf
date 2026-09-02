@@ -98,7 +98,8 @@ fields
   first_release_date,
   rating,
   rating_count,
-  cover.url;
+  cover.url,
+  genres.name;
 limit 20;
 `,
       },
@@ -129,6 +130,9 @@ limit 20;
       cover_url: game.cover?.url
         ? `https:${game.cover.url.replace("t_thumb", "t_cover_big")}`
         : null,
+      genres: Array.isArray(game.genres)
+        ? game.genres.map((g: { name: string }) => g.name)
+        : [],
     }));
 
     return new Response(

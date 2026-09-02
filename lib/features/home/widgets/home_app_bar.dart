@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:gameshelf/core/navigation/page_transitions.dart';
+import 'package:gameshelf/core/strings/home_strings.dart';
 import 'package:gameshelf/core/widgets/app_logo.dart';
 import 'package:gameshelf/features/notifications/notifications_page.dart';
 import 'package:gameshelf/features/notifications/widgets/notification_banner.dart';
@@ -115,10 +117,7 @@ class _HomeAppBarState extends State<HomeAppBar>
 
         if (profile == null || !mounted) return;
 
-        await Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => UserProfilePage(profile: profile)),
-        );
+        await pushFade(context, (_) => UserProfilePage(profile: profile));
 
         await _checkForNotifications();
       },
@@ -126,10 +125,7 @@ class _HomeAppBarState extends State<HomeAppBar>
   }
 
   Future<void> _openNotifications() async {
-    await Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => const NotificationsPage()),
-    );
+    await pushFade(context, (_) => const NotificationsPage());
 
     await _checkForNotifications();
   }
@@ -158,12 +154,9 @@ class _HomeAppBarState extends State<HomeAppBar>
         child: IconButton(
           padding: EdgeInsets.zero,
           icon: const Icon(Icons.add, color: Colors.white),
-          tooltip: "Afegir joc",
+          tooltip: HomeStrings.addGameTooltip,
           onPressed: () async {
-            await Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const SearchPage()),
-            );
+            await pushFade(context, (_) => const SearchPage());
 
             widget.onLibraryChanged();
           },
@@ -206,7 +199,7 @@ class _HomeAppBarState extends State<HomeAppBar>
                   );
                 },
               ),
-              tooltip: "Notificacions",
+              tooltip: HomeStrings.notificationsTooltip,
               onPressed: _openNotifications,
             ),
           ),

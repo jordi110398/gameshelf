@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:gameshelf/core/services/auth_service.dart';
+import 'package:gameshelf/core/strings/auth_strings.dart';
 import 'package:gameshelf/features/auth/widgets/auth_text_field.dart';
 import 'package:gameshelf/core/utils/error_messages.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -142,12 +143,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
 
     if (session == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'L\'enllaç de recuperació ha caducat. '
-            'Torna a sol·licitar el canvi de contrasenya.',
-          ),
-        ),
+        const SnackBar(content: Text(AuthStrings.resetLinkExpired)),
       );
       return;
     }
@@ -170,18 +166,15 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
         barrierDismissible: false,
         builder: (dialogContext) {
           return AlertDialog(
-            title: const Text('Contrasenya actualitzada'),
-            content: const Text(
-              'La teva contrasenya s\'ha canviat correctament. '
-              'Ara pots iniciar sessió amb la nova contrasenya.',
-            ),
+            title: const Text(AuthStrings.resetSuccessTitle),
+            content: const Text(AuthStrings.resetSuccessBody),
             actions: [
               FilledButton(
                 onPressed: () {
                   Navigator.pop(dialogContext);
                   context.go('/');
                 },
-                child: const Text('Iniciar sessió'),
+                child: const Text(AuthStrings.resetSuccessButton),
               ),
             ],
           );
@@ -192,9 +185,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            'No s\'ha pogut canviar la contrasenya: ${friendlyError(e)}',
-          ),
+          content: Text('${AuthStrings.resetFailedPrefix}${friendlyError(e)}'),
         ),
       );
 
@@ -246,7 +237,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
         confirmPasswordController.text.isNotEmpty && !_passwordsMatch;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Restablir contrasenya')),
+      appBar: AppBar(title: const Text(AuthStrings.resetAppBarTitle)),
       body: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 420),
@@ -260,14 +251,14 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                 const SizedBox(height: 24),
 
                 const Text(
-                  'Nova contrasenya',
+                  AuthStrings.resetTitle,
                   style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
                 ),
 
                 const SizedBox(height: 12),
 
                 const Text(
-                  'Introdueix una nova contrasenya per al teu compte.',
+                  AuthStrings.resetBody,
                   textAlign: TextAlign.center,
                   style: TextStyle(fontSize: 14),
                 ),
@@ -276,7 +267,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
 
                 AuthTextField(
                   controller: passwordController,
-                  label: 'Nova contrasenya',
+                  label: AuthStrings.resetNewPasswordLabel,
                   icon: Icons.lock,
                   obscureText: true,
                 ),
@@ -289,7 +280,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text(
-                        'La contrasenya ha de tenir:',
+                        AuthStrings.passwordRequirementsTitle,
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.bold,
@@ -300,27 +291,27 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
 
                       _buildPasswordRequirement(
                         fulfilled: _hasMinLength,
-                        text: 'Almenys 8 caràcters',
+                        text: AuthStrings.passwordReqMinLength,
                       ),
 
                       _buildPasswordRequirement(
                         fulfilled: _hasUppercase,
-                        text: 'Una lletra majúscula',
+                        text: AuthStrings.passwordReqUppercase,
                       ),
 
                       _buildPasswordRequirement(
                         fulfilled: _hasLowercase,
-                        text: 'Una lletra minúscula',
+                        text: AuthStrings.passwordReqLowercase,
                       ),
 
                       _buildPasswordRequirement(
                         fulfilled: _hasNumber,
-                        text: 'Un número',
+                        text: AuthStrings.passwordReqNumber,
                       ),
 
                       _buildPasswordRequirement(
                         fulfilled: _hasSymbol,
-                        text: 'Un símbol',
+                        text: AuthStrings.passwordReqSymbol,
                       ),
                     ],
                   ),
@@ -330,7 +321,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
 
                 AuthTextField(
                   controller: confirmPasswordController,
-                  label: 'Repeteix la contrasenya',
+                  label: AuthStrings.resetConfirmPasswordLabel,
                   icon: Icons.lock_outline,
                   obscureText: true,
                 ),
@@ -341,7 +332,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                   const Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
-                      'Les contrasenyes no coincideixen.',
+                      AuthStrings.resetPasswordMismatch,
                       style: TextStyle(color: Colors.red, fontSize: 12),
                     ),
                   ),
@@ -364,7 +355,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                             height: 22,
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
-                        : const Text('Canviar contrasenya'),
+                        : const Text(AuthStrings.resetSubmit),
                   ),
                 ),
 
@@ -372,7 +363,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
 
                 TextButton(
                   onPressed: _isSaving ? null : () => context.go('/'),
-                  child: const Text('Tornar a iniciar sessió'),
+                  child: const Text(AuthStrings.resetBackToLogin),
                 ),
               ],
             ),

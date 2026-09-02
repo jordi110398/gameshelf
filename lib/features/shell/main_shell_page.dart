@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:gameshelf/core/navigation/page_transitions.dart';
+import 'package:gameshelf/core/strings/app_strings.dart';
 import 'package:gameshelf/core/widgets/floating_pill.dart';
+import 'package:gameshelf/core/widgets/pressable_scale.dart';
+import 'package:gameshelf/core/widgets/shimmer_box.dart';
 import 'package:gameshelf/features/home/home_page.dart';
 import 'package:gameshelf/features/search/search_page.dart';
 import 'package:gameshelf/features/social/social_page.dart';
@@ -31,17 +35,17 @@ const _navItems = [
   _NavItemData(
     icon: Icons.home_outlined,
     selectedIcon: Icons.home,
-    label: 'Inici',
+    label: AppStrings.navHome,
   ),
   _NavItemData(
     icon: Icons.people_outline,
     selectedIcon: Icons.people,
-    label: 'Social',
+    label: AppStrings.navSocial,
   ),
   _NavItemData(
     icon: Icons.person_outline,
     selectedIcon: Icons.person,
-    label: 'Perfil',
+    label: AppStrings.navProfile,
   ),
 ];
 
@@ -49,6 +53,7 @@ class _MainShellPageState extends State<MainShellPage> {
   int _currentIndex = 0;
 
   final _homeKey = GlobalKey<HomePageState>();
+  final _socialKey = GlobalKey<SocialPageState>();
   final _profileKey = GlobalKey<ProfileTabState>();
 
   void _selectTab(int index) {
@@ -58,19 +63,19 @@ class _MainShellPageState extends State<MainShellPage> {
       _currentIndex = index;
     });
 
-    // Quan tornem al perfil, el refresquem: com que l'`IndexedStack` el
-    // manté viu, si s'ha canviat algun joc (p. ex. marcar un preferit) des
-    // d'una altra pestanya, no es refaria sol.
-    if (index == 2) {
+    // Com que l'`IndexedStack` manté totes les pestanyes vives, si alguna
+    // cosa canvia des d'una altra pantalla (acceptar una sol·licitud des
+    // del perfil, marcar un preferit, etc.) la pestanya no es refaria sola
+    // en tornar-hi. Ho refresquem explícitament en seleccionar-la.
+    if (index == 1) {
+      _socialKey.currentState?.loadSocialData();
+    } else if (index == 2) {
       _profileKey.currentState?.refresh();
     }
   }
 
   Future<void> _addGame() async {
-    await Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => const SearchPage()),
-    );
+    await pushFade(context, (_) => const SearchPage());
 
     _homeKey.currentState?.refresh();
     _profileKey.currentState?.refresh();
@@ -85,7 +90,7 @@ class _MainShellPageState extends State<MainShellPage> {
             index: _currentIndex,
             children: [
               HomePage(key: _homeKey),
-              const SocialPage(),
+              SocialPage(key: _socialKey),
               ProfileTab(key: _profileKey),
             ],
           ),
@@ -165,14 +170,15 @@ class _FloatingNavBar extends StatelessWidget {
     final item = _navItems[index];
     final isSelected = index == currentIndex;
 
-    return _PressableScale(
+    return PressableScale(
+      scale: 0.85,
       onTap: () => onSelect(index),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           AnimatedContainer(
             duration: const Duration(milliseconds: 200),
-            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
               color: isSelected
                   ? colorScheme.primary.withValues(alpha: 0.18)
@@ -187,14 +193,19 @@ class _FloatingNavBar extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 3),
-          Text(
-            item.label,
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-              color: isSelected
-                  ? colorScheme.primary
-                  : colorScheme.onSurfaceVariant,
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              item.label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                color: isSelected
+                    ? colorScheme.primary
+                    : colorScheme.onSurfaceVariant,
+              ),
             ),
           ),
         ],
@@ -211,7 +222,8 @@ class _AddGameButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: _PressableScale(
+      child: PressableScale(
+        scale: 0.85,
         onTap: onTap,
         child: Container(
           width: 42,
@@ -222,44 +234,6 @@ class _AddGameButton extends StatelessWidget {
           ),
           child: const Icon(Icons.add, color: Colors.white),
         ),
-      ),
-    );
-  }
-}
-
-/// Embolcall que contrau lleugerament el fill en prémer'l (a l'estil
-/// Instagram), independent del `Material`/`InkWell` de sota.
-class _PressableScale extends StatefulWidget {
-  final Widget child;
-  final VoidCallback onTap;
-
-  const _PressableScale({required this.child, required this.onTap});
-
-  @override
-  State<_PressableScale> createState() => _PressableScaleState();
-}
-
-class _PressableScaleState extends State<_PressableScale> {
-  bool _pressed = false;
-
-  void _setPressed(bool value) {
-    if (_pressed == value) return;
-    setState(() => _pressed = value);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTapDown: (_) => _setPressed(true),
-      onTapCancel: () => _setPressed(false),
-      onTapUp: (_) => _setPressed(false),
-      onTap: widget.onTap,
-      child: AnimatedScale(
-        scale: _pressed ? 0.85 : 1.0,
-        duration: const Duration(milliseconds: 120),
-        curve: Curves.easeOut,
-        child: widget.child,
       ),
     );
   }
@@ -323,7 +297,7 @@ class ProfileTabState extends State<ProfileTab> {
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return const Scaffold(body: _ProfileSkeleton());
     }
 
     if (profile == null) {
@@ -333,5 +307,59 @@ class ProfileTabState extends State<ProfileTab> {
     }
 
     return UserProfilePage(key: ValueKey(_refreshToken), profile: profile!);
+  }
+}
+
+/// Esquelet de càrrega del perfil, en lloc d'un `CircularProgressIndicator`
+/// genèric: dona una idea de la forma real de la pantalla mentre carrega.
+class _ProfileSkeleton extends StatelessWidget {
+  const _ProfileSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      physics: const NeverScrollableScrollPhysics(),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const ShimmerBox(height: 152, borderRadius: BorderRadius.zero),
+          const SizedBox(height: 44),
+          Center(
+            child: ShimmerBox(
+              width: 140,
+              height: 20,
+              borderRadius: BorderRadius.circular(6),
+            ),
+          ),
+          const SizedBox(height: 24),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: ShimmerBox(
+              height: 76,
+              borderRadius: BorderRadius.circular(16),
+            ),
+          ),
+          const SizedBox(height: 28),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Row(
+              children: List.generate(3, (i) {
+                return Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.only(right: i == 2 ? 0 : 10),
+                    child: AspectRatio(
+                      aspectRatio: 2 / 3,
+                      child: ShimmerBox(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                );
+              }),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

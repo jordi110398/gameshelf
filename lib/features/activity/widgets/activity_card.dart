@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:gameshelf/core/navigation/page_transitions.dart';
+import 'package:gameshelf/core/strings/activity_strings.dart';
 import 'package:gameshelf/core/widgets/star_burst.dart';
 import 'package:gameshelf/core/widgets/wood_drawer_container.dart';
 import 'package:gameshelf/models/activity_item.dart';
@@ -46,36 +48,50 @@ class _ActivityCardState extends State<ActivityCard> {
         return (icon: Icons.edit_note, color: Colors.teal);
       case ActivityType.addedToLibrary:
         return (icon: Icons.add_circle_outline, color: Colors.green);
+      case ActivityType.friendshipFormed:
+        return (icon: Icons.people_alt, color: Colors.deepPurpleAccent);
     }
   }
 
   String get _actionText {
     switch (widget.item.type) {
       case ActivityType.startedPlaying:
-        return 'està jugant a ${widget.item.gameTitle}';
+        return '${ActivityStrings.actionStartedPlayingPrefix}'
+            '${widget.item.gameTitle}';
       case ActivityType.completed:
-        return 'ha completat ${widget.item.gameTitle}';
+        return '${ActivityStrings.actionCompletedPrefix}'
+            '${widget.item.gameTitle}';
       case ActivityType.dropped:
-        return 'ha abandonat ${widget.item.gameTitle}';
+        return '${ActivityStrings.actionDroppedPrefix}'
+            '${widget.item.gameTitle}';
       case ActivityType.review:
-        return 'ha publicat una review de ${widget.item.gameTitle}';
+        return '${ActivityStrings.actionReviewPrefix}'
+            '${widget.item.gameTitle}';
       case ActivityType.addedToLibrary:
-        return 'ha afegit ${widget.item.gameTitle} a la seva biblioteca';
+        return '${ActivityStrings.actionAddedToLibraryVerb}'
+            '${widget.item.gameTitle}'
+            '${ActivityStrings.actionAddedToLibrarySuffix}';
+      case ActivityType.friendshipFormed:
+        // No s'utilitza: el build() construeix un RichText propi per a
+        // aquest tipus (calen dos enllaços de perfil, no un).
+        return '${ActivityStrings.friendshipFormedConnector}'
+            '@${widget.item.friendNickname ?? ActivityStrings.friendshipFormedUnknownFriend} '
+            '${ActivityStrings.friendshipFormedSuffix}';
     }
   }
 
-  Future<void> _openProfile(BuildContext context) async {
+  Future<void> _openProfileById(BuildContext context, String userId) async {
     final profile = await ProfileRepository(
       Supabase.instance.client,
-    ).getProfileById(widget.item.userId);
+    ).getProfileById(userId);
 
     if (profile == null || !context.mounted) return;
 
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => UserProfilePage(profile: profile)),
-    );
+    pushFade(context, (_) => UserProfilePage(profile: profile));
   }
+
+  Future<void> _openProfile(BuildContext context) =>
+      _openProfileById(context, widget.item.userId);
 
   // ─────────────────────────────────────────────
   // LIKE (doble tap)
@@ -119,14 +135,14 @@ class _ActivityCardState extends State<ActivityCard> {
     try {
       final review = await _repository.getReview(
         userId: widget.item.userId,
-        gameId: widget.item.gameId,
+        gameId: widget.item.gameId!,
       );
 
       if (!context.mounted) return;
 
       if (review == null || review.trim().isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No s\'ha pogut trobar la review.')),
+          const SnackBar(content: Text(ActivityStrings.reviewNotFound)),
         );
         return;
       }
@@ -193,7 +209,7 @@ class _ActivityCardState extends State<ActivityCard> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                widget.item.gameTitle,
+                                widget.item.gameTitle!,
                                 maxLines: 3,
                                 overflow: TextOverflow.ellipsis,
                                 style: const TextStyle(
@@ -342,7 +358,7 @@ class _ActivityCardState extends State<ActivityCard> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'No s\'ha pogut carregar la review: ${friendlyError(e)}',
+            '${ActivityStrings.reviewLoadFailedPrefix}${friendlyError(e)}',
           ),
         ),
       );
@@ -400,17 +416,56 @@ class _ActivityCardState extends State<ActivityCard> {
                           child: RichText(
                             text: TextSpan(
                               style: DefaultTextStyle.of(context).style,
-                              children: [
-                                TextSpan(
-                                  text: '@${widget.item.userNickname} ',
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                  recognizer: TapGestureRecognizer()
-                                    ..onTap = () => _openProfile(context),
-                                ),
-                                TextSpan(text: _actionText),
-                              ],
+                              children:
+                                  widget.item.type ==
+                                      ActivityType.friendshipFormed
+                                  ? [
+                                      TextSpan(
+                                        text: '@${widget.item.userNickname} ',
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                        recognizer: TapGestureRecognizer()
+                                          ..onTap = () => _openProfile(context),
+                                      ),
+                                      const TextSpan(
+                                        text: ActivityStrings
+                                            .friendshipFormedConnector,
+                                      ),
+                                      TextSpan(
+                                        text:
+                                            '@${widget.item.friendNickname ?? ActivityStrings.friendshipFormedUnknownFriend} ',
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                        recognizer: TapGestureRecognizer()
+                                          ..onTap = () {
+                                            final friendId =
+                                                widget.item.friendId;
+                                            if (friendId != null) {
+                                              _openProfileById(
+                                                context,
+                                                friendId,
+                                              );
+                                            }
+                                          },
+                                      ),
+                                      const TextSpan(
+                                        text: ActivityStrings
+                                            .friendshipFormedSuffix,
+                                      ),
+                                    ]
+                                  : [
+                                      TextSpan(
+                                        text: '@${widget.item.userNickname} ',
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                        recognizer: TapGestureRecognizer()
+                                          ..onTap = () => _openProfile(context),
+                                      ),
+                                      TextSpan(text: _actionText),
+                                    ],
                             ),
                           ),
                         ),
@@ -451,7 +506,7 @@ class _ActivityCardState extends State<ActivityCard> {
                       TextButton(
                         onPressed: () => _showReview(context),
                         style: TextButton.styleFrom(padding: EdgeInsets.zero),
-                        child: const Text('Veure review'),
+                        child: const Text(ActivityStrings.seeReview),
                       ),
                     ],
 

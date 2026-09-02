@@ -6,15 +6,14 @@ import 'package:gameshelf/models/profile.dart';
 import 'package:gameshelf/repositories/profile_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:gameshelf/core/services/auth_service.dart';
+import 'package:gameshelf/core/strings/app_strings.dart';
+import 'package:gameshelf/core/strings/profile_strings.dart';
 import 'package:gameshelf/core/utils/error_messages.dart';
 
 class EditProfilePage extends StatefulWidget {
   final Profile profile;
 
-  const EditProfilePage({
-    super.key,
-    required this.profile,
-  });
+  const EditProfilePage({super.key, required this.profile});
 
   @override
   State<EditProfilePage> createState() => _EditProfilePageState();
@@ -40,13 +39,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
   void initState() {
     super.initState();
 
-    repository = ProfileRepository(
-      Supabase.instance.client,
-    );
+    repository = ProfileRepository(Supabase.instance.client);
 
-    bioController = TextEditingController(
-      text: widget.profile.bio ?? '',
-    );
+    bioController = TextEditingController(text: widget.profile.bio ?? '');
   }
 
   @override
@@ -119,13 +114,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
               ),
             );
 
-        avatarUrl = client.storage
-            .from('avatars')
-            .getPublicUrl(path);
+        avatarUrl = client.storage.from('avatars').getPublicUrl(path);
 
         // Evitem problemes de caché
-        avatarUrl =
-            '$avatarUrl?t=${DateTime.now().millisecondsSinceEpoch}';
+        avatarUrl = '$avatarUrl?t=${DateTime.now().millisecondsSinceEpoch}';
       }
 
       // ─────────────────────────────────────────
@@ -158,11 +150,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
       debugPrint('ERROR COMPLET: $e');
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(friendlyError(e)),
-        ),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(friendlyError(e))));
 
       setState(() {
         isSaving = false;
@@ -179,18 +169,14 @@ class _EditProfilePageState extends State<EditProfilePage> {
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
-          title: const Text('Eliminar compte?'),
-          content: const Text(
-            'Aquesta acció és permanent. '
-            'S\'eliminaran el teu perfil, biblioteca, reviews, '
-            'amistats i activitat.',
-          ),
+          title: const Text(ProfileStrings.deleteAccountDialogTitle),
+          content: const Text(ProfileStrings.deleteAccountDialogBody),
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.pop(dialogContext, false);
               },
-              child: const Text('Cancel·lar'),
+              child: const Text(AppStrings.actionCancel),
             ),
             FilledButton(
               style: FilledButton.styleFrom(
@@ -200,7 +186,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
               onPressed: () {
                 Navigator.pop(dialogContext, true);
               },
-              child: const Text('Eliminar compte'),
+              child: const Text(ProfileStrings.deleteAccountTitle),
             ),
           ],
         );
@@ -219,9 +205,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
       if (!mounted) return;
 
       // Tornem al login.
-      Navigator.of(context).popUntil(
-        (route) => route.isFirst,
-      );
+      Navigator.of(context).popUntil((route) => route.isFirst);
     } catch (e) {
       if (!mounted) return;
 
@@ -232,7 +216,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'No s\'ha pogut eliminar el compte: ${friendlyError(e)}',
+            '${ProfileStrings.deleteAccountFailedPrefix}${friendlyError(e)}',
           ),
         ),
       );
@@ -260,9 +244,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
   }
 
   bool _hasSymbol(String password) {
-    return RegExp(
-      r'[!@#$%^&*(),.?":{}|<>_\-\\/\[\]+=]',
-    ).hasMatch(password);
+    return RegExp(r'[!@#$%^&*(),.?":{}|<>_\-\\/\[\]+=]').hasMatch(password);
   }
 
   bool _isPasswordValid(String password) {
@@ -285,28 +267,20 @@ class _EditProfilePageState extends State<EditProfilePage> {
     final color = !hasStartedTyping
         ? Colors.grey.shade500
         : fulfilled
-            ? Colors.green
-            : Colors.grey.shade500;
+        ? Colors.green
+        : Colors.grey.shade500;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 5),
       child: Row(
         children: [
           Icon(
-            fulfilled
-                ? Icons.check_circle
-                : Icons.circle_outlined,
+            fulfilled ? Icons.check_circle : Icons.circle_outlined,
             size: 16,
             color: color,
           ),
           const SizedBox(width: 8),
-          Text(
-            text,
-            style: TextStyle(
-              fontSize: 12,
-              color: color,
-            ),
-          ),
+          Text(text, style: TextStyle(fontSize: 12, color: color)),
         ],
       ),
     );
@@ -329,8 +303,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
         return StatefulBuilder(
           builder: (context, setDialogState) {
             final password = newPasswordController.text;
-            final confirmPassword =
-                confirmPasswordController.text;
+            final confirmPassword = confirmPasswordController.text;
 
             final hasStartedTyping = password.isNotEmpty;
 
@@ -340,20 +313,15 @@ class _EditProfilePageState extends State<EditProfilePage> {
             final hasNumber = _hasNumber(password);
             final hasSymbol = _hasSymbol(password);
 
-            final passwordValid =
-                _isPasswordValid(password);
+            final passwordValid = _isPasswordValid(password);
 
             final passwordsMatch =
-                password.isNotEmpty &&
-                password == confirmPassword;
+                password.isNotEmpty && password == confirmPassword;
 
-            final canChange =
-                passwordValid &&
-                passwordsMatch &&
-                !isChanging;
+            final canChange = passwordValid && passwordsMatch && !isChanging;
 
             return AlertDialog(
-              title: const Text('Canviar contrasenya'),
+              title: const Text(ProfileStrings.changePasswordDialogTitle),
 
               content: SingleChildScrollView(
                 child: Column(
@@ -362,7 +330,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     // ─────────────────────────
                     // NOVA CONTRASENYA
                     // ─────────────────────────
-
                     TextField(
                       controller: newPasswordController,
                       obscureText: true,
@@ -371,10 +338,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
                         setDialogState(() {});
                       },
                       decoration: const InputDecoration(
-                        labelText: 'Nova contrasenya',
-                        prefixIcon: Icon(
-                          Icons.lock_outline,
-                        ),
+                        labelText: ProfileStrings.newPasswordLabel,
+                        prefixIcon: Icon(Icons.lock_outline),
                         border: OutlineInputBorder(),
                       ),
                     ),
@@ -384,15 +349,13 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     // ─────────────────────────
                     // REQUISITS
                     // ─────────────────────────
-
                     Align(
                       alignment: Alignment.centerLeft,
                       child: Column(
-                        crossAxisAlignment:
-                            CrossAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const Text(
-                            'La contrasenya ha de tenir:',
+                            ProfileStrings.passwordRequirementsIntro,
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 13,
@@ -403,37 +366,32 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
                           _buildPasswordRequirement(
                             fulfilled: hasMinLength,
-                            hasStartedTyping:
-                                hasStartedTyping,
-                            text: 'Almenys 8 caràcters',
+                            hasStartedTyping: hasStartedTyping,
+                            text: ProfileStrings.reqMinLength,
                           ),
 
                           _buildPasswordRequirement(
                             fulfilled: hasUppercase,
-                            hasStartedTyping:
-                                hasStartedTyping,
-                            text: 'Una lletra majúscula',
+                            hasStartedTyping: hasStartedTyping,
+                            text: ProfileStrings.reqUppercase,
                           ),
 
                           _buildPasswordRequirement(
                             fulfilled: hasLowercase,
-                            hasStartedTyping:
-                                hasStartedTyping,
-                            text: 'Una lletra minúscula',
+                            hasStartedTyping: hasStartedTyping,
+                            text: ProfileStrings.reqLowercase,
                           ),
 
                           _buildPasswordRequirement(
                             fulfilled: hasNumber,
-                            hasStartedTyping:
-                                hasStartedTyping,
-                            text: 'Un número',
+                            hasStartedTyping: hasStartedTyping,
+                            text: ProfileStrings.reqNumber,
                           ),
 
                           _buildPasswordRequirement(
                             fulfilled: hasSymbol,
-                            hasStartedTyping:
-                                hasStartedTyping,
-                            text: 'Un símbol',
+                            hasStartedTyping: hasStartedTyping,
+                            text: ProfileStrings.reqSymbol,
                           ),
                         ],
                       ),
@@ -444,7 +402,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     // ─────────────────────────
                     // CONFIRMAR CONTRASENYA
                     // ─────────────────────────
-
                     TextField(
                       controller: confirmPasswordController,
                       obscureText: true,
@@ -453,36 +410,29 @@ class _EditProfilePageState extends State<EditProfilePage> {
                         setDialogState(() {});
                       },
                       decoration: InputDecoration(
-                        labelText: 'Repeteix la contrasenya',
-                        prefixIcon: const Icon(
-                          Icons.lock_outline,
-                        ),
+                        labelText: ProfileStrings.repeatPasswordLabel,
+                        prefixIcon: const Icon(Icons.lock_outline),
                         border: const OutlineInputBorder(),
-                        suffixIcon:
-                            confirmPassword.isEmpty
-                                ? null
-                                : Icon(
-                                    passwordsMatch
-                                        ? Icons.check_circle
-                                        : Icons.cancel,
-                                    color: passwordsMatch
-                                        ? Colors.green
-                                        : Colors.red,
-                                  ),
+                        suffixIcon: confirmPassword.isEmpty
+                            ? null
+                            : Icon(
+                                passwordsMatch
+                                    ? Icons.check_circle
+                                    : Icons.cancel,
+                                color: passwordsMatch
+                                    ? Colors.green
+                                    : Colors.red,
+                              ),
                       ),
                     ),
 
-                    if (confirmPassword.isNotEmpty &&
-                        !passwordsMatch) ...[
+                    if (confirmPassword.isNotEmpty && !passwordsMatch) ...[
                       const SizedBox(height: 6),
                       const Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
-                          'Les contrasenyes no coincideixen.',
-                          style: TextStyle(
-                            color: Colors.red,
-                            fontSize: 12,
-                          ),
+                          ProfileStrings.passwordsDontMatch,
+                          style: TextStyle(color: Colors.red, fontSize: 12),
                         ),
                       ),
                     ],
@@ -497,7 +447,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       : () {
                           Navigator.pop(dialogContext);
                         },
-                  child: const Text('Cancel·lar'),
+                  child: const Text(AppStrings.actionCancel),
                 ),
 
                 FilledButton(
@@ -516,11 +466,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
                             Navigator.pop(dialogContext);
 
-                            ScaffoldMessenger.of(context)
-                                .showSnackBar(
+                            ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
                                 content: Text(
-                                  'Contrasenya canviada correctament.',
+                                  ProfileStrings.changePasswordSuccess,
                                 ),
                               ),
                             );
@@ -531,12 +480,11 @@ class _EditProfilePageState extends State<EditProfilePage> {
                               isChanging = false;
                             });
 
-                            ScaffoldMessenger.of(context)
-                                .showSnackBar(
+                            ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(
-                                  'No s\'ha pogut canviar la '
-                                  'contrasenya: ${friendlyError(e)}',
+                                  '${ProfileStrings.changePasswordFailedPrefix}'
+                                  '${friendlyError(e)}',
                                 ),
                               ),
                             );
@@ -547,11 +495,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       ? const SizedBox(
                           width: 18,
                           height: 18,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                          ),
+                          child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : const Text('Canviar'),
+                      : const Text(ProfileStrings.changeAction),
                 ),
               ],
             );
@@ -580,7 +526,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
         fit: BoxFit.cover,
       );
     }
-
     // Avatar actual
     else if (widget.profile.avatarUrl != null &&
         widget.profile.avatarUrl!.isNotEmpty) {
@@ -590,47 +535,34 @@ class _EditProfilePageState extends State<EditProfilePage> {
         height: 130,
         fit: BoxFit.cover,
         errorBuilder: (_, _, _) {
-          return const Icon(
-            Icons.person,
-            size: 65,
-          );
+          return const Icon(Icons.person, size: 65);
         },
       );
     }
-
     // Sense avatar
     else {
-      avatarContent = const Icon(
-        Icons.person,
-        size: 65,
-      );
+      avatarContent = const Icon(Icons.person, size: 65);
     }
 
     return Center(
       child: GestureDetector(
-        onTap: isSaving || isDeletingAccount
-            ? null
-            : pickAvatar,
+        onTap: isSaving || isDeletingAccount ? null : pickAvatar,
         child: Stack(
           alignment: Alignment.bottomRight,
           children: [
             CircleAvatar(
               radius: 65,
-              backgroundColor: Theme.of(context)
-                  .colorScheme
-                  .surfaceContainerHighest,
-              child: ClipOval(
-                child: avatarContent,
-              ),
+              backgroundColor: Theme.of(
+                context,
+              ).colorScheme.surfaceContainerHighest,
+              child: ClipOval(child: avatarContent),
             ),
 
             // Icona de càmera
             Container(
               padding: const EdgeInsets.all(9),
               decoration: BoxDecoration(
-                color: Theme.of(context)
-                    .colorScheme
-                    .primary,
+                color: Theme.of(context).colorScheme.primary,
                 shape: BoxShape.circle,
               ),
               child: const Icon(
@@ -652,9 +584,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Editar perfil'),
-      ),
+      appBar: AppBar(title: const Text(ProfileStrings.editAppBarTitle)),
 
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
@@ -665,18 +595,14 @@ class _EditProfilePageState extends State<EditProfilePage> {
             // ───────────────────────────────────
             // AVATAR
             // ───────────────────────────────────
-
             _buildAvatar(),
 
             const SizedBox(height: 12),
 
             Center(
               child: TextButton(
-                onPressed:
-                    isSaving || isDeletingAccount
-                        ? null
-                        : pickAvatar,
-                child: const Text('Canviar foto'),
+                onPressed: isSaving || isDeletingAccount ? null : pickAvatar,
+                child: const Text(ProfileStrings.changePhoto),
               ),
             ),
 
@@ -685,13 +611,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
             // ───────────────────────────────────
             // NICKNAME
             // ───────────────────────────────────
-
             const Text(
-              'Nickname',
-              style: TextStyle(
-                fontSize: 17,
-                fontWeight: FontWeight.bold,
-              ),
+              ProfileStrings.nicknameLabel,
+              style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
             ),
 
             const SizedBox(height: 10),
@@ -702,9 +624,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
               decoration: const InputDecoration(
                 prefixText: '@ ',
                 border: OutlineInputBorder(),
-                prefixIcon: Icon(
-                  Icons.person_outline,
-                ),
+                prefixIcon: Icon(Icons.person_outline),
               ),
             ),
 
@@ -713,13 +633,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
             // ───────────────────────────────────
             // BIO
             // ───────────────────────────────────
-
             const Text(
-              'Bio',
-              style: TextStyle(
-                fontSize: 17,
-                fontWeight: FontWeight.bold,
-              ),
+              ProfileStrings.bioLabel,
+              style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
             ),
 
             const SizedBox(height: 10),
@@ -731,8 +647,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
               maxLines: 5,
               decoration: const InputDecoration(
                 border: OutlineInputBorder(),
-                hintText:
-                    'Explica alguna cosa sobre tu...',
+                hintText: ProfileStrings.bioHint,
                 alignLabelWithHint: true,
               ),
             ),
@@ -742,13 +657,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
             // ───────────────────────────────────
             // EMAIL
             // ───────────────────────────────────
-
             const Text(
-              'Email',
-              style: TextStyle(
-                fontSize: 17,
-                fontWeight: FontWeight.bold,
-              ),
+              ProfileStrings.emailLabel,
+              style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
             ),
 
             const SizedBox(height: 10),
@@ -758,9 +669,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
               readOnly: true,
               decoration: const InputDecoration(
                 border: OutlineInputBorder(),
-                prefixIcon: Icon(
-                  Icons.email_outlined,
-                ),
+                prefixIcon: Icon(Icons.email_outlined),
               ),
             ),
 
@@ -769,27 +678,19 @@ class _EditProfilePageState extends State<EditProfilePage> {
             // ───────────────────────────────────
             // GUARDAR
             // ───────────────────────────────────
-
             SizedBox(
               width: double.infinity,
               child: FilledButton.icon(
-                onPressed:
-                    isSaving || isDeletingAccount
-                        ? null
-                        : saveProfile,
+                onPressed: isSaving || isDeletingAccount ? null : saveProfile,
                 icon: isSaving
                     ? const SizedBox(
                         width: 18,
                         height: 18,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                        ),
+                        child: CircularProgressIndicator(strokeWidth: 2),
                       )
                     : const Icon(Icons.save),
                 label: Text(
-                  isSaving
-                      ? 'Guardant...'
-                      : 'Guardar canvis',
+                  isSaving ? ProfileStrings.saving : ProfileStrings.saveChanges,
                 ),
               ),
             ),
@@ -799,47 +700,34 @@ class _EditProfilePageState extends State<EditProfilePage> {
             // ───────────────────────────────────
             // SEGURETAT
             // ───────────────────────────────────
-
             const Text(
-              'Seguretat',
-              style: TextStyle(
-                fontSize: 17,
-                fontWeight: FontWeight.bold,
-              ),
+              ProfileStrings.securityTitle,
+              style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
             ),
 
             const SizedBox(height: 10),
 
             Material(
-              color: Theme.of(context)
-                  .colorScheme
-                  .surfaceContainerHighest,
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(14),
 
               child: ListTile(
-                leading: const Icon(
-                  Icons.lock_outline,
-                ),
+                leading: const Icon(Icons.lock_outline),
 
                 title: const Text(
-                  'Canviar contrasenya',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                  ),
+                  ProfileStrings.changePasswordTitle,
+                  style: TextStyle(fontWeight: FontWeight.w600),
                 ),
 
                 subtitle: const Text(
-                  'Actualitza la contrasenya del teu compte',
+                  ProfileStrings.changePasswordSubtitle,
                 ),
 
-                trailing: const Icon(
-                  Icons.chevron_right,
-                ),
+                trailing: const Icon(Icons.chevron_right),
 
-                onTap:
-                    isSaving || isDeletingAccount
-                        ? null
-                        : _showChangePasswordDialog,
+                onTap: isSaving || isDeletingAccount
+                    ? null
+                    : _showChangePasswordDialog,
               ),
             ),
 
@@ -848,9 +736,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
             // ───────────────────────────────────
             // ZONA DE PERILL
             // ───────────────────────────────────
-
             const Text(
-              'Zona de perill',
+              ProfileStrings.dangerZoneTitle,
               style: TextStyle(
                 fontSize: 17,
                 fontWeight: FontWeight.bold,
@@ -861,9 +748,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
             const SizedBox(height: 10),
 
             Material(
-              color: Theme.of(context)
-                  .colorScheme
-                  .surfaceContainerHighest,
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(14),
 
               child: ListTile(
@@ -871,17 +756,12 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     ? const SizedBox(
                         width: 24,
                         height: 24,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                        ),
+                        child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : const Icon(
-                        Icons.delete_outline,
-                        color: Colors.red,
-                      ),
+                    : const Icon(Icons.delete_outline, color: Colors.red),
 
                 title: const Text(
-                  'Eliminar compte',
+                  ProfileStrings.deleteAccountTitle,
                   style: TextStyle(
                     color: Colors.red,
                     fontWeight: FontWeight.bold,
@@ -889,14 +769,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 ),
 
                 subtitle: const Text(
-                  'Elimina permanentment el teu compte i '
-                  'les teves dades',
+                  ProfileStrings.deleteAccountSubtitle,
                 ),
 
-                onTap:
-                    isSaving || isDeletingAccount
-                        ? null
-                        : deleteAccount,
+                onTap: isSaving || isDeletingAccount ? null : deleteAccount,
               ),
             ),
 

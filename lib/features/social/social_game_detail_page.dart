@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gameshelf/core/strings/social_strings.dart';
 import 'package:gameshelf/core/widgets/rating_stars.dart';
 import 'package:gameshelf/models/game_status.dart';
 import 'package:gameshelf/models/library_game.dart';
@@ -20,9 +21,7 @@ class SocialGameDetailPage extends StatelessWidget {
     final status = userGame.status;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(game.title),
-      ),
+      appBar: AppBar(title: Text(game.title)),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Column(
@@ -43,10 +42,7 @@ class SocialGameDetailPage extends StatelessWidget {
                         height: 330,
                         width: double.infinity,
                         color: Colors.grey.shade800,
-                        child: const Icon(
-                          Icons.image_not_supported,
-                          size: 48,
-                        ),
+                        child: const Icon(Icons.image_not_supported, size: 48),
                       ),
               ),
             ),
@@ -56,10 +52,7 @@ class SocialGameDetailPage extends StatelessWidget {
             // TÍTOL
             Text(
               game.title,
-              style: const TextStyle(
-                fontSize: 30,
-                fontWeight: FontWeight.bold,
-              ),
+              style: const TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
             ),
 
             const SizedBox(height: 20),
@@ -73,10 +66,7 @@ class SocialGameDetailPage extends StatelessWidget {
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(
-                      status.icon,
-                      color: status.color,
-                    ),
+                    Icon(status.icon, color: status.color),
                     const SizedBox(width: 6),
                     Text(status.displayName),
                   ],
@@ -85,10 +75,7 @@ class SocialGameDetailPage extends StatelessWidget {
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    RatingStars(
-                      rating: userGame.rating ?? 0,
-                      size: 22,
-                    ),
+                    RatingStars(rating: userGame.rating ?? 0, size: 22),
                   ],
                 ),
 
@@ -115,7 +102,7 @@ class SocialGameDetailPage extends StatelessWidget {
               Row(
                 children: [
                   Text(
-                    "Review de $nickname",
+                    "${SocialStrings.reviewOfPrefix}$nickname",
                     style: const TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
@@ -124,10 +111,7 @@ class SocialGameDetailPage extends StatelessWidget {
 
                   const Spacer(),
 
-                  RatingStars(
-                    rating: userGame.rating ?? 0,
-                    size: 20,
-                  ),
+                  RatingStars(rating: userGame.rating ?? 0, size: 20),
                 ],
               ),
 
@@ -144,28 +128,19 @@ class SocialGameDetailPage extends StatelessWidget {
             ],
 
             // DESCRIPCIÓ DEL JOC
-            if (game.summary != null &&
-                game.summary!.trim().isNotEmpty) ...[
+            if (game.summary != null && game.summary!.trim().isNotEmpty) ...[
               const SizedBox(height: 32),
               const Divider(),
               const SizedBox(height: 20),
 
               const Text(
                 "Descripció",
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               ),
 
               const SizedBox(height: 12),
 
-              Text(
-                game.summary!,
-                style: const TextStyle(
-                  height: 1.5,
-                ),
-              ),
+              Text(game.summary!, style: const TextStyle(height: 1.5)),
             ],
 
             const SizedBox(height: 40),

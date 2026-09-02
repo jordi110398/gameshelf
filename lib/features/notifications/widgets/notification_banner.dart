@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:gameshelf/core/strings/notification_strings.dart';
 import 'package:gameshelf/models/notification_item.dart';
 
 /// Mostra un banner flotant a la part superior de la pantalla (per sobre de
@@ -84,13 +85,13 @@ class _NotificationBannerState extends State<_NotificationBanner>
 
     switch (n.type) {
       case NotificationType.friendRequest:
-        return "@${n.actorNickname} t'ha enviat una sol·licitud d'amistat";
+        return '@${n.actorNickname} ${NotificationStrings.bannerFriendRequestSuffix}';
       case NotificationType.friendAccepted:
-        return '@${n.actorNickname} ha acceptat la teva sol·licitud';
+        return '@${n.actorNickname} ${NotificationStrings.bannerFriendAcceptedSuffix}';
       case NotificationType.activityLike:
         final game = n.gameTitle;
-        return '@${n.actorNickname} ha donat una estrella'
-            '${game != null ? ' a $game' : ''}';
+        return '@${n.actorNickname} ${NotificationStrings.bannerActivityLikeSuffix}'
+            '${game != null ? '${NotificationStrings.bannerActivityLikeGamePrefix}$game' : ''}';
     }
   }
 

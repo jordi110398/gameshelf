@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:gameshelf/core/strings/app_strings.dart';
+import 'package:gameshelf/core/strings/home_strings.dart';
 import 'package:gameshelf/core/widgets/shelf_list.dart';
 import 'package:gameshelf/models/library_game.dart';
 import 'game_card.dart';
@@ -35,9 +37,7 @@ class _GameGridState extends State<GameGrid> {
     // Si el joc actiu ja no existeix després d'un refresh,
     // desactivem la card.
     if (activeGameId != null &&
-        !widget.games.any(
-          (game) => game.game.igdbId == activeGameId,
-        )) {
+        !widget.games.any((game) => game.game.igdbId == activeGameId)) {
       activeGameId = null;
     }
   }
@@ -65,25 +65,25 @@ class _GameGridState extends State<GameGrid> {
           context: context,
           builder: (context) {
             return AlertDialog(
-              title: const Text("Eliminar joc"),
+              title: const Text(HomeStrings.deleteGameTitle),
               content: Text(
-                "Vols eliminar "
-                "${libraryGame.game.title} "
-                "de la biblioteca?",
+                '${HomeStrings.deleteGameBodyPrefix}'
+                '${libraryGame.game.title}'
+                '${HomeStrings.deleteGameBodySuffix}',
               ),
               actions: [
                 TextButton(
                   onPressed: () {
                     Navigator.pop(context, false);
                   },
-                  child: const Text("Cancel·lar"),
+                  child: const Text(AppStrings.actionCancel),
                 ),
                 FilledButton(
                   style: FilledButton.styleFrom(backgroundColor: Colors.red),
                   onPressed: () {
                     Navigator.pop(context, true);
                   },
-                  child: const Text("Eliminar"),
+                  child: const Text(AppStrings.actionDelete),
                 ),
               ],
             );

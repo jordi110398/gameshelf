@@ -4,9 +4,12 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:gameshelf/models/activity_item.dart';
 import 'package:gameshelf/repositories/activity_repository.dart';
 import 'package:gameshelf/features/activity/widgets/activity_card.dart';
+import 'package:gameshelf/core/strings/activity_strings.dart';
 import 'package:gameshelf/core/utils/error_messages.dart';
 import 'package:gameshelf/core/widgets/bookshelf_background.dart';
 import 'package:gameshelf/core/widgets/responsive_center.dart';
+import 'package:gameshelf/core/widgets/shimmer_box.dart';
+import 'package:gameshelf/core/widgets/staggered_fade_in.dart';
 
 class ActivityFeedPage extends StatefulWidget {
   const ActivityFeedPage({super.key});
@@ -78,7 +81,7 @@ class _ActivityFeedPageState extends State<ActivityFeedPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'No s\'ha pogut carregar l\'activitat: ${friendlyError(e)}',
+            '${ActivityStrings.loadFailedPrefix}${friendlyError(e)}',
           ),
         ),
       );
@@ -139,7 +142,7 @@ class _ActivityFeedPageState extends State<ActivityFeedPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'No s\'han pogut carregar més activitats: ${friendlyError(e)}',
+            '${ActivityStrings.loadMoreFailedPrefix}${friendlyError(e)}',
           ),
         ),
       );
@@ -197,7 +200,7 @@ class _ActivityFeedPageState extends State<ActivityFeedPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'No s\'ha pogut actualitzar l\'activitat: ${friendlyError(e)}',
+            '${ActivityStrings.refreshFailedPrefix}${friendlyError(e)}',
           ),
         ),
       );
@@ -211,14 +214,14 @@ class _ActivityFeedPageState extends State<ActivityFeedPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Activitat')),
+      appBar: AppBar(title: const Text(ActivityStrings.appBarTitle)),
       body: Stack(
         children: [
           const Positioned.fill(child: BookshelfBackground()),
           ResponsiveCenter(
             maxWidth: 640,
             child: _isLoading
-                ? const Center(child: CircularProgressIndicator())
+                ? const _ActivitySkeleton()
                 : Stack(
                     alignment: Alignment.topCenter,
                     children: [
@@ -232,9 +235,7 @@ class _ActivityFeedPageState extends State<ActivityFeedPage> {
                                   Padding(
                                     padding: EdgeInsets.only(top: 80),
                                     child: Center(
-                                      child: Text(
-                                        'Encara no hi ha activitat.',
-                                      ),
+                                      child: Text(ActivityStrings.emptyFeed),
                                     ),
                                   ),
                                 ],
@@ -263,7 +264,10 @@ class _ActivityFeedPageState extends State<ActivityFeedPage> {
                                     );
                                   }
 
-                                  return ActivityCard(item: _items[index]);
+                                  return StaggeredFadeIn(
+                                    index: index,
+                                    child: ActivityCard(item: _items[index]),
+                                  );
                                 },
                               ),
                       ),
@@ -278,7 +282,9 @@ class _ActivityFeedPageState extends State<ActivityFeedPage> {
                             child: FilledButton.icon(
                               onPressed: _refresh,
                               icon: const Icon(Icons.arrow_upward, size: 18),
-                              label: const Text('Hi ha activitat nova'),
+                              label: const Text(
+                                ActivityStrings.newActivityAvailable,
+                              ),
                             ),
                           ),
                         ),
@@ -286,6 +292,25 @@ class _ActivityFeedPageState extends State<ActivityFeedPage> {
                   ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Esquelet de càrrega del feed d'activitat, en lloc d'un spinner genèric.
+class _ActivitySkeleton extends StatelessWidget {
+  const _ActivitySkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.separated(
+      physics: const NeverScrollableScrollPhysics(),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+      itemCount: 6,
+      separatorBuilder: (_, _) => const SizedBox(height: 10),
+      itemBuilder: (context, index) => const ShimmerBox(
+        height: 96,
+        borderRadius: BorderRadius.all(Radius.circular(14)),
       ),
     );
   }

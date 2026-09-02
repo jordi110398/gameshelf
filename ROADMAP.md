@@ -23,9 +23,9 @@
 - [x] Descobrir nous jugadors
 - [x] Esborrar compte
 - [x] Recuperació/canvi password
-- [ ] Política de privacitat/cookies
+- [x] Política de privacitat/cookies
 - [x] Generació de banners
-- [ ] About
+- [x] About
 
 ## v1.1 Social Update
 - [ ] Compartir perfil
@@ -51,6 +51,6 @@ FET
 ⚠️ Gestió d'errors — substituir errors tècnics de Supabase per missatges comprensibles.FET
 👤 Perfil — acabar de polir edició, avatar, email, contrasenya i eliminació.
 
-🎮 Activitats — deixar els likes/notificacions per més endavant, com havíem dit.
+🎮 Activitats — deixar els likes/notificacions per més endavant, com havíem dit. 
 
 🚀 Deploy final — Netlify/Vercel/etc. + domini si vols.

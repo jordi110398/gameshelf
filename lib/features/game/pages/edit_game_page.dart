@@ -4,6 +4,7 @@ import 'package:gameshelf/models/user_game.dart';
 import 'package:gameshelf/models/game_status.dart';
 import 'package:gameshelf/repositories/supabase_library_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:gameshelf/core/strings/game_strings.dart';
 import 'package:gameshelf/core/widgets/responsive_center.dart';
 
 class EditGamePage extends StatefulWidget {
@@ -103,7 +104,7 @@ class _EditGamePageState extends State<EditGamePage> {
         status == GameStatus.completed || status == GameStatus.dropped;
 
     return Scaffold(
-      appBar: AppBar(title: Text("Editar ${widget.game.title}")),
+      appBar: AppBar(title: Text(GameStrings.editTitle(widget.game.title))),
 
       body: ResponsiveCenter(
         maxWidth: 480,
@@ -118,7 +119,7 @@ class _EditGamePageState extends State<EditGamePage> {
               // ESTAT
               // ───────────────────────────
               const Text(
-                "Estat",
+                GameStrings.statusTitle,
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
 
@@ -164,7 +165,7 @@ class _EditGamePageState extends State<EditGamePage> {
                 // ───────────────────────────
                 if (canReview) ...[
                   const Text(
-                    "La meva valoració",
+                    GameStrings.myRatingTitle,
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
 
@@ -199,7 +200,7 @@ class _EditGamePageState extends State<EditGamePage> {
 
                     value: favorite,
 
-                    title: const Text("Marcar com a favorit"),
+                    title: const Text(GameStrings.markAsFavorite),
 
                     secondary: Icon(
                       favorite ? Icons.star : Icons.star_border,
@@ -220,7 +221,7 @@ class _EditGamePageState extends State<EditGamePage> {
                 // HORES
                 // ───────────────────────────
                 const Text(
-                  "Hores jugades",
+                  GameStrings.hoursPlayedTitle,
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
 
@@ -233,7 +234,7 @@ class _EditGamePageState extends State<EditGamePage> {
                   decoration: const InputDecoration(
                     border: OutlineInputBorder(),
                     hintText: "0",
-                    suffixText: "hores",
+                    suffixText: GameStrings.hoursSuffix,
                   ),
                 ),
 
@@ -245,7 +246,7 @@ class _EditGamePageState extends State<EditGamePage> {
                 // ───────────────────────────
                 if (canReview) ...[
                   const Text(
-                    "La meva review",
+                    GameStrings.myReviewTitle,
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
 
@@ -259,7 +260,7 @@ class _EditGamePageState extends State<EditGamePage> {
 
                     decoration: const InputDecoration(
                       border: OutlineInputBorder(),
-                      hintText: "Escriu la teva opinió...",
+                      hintText: GameStrings.reviewHint,
                       alignLabelWithHint: true,
                     ),
                   ),
@@ -279,7 +280,7 @@ class _EditGamePageState extends State<EditGamePage> {
 
                   icon: const Icon(Icons.save),
 
-                  label: const Text("Guardar"),
+                  label: const Text(GameStrings.saveAction),
                 ),
               ),
             ],

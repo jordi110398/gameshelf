@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gameshelf/core/widgets/shelf_ledge.dart';
 import 'package:gameshelf/core/widgets/shelf_led_strip.dart';
+import 'package:gameshelf/core/widgets/staggered_fade_in.dart';
 
 /// Llista genèrica organitzada en "prestatges": files d'elements amb un fil
 /// de llumets a sobre i una planxa de fusta a sota, reutilitzable a
@@ -51,7 +52,12 @@ class ShelfList<T> extends StatelessWidget {
     return rows;
   }
 
-  Widget _buildRow(BuildContext context, List<T> rowItems, int columns) {
+  Widget _buildRow(
+    BuildContext context,
+    List<T> rowItems,
+    int columns,
+    int startIndex,
+  ) {
     return Padding(
       padding: EdgeInsets.only(bottom: rowGap),
       child: LayoutBuilder(
@@ -68,8 +74,11 @@ class ShelfList<T> extends StatelessWidget {
                     if (i > 0) SizedBox(width: horizontalGap),
                     Expanded(
                       child: i < rowItems.length
-                          ? _wrapAspect(
-                              itemBuilder(context, rowItems[i]),
+                          ? StaggeredFadeIn(
+                              index: startIndex + i,
+                              child: _wrapAspect(
+                                itemBuilder(context, rowItems[i]),
+                              ),
                             )
                           : const SizedBox.shrink(),
                     ),
@@ -108,7 +117,7 @@ class ShelfList<T> extends StatelessWidget {
             padding: padding,
             itemCount: rows.length,
             itemBuilder: (context, index) =>
-                _buildRow(context, rows[index], columns),
+                _buildRow(context, rows[index], columns, index * columns),
           );
         }
 
@@ -116,7 +125,8 @@ class ShelfList<T> extends StatelessWidget {
           padding: padding,
           child: Column(
             children: [
-              for (final row in rows) _buildRow(context, row, columns),
+              for (var i = 0; i < rows.length; i++)
+                _buildRow(context, rows[i], columns, i * columns),
             ],
           ),
         );

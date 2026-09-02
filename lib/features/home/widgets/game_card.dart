@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gameshelf/core/navigation/page_transitions.dart';
 import 'package:gameshelf/core/widgets/star_burst.dart';
 import 'package:gameshelf/features/game/pages/game_detail_page.dart';
 import 'package:gameshelf/models/library_game.dart';
@@ -34,24 +35,20 @@ class _GameCardState extends State<GameCard> {
 
   Future<void> openGameDetail() async {
     if (widget.socialNickname != null) {
-      await Navigator.push(
+      await pushFade(
         context,
-        MaterialPageRoute(
-          builder: (_) => SocialGameDetailPage(
-            libraryGame: widget.libraryGame,
-            nickname: widget.socialNickname!,
-          ),
+        (_) => SocialGameDetailPage(
+          libraryGame: widget.libraryGame,
+          nickname: widget.socialNickname!,
         ),
       );
 
       return;
     }
 
-    final refresh = await Navigator.push<bool>(
+    final refresh = await pushFade<bool>(
       context,
-      MaterialPageRoute(
-        builder: (_) => GameDetailPage(game: widget.libraryGame.game),
-      ),
+      (_) => GameDetailPage(game: widget.libraryGame.game),
     );
 
     if (refresh == true) {

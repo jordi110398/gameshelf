@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:gameshelf/features/home/widgets/games_grid.dart';
 import 'package:gameshelf/core/widgets/bookshelf_background.dart';
 import 'package:gameshelf/core/widgets/floating_pill.dart';
+import 'package:gameshelf/core/widgets/pressable_scale.dart';
+import 'package:gameshelf/core/widgets/shimmer_box.dart';
+import 'package:gameshelf/core/strings/home_strings.dart';
 import 'package:gameshelf/models/game_status.dart';
 import 'package:gameshelf/models/library_game.dart';
 import 'package:gameshelf/repositories/supabase_library_repository.dart';
@@ -18,13 +21,13 @@ extension on LibrarySort {
   String get label {
     switch (this) {
       case LibrarySort.dateAdded:
-        return "Data d'addició";
+        return HomeStrings.sortDateAdded;
       case LibrarySort.hoursPlayed:
-        return 'Hores jugades';
+        return HomeStrings.sortHoursPlayed;
       case LibrarySort.status:
-        return 'Estat';
+        return HomeStrings.sortStatus;
       case LibrarySort.title:
-        return 'Títol (A-Z)';
+        return HomeStrings.sortTitle;
     }
   }
 
@@ -201,7 +204,8 @@ class HomePageState extends State<HomePage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            "${profile?.nickname ?? "GameShelf"}'s GameShelf",
+            "${profile?.nickname ?? HomeStrings.defaultNickname}"
+            "${HomeStrings.titleSuffix}",
             style: Theme.of(context).textTheme.headlineMedium?.copyWith(
               fontWeight: FontWeight.w800,
               letterSpacing: -0.8,
@@ -209,7 +213,7 @@ class HomePageState extends State<HomePage> {
           ),
           const SizedBox(height: 4),
           Text(
-            '$totalGames jocs',
+            '$totalGames ${HomeStrings.gamesCountSuffix}',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: colorScheme.onSurfaceVariant,
             ),
@@ -256,7 +260,7 @@ class HomePageState extends State<HomePage> {
     final colorScheme = Theme.of(context).colorScheme;
 
     return PopupMenuButton<LibrarySort>(
-      tooltip: 'Ordenar',
+      tooltip: HomeStrings.sortTooltip,
       initialValue: selectedSort,
       onSelected: (value) {
         setState(() {
@@ -295,8 +299,7 @@ class HomePageState extends State<HomePage> {
   Widget _buildSortDirectionButton(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    return InkWell(
-      borderRadius: BorderRadius.circular(20),
+    return PressableScale(
       onTap: () {
         setState(() {
           sortAscending = !sortAscending;
@@ -316,8 +319,7 @@ class HomePageState extends State<HomePage> {
   Widget _buildSearchToggle(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    return InkWell(
-      borderRadius: BorderRadius.circular(20),
+    return PressableScale(
       onTap: () {
         setState(() {
           isSearchExpanded = true;
@@ -344,8 +346,7 @@ class HomePageState extends State<HomePage> {
   }) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    return InkWell(
-      borderRadius: BorderRadius.circular(16),
+    return PressableScale(
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
@@ -397,11 +398,11 @@ class HomePageState extends State<HomePage> {
           });
         },
         decoration: InputDecoration(
-          hintText: "Buscar a la meva biblioteca...",
+          hintText: HomeStrings.searchHint,
           prefixIcon: const Icon(Icons.search, size: 20),
           suffixIcon: IconButton(
             icon: const Icon(Icons.close, size: 20),
-            tooltip: 'Tancar cerca',
+            tooltip: HomeStrings.searchCloseTooltip,
             onPressed: _collapseSearch,
           ),
           filled: true,
@@ -472,7 +473,7 @@ class HomePageState extends State<HomePage> {
                               _buildFilterButton(
                                 context: context,
                                 icon: Icons.library_books_outlined,
-                                label: 'Biblioteca',
+                                label: HomeStrings.filterLibrary,
                                 count: libraryCount,
                                 selected:
                                     selectedFilter == LibraryFilter.library,
@@ -487,7 +488,7 @@ class HomePageState extends State<HomePage> {
                               _buildFilterButton(
                                 context: context,
                                 icon: Icons.cancel_outlined,
-                                label: 'Dropped',
+                                label: HomeStrings.filterDropped,
                                 count: droppedCount,
                                 selected:
                                     selectedFilter == LibraryFilter.dropped,
@@ -502,7 +503,7 @@ class HomePageState extends State<HomePage> {
                               _buildFilterButton(
                                 context: context,
                                 icon: Icons.bookmark_outline,
-                                label: 'Wishlist',
+                                label: HomeStrings.filterWishlist,
                                 count: wantToPlayCount,
                                 selected:
                                     selectedFilter == LibraryFilter.wantToPlay,
@@ -542,27 +543,27 @@ class HomePageState extends State<HomePage> {
     switch (selectedFilter) {
       case LibraryFilter.library:
         icon = Icons.videogame_asset_outlined;
-        title = 'La teva biblioteca està buida';
-        subtitle = 'Afegeix jocs i comença a construir la teva col·lecció.';
+        title = HomeStrings.emptyLibraryTitle;
+        subtitle = HomeStrings.emptyLibrarySubtitle;
         break;
 
       case LibraryFilter.dropped:
         icon = Icons.cancel_outlined;
-        title = 'Cap joc abandonat';
-        subtitle = 'Aquí apareixeran els jocs que decideixis deixar.';
+        title = HomeStrings.emptyDroppedTitle;
+        subtitle = HomeStrings.emptyDroppedSubtitle;
         break;
 
       case LibraryFilter.wantToPlay:
         icon = Icons.bookmark_outline;
-        title = 'No tens jocs pendents';
-        subtitle = 'Afegeix jocs que vulguis jugar més endavant.';
+        title = HomeStrings.emptyWishlistTitle;
+        subtitle = HomeStrings.emptyWishlistSubtitle;
         break;
     }
 
     if (searchQuery.trim().isNotEmpty) {
       icon = Icons.search_off;
-      title = 'No s\'han trobat jocs';
-      subtitle = 'Prova amb un altre terme de cerca.';
+      title = HomeStrings.emptySearchTitle;
+      subtitle = HomeStrings.emptySearchSubtitle;
     }
 
     return Center(
@@ -624,11 +625,13 @@ class HomePageState extends State<HomePage> {
 
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
+            return const _LibrarySkeleton();
           }
 
           if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
+            return Center(
+              child: Text('${HomeStrings.loadErrorPrefix}${snapshot.error}'),
+            );
           }
 
           if (!snapshot.hasData) {
@@ -680,6 +683,56 @@ class HomePageState extends State<HomePage> {
           );
         },
       ),
+    );
+  }
+}
+
+/// Esquelet de càrrega de la biblioteca, en lloc d'un spinner genèric.
+class _LibrarySkeleton extends StatelessWidget {
+  const _LibrarySkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        const Positioned.fill(child: BookshelfBackground()),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 22, 20, 20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ShimmerBox(
+                width: 220,
+                height: 26,
+                borderRadius: BorderRadius.circular(6),
+              ),
+              const SizedBox(height: 8),
+              ShimmerBox(
+                width: 70,
+                height: 14,
+                borderRadius: BorderRadius.circular(4),
+              ),
+              const SizedBox(height: 20),
+              ShimmerBox(height: 58, borderRadius: BorderRadius.circular(29)),
+              const SizedBox(height: 28),
+              Expanded(
+                child: GridView.builder(
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: 9,
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 3,
+                    crossAxisSpacing: 12,
+                    mainAxisSpacing: 20,
+                    childAspectRatio: 2 / 3,
+                  ),
+                  itemBuilder: (context, i) =>
+                      ShimmerBox(borderRadius: BorderRadius.circular(16)),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

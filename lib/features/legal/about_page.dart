@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:gameshelf/features/legal/privacy_policy_page.dart'
-    show contactEmail;
+import 'package:url_launcher/url_launcher.dart';
+import 'package:gameshelf/core/strings/legal_strings.dart';
 import 'package:gameshelf/features/legal/widgets/legal_page_scaffold.dart';
 
 const _appVersion = '1.0.0';
@@ -12,7 +12,7 @@ class AboutPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return LegalPageScaffold(
-      title: 'Sobre GameShelf',
+      title: LegalStrings.aboutTitle,
       children: [
         const SizedBox(height: 8),
 
@@ -24,46 +24,65 @@ class AboutPage extends StatelessWidget {
 
         const Center(
           child: Text(
-            'GameShelf',
+            LegalStrings.aboutAppName,
             style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
           ),
         ),
 
         Center(
           child: Text(
-            'Versió $_appVersion',
+            '${LegalStrings.aboutVersionLabel} $_appVersion',
             style: TextStyle(color: Colors.grey.shade500, fontSize: 13),
           ),
         ),
 
         const SizedBox(height: 28),
 
-        const LegalParagraph(
-          'GameShelf és una aplicació social per als jugadors que permet '
-          'fer seguiment de la teva biblioteca de videojocs: '
-          'registra a què estàs jugant, marca els teus preferits, '
-          'escriu reviews i comparteix la teva activitat '
-          'amb amics, i descobreix nous videojocs.',
+        const LegalParagraph(LegalStrings.aboutDescription),
+
+        const LegalSectionTitle(LegalStrings.aboutDeveloperTitle),
+        const LegalParagraph(LegalStrings.aboutDeveloperName),
+        const LegalParagraph(LegalStrings.aboutDeveloperBio),
+
+        Padding(
+          padding: const EdgeInsets.only(bottom: 10),
+          child: InkWell(
+            onTap: () => launchUrl(
+              Uri.parse(LegalStrings.aboutDeveloperPortfolioUrl),
+              webOnlyWindowName: '_blank',
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.open_in_new, size: 16),
+                const SizedBox(width: 6),
+                Text(
+                  LegalStrings.aboutDeveloperPortfolioLabel,
+                  style: const TextStyle(
+                    decoration: TextDecoration.underline,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
 
-        const LegalSectionTitle('Desenvolupador'),
-        const LegalParagraph('Jordi Bertomeu Primo'),
+        const LegalSectionTitle(LegalStrings.aboutDevelopmentTitle),
+        const LegalParagraph(LegalStrings.aboutDevelopmentBody),
 
-        const LegalSectionTitle('Contacte'),
-        LegalParagraph(contactEmail),
+        const LegalSectionTitle(LegalStrings.aboutContactTitle),
+        const LegalParagraph(LegalStrings.contactEmail),
 
-        const LegalSectionTitle('Dades del catàleg de jocs'),
-        const LegalParagraph(
-          'La informació dels jocs (títols, portades, descripcions) prové '
-          'd\'IGDB.',
-        ),
+        const LegalSectionTitle(LegalStrings.aboutCatalogDataTitle),
+        const LegalParagraph(LegalStrings.aboutCatalogDataBody),
 
-        const LegalSectionTitle('Documents legals'),
+        const LegalSectionTitle(LegalStrings.aboutLegalDocumentsTitle),
 
         ListTile(
           contentPadding: EdgeInsets.zero,
           leading: const Icon(Icons.privacy_tip_outlined),
-          title: const Text('Política de privacitat'),
+          title: const Text(LegalStrings.privacyTitle),
           trailing: const Icon(Icons.chevron_right),
           onTap: () => context.push('/legal/privacy'),
         ),
@@ -71,7 +90,7 @@ class AboutPage extends StatelessWidget {
         ListTile(
           contentPadding: EdgeInsets.zero,
           leading: const Icon(Icons.cookie_outlined),
-          title: const Text('Política de cookies'),
+          title: const Text(LegalStrings.cookiesTitle),
           trailing: const Icon(Icons.chevron_right),
           onTap: () => context.push('/legal/cookies'),
         ),

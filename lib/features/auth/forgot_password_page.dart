@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:gameshelf/core/services/auth_service.dart';
+import 'package:gameshelf/core/strings/auth_strings.dart';
 import 'package:gameshelf/features/auth/widgets/auth_text_field.dart';
 import 'package:gameshelf/core/utils/error_messages.dart';
 
@@ -29,9 +30,9 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     final email = emailController.text.trim();
 
     if (email.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Introdueix el teu email.')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text(AuthStrings.forgotEnterEmail)),
+      );
       return;
     }
 
@@ -52,7 +53,9 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('No s\'ha pogut enviar el correu: ${friendlyError(e)}'),
+          content: Text(
+            '${AuthStrings.forgotEmailFailedPrefix}${friendlyError(e)}',
+          ),
         ),
       );
     } finally {
@@ -82,7 +85,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                         const SizedBox(height: 24),
 
                         const Text(
-                          'Revisa el teu correu',
+                          AuthStrings.forgotSentTitle,
                           style: TextStyle(
                             fontSize: 28,
                             fontWeight: FontWeight.bold,
@@ -93,8 +96,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                         const SizedBox(height: 16),
 
                         Text(
-                          'T\'hem enviat un enllaç per restablir '
-                          'la teva contrasenya a:',
+                          AuthStrings.forgotSentBody,
                           textAlign: TextAlign.center,
                           style: Theme.of(context).textTheme.bodyLarge,
                         ),
@@ -111,7 +113,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
 
                         FilledButton(
                           onPressed: () => context.go('/'),
-                          child: const Text('Tornar al login'),
+                          child: const Text(AuthStrings.forgotBackToLogin),
                         ),
                       ],
                     )
@@ -123,7 +125,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                         const SizedBox(height: 24),
 
                         const Text(
-                          'Recuperar contrasenya',
+                          AuthStrings.forgotTitle,
                           style: TextStyle(
                             fontSize: 28,
                             fontWeight: FontWeight.bold,
@@ -134,8 +136,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                         const SizedBox(height: 16),
 
                         const Text(
-                          'Introdueix el teu email i t\'enviarem '
-                          'un enllaç per crear una nova contrasenya.',
+                          AuthStrings.forgotBody,
                           textAlign: TextAlign.center,
                         ),
 
@@ -143,7 +144,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
 
                         AuthTextField(
                           controller: emailController,
-                          label: 'Email',
+                          label: AuthStrings.forgotEmailLabel,
                           icon: Icons.email,
                         ),
 
@@ -161,7 +162,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                                       strokeWidth: 2,
                                     ),
                                   )
-                                : const Text('Enviar correu'),
+                                : const Text(AuthStrings.forgotSubmit),
                           ),
                         ),
 
@@ -169,7 +170,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
 
                         TextButton(
                           onPressed: _loading ? null : () => context.go('/'),
-                          child: const Text('Tornar al login'),
+                          child: const Text(AuthStrings.forgotBackToLogin),
                         ),
                       ],
                     ),

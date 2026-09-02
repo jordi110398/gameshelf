@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:gameshelf/core/strings/auth_strings.dart';
 import 'package:gameshelf/core/utils/error_messages.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -35,8 +36,7 @@ class _AuthCallbackPageState extends State<AuthCallbackPage> {
 
       if (!mounted) return;
 
-      final session =
-          Supabase.instance.client.auth.currentSession;
+      final session = Supabase.instance.client.auth.currentSession;
 
       if (session != null) {
         context.go('/home');
@@ -65,30 +65,24 @@ class _AuthCallbackPageState extends State<AuthCallbackPage> {
                 children: [
                   CircularProgressIndicator(),
                   SizedBox(height: 16),
-                  Text('Verificant el compte...'),
+                  Text(AuthStrings.callbackVerifying),
                 ],
               )
             : Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(
-                    Icons.error_outline,
-                    size: 60,
-                    color: Colors.red,
-                  ),
+                  const Icon(Icons.error_outline, size: 60, color: Colors.red),
                   const SizedBox(height: 16),
-                  const Text(
-                    'No s\'ha pogut verificar l\'enllaç.',
-                  ),
+                  const Text(AuthStrings.callbackFailedTitle),
                   const SizedBox(height: 8),
                   Text(
-                    _error ?? 'Error desconegut',
+                    _error ?? AuthStrings.callbackUnknownError,
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 24),
                   FilledButton(
                     onPressed: () => context.go('/'),
-                    child: const Text('Tornar al login'),
+                    child: const Text(AuthStrings.callbackBackToLogin),
                   ),
                 ],
               ),

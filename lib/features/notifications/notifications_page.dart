@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:gameshelf/core/navigation/page_transitions.dart';
+import 'package:gameshelf/core/strings/notification_strings.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:gameshelf/core/utils/error_messages.dart';
@@ -50,7 +52,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'No s\'han pogut carregar les notificacions: ${friendlyError(e)}',
+            '${NotificationStrings.loadFailedPrefix}${friendlyError(e)}',
           ),
         ),
       );
@@ -119,20 +121,18 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
     if (profile == null || !mounted) return;
 
-    await Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => UserProfilePage(profile: profile)),
-    );
+    await pushFade(context, (_) => UserProfilePage(profile: profile));
   }
 
   String _messageFor(NotificationItem item) {
     switch (item.type) {
       case NotificationType.friendRequest:
-        return 't\'ha enviat una sol·licitud d\'amistat';
+        return NotificationStrings.listFriendRequest;
       case NotificationType.friendAccepted:
-        return 'ha acceptat la teva sol·licitud d\'amistat';
+        return NotificationStrings.listFriendAccepted;
       case NotificationType.activityLike:
-        return 'li ha agradat la teva activitat sobre ${item.gameTitle ?? "un joc"}';
+        return '${NotificationStrings.listActivityLikePrefix}'
+            '${item.gameTitle ?? NotificationStrings.listActivityLikeUnknownGame}';
     }
   }
 
@@ -153,12 +153,12 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Notificacions'),
+        title: const Text(NotificationStrings.appBarTitle),
         actions: [
           if (hasUnread)
             TextButton(
               onPressed: _markAllAsRead,
-              child: const Text('Marcar totes com a llegides'),
+              child: const Text(NotificationStrings.markAllAsRead),
             ),
         ],
       ),
@@ -169,7 +169,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
             : _items.isEmpty
             ? Center(
                 child: Text(
-                  'Encara no tens cap notificació.',
+                  NotificationStrings.emptyList,
                   style: TextStyle(color: Colors.grey.shade600),
                 ),
               )

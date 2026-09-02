@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:gameshelf/core/services/auth_service.dart';
 import '../widgets/auth_text_field.dart';
 import 'package:gameshelf/core/services/profile_service.dart';
+import 'package:gameshelf/core/strings/auth_strings.dart';
 import 'package:gameshelf/core/utils/error_messages.dart';
 
 class LoginPage extends StatefulWidget {
@@ -43,7 +44,7 @@ class _LoginPageState extends State<LoginPage> {
         input = await profileService.getEmailFromNickname(input) ?? "";
 
         if (input.isEmpty) {
-          throw Exception("No s'ha trobat cap usuari amb aquest nickname.");
+          throw Exception(AuthStrings.loginNoUserWithNickname);
         }
       }
 
@@ -74,11 +75,7 @@ class _LoginPageState extends State<LoginPage> {
 
     if (email.isEmpty || !email.contains("@")) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Introdueix el teu email per recuperar la contrasenya.',
-          ),
-        ),
+        const SnackBar(content: Text(AuthStrings.loginEnterEmailToReset)),
       );
       return;
     }
@@ -96,11 +93,8 @@ class _LoginPageState extends State<LoginPage> {
         context: context,
         builder: (context) {
           return AlertDialog(
-            title: const Text('Revisa el teu correu'),
-            content: const Text(
-              'T\'hem enviat un enllaç per restablir la contrasenya. '
-              'Revisa la safata d\'entrada i també la carpeta de correu brossa.',
-            ),
+            title: const Text(AuthStrings.loginResetEmailSentTitle),
+            content: const Text(AuthStrings.loginResetEmailSentBody),
             actions: [
               FilledButton(
                 onPressed: () => Navigator.pop(context),
@@ -115,7 +109,9 @@ class _LoginPageState extends State<LoginPage> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('No s\'ha pogut enviar el correu: ${friendlyError(e)}'),
+          content: Text(
+            '${AuthStrings.loginResetEmailFailed}: ${friendlyError(e)}',
+          ),
         ),
       );
     } finally {
@@ -148,7 +144,7 @@ class _LoginPageState extends State<LoginPage> {
                   const SizedBox(height: 24),
 
                   const Text(
-                    "GameShelf",
+                    AuthStrings.appName,
                     style: TextStyle(fontSize: 34, fontWeight: FontWeight.bold),
                   ),
 
@@ -157,7 +153,7 @@ class _LoginPageState extends State<LoginPage> {
                   // EMAIL / NICKNAME
                   AuthTextField(
                     controller: emailController,
-                    label: "Email o usuari",
+                    label: AuthStrings.loginEmailOrNicknameLabel,
                     icon: Icons.email,
                   ),
 
@@ -166,7 +162,7 @@ class _LoginPageState extends State<LoginPage> {
                   // CONTRASENYA
                   AuthTextField(
                     controller: passwordController,
-                    label: "Contrasenya",
+                    label: AuthStrings.loginPasswordLabel,
                     icon: Icons.lock,
                     obscureText: true,
                   ),
@@ -186,7 +182,7 @@ class _LoginPageState extends State<LoginPage> {
                               height: 18,
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
-                          : const Text("He oblidat la contrasenya"),
+                          : const Text(AuthStrings.loginForgotPassword),
                     ),
                   ),
 
@@ -203,7 +199,7 @@ class _LoginPageState extends State<LoginPage> {
                               height: 22,
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
-                          : const Text("Inicia sessió"),
+                          : const Text(AuthStrings.loginSubmit),
                     ),
                   ),
 
@@ -214,7 +210,7 @@ class _LoginPageState extends State<LoginPage> {
                     onPressed: _loading || _resettingPassword
                         ? null
                         : () => context.go("/register"),
-                    child: const Text("Crear compte"),
+                    child: const Text(AuthStrings.loginCreateAccount),
                   ),
 
                   const SizedBox(height: 8),
@@ -225,7 +221,7 @@ class _LoginPageState extends State<LoginPage> {
                       foregroundColor: Colors.grey.shade600,
                     ),
                     child: const Text(
-                      'Sobre GameShelf',
+                      AuthStrings.loginAboutLink,
                       style: TextStyle(fontSize: 12),
                     ),
                   ),

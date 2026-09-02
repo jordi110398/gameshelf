@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gameshelf/core/strings/profile_strings.dart';
 import 'package:gameshelf/core/utils/error_messages.dart';
 import 'package:gameshelf/core/widgets/responsive_center.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -30,17 +31,17 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
     final confirmPassword = confirmPasswordController.text;
 
     if (password.isEmpty || confirmPassword.isEmpty) {
-      _showError('Omple tots els camps.');
+      _showError(ProfileStrings.fillAllFields);
       return;
     }
 
     if (password.length < 6) {
-      _showError('La contrasenya ha de tenir almenys 6 caràcters.');
+      _showError(ProfileStrings.passwordMinLength6);
       return;
     }
 
     if (password != confirmPassword) {
-      _showError('Les contrasenyes no coincideixen.');
+      _showError(ProfileStrings.passwordsDontMatch);
       return;
     }
 
@@ -56,7 +57,9 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Contrasenya actualitzada correctament.')),
+        const SnackBar(
+          content: Text(ProfileStrings.passwordUpdatedSuccess),
+        ),
       );
 
       Navigator.pop(context);
@@ -80,7 +83,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Canviar contrasenya')),
+      appBar: AppBar(title: const Text(ProfileStrings.changePasswordPageTitle)),
       body: ResponsiveCenter(
         maxWidth: 420,
         child: SingleChildScrollView(
@@ -89,7 +92,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
-                'Nova contrasenya',
+                ProfileStrings.newPasswordFieldLabel,
                 style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
               ),
 
@@ -121,7 +124,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
               const SizedBox(height: 24),
 
               const Text(
-                'Repetir contrasenya',
+                ProfileStrings.repeatPasswordFieldLabel,
                 style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
               ),
 
@@ -154,7 +157,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
               const SizedBox(height: 12),
 
               Text(
-                'La contrasenya ha de tenir almenys 6 caràcters.',
+                ProfileStrings.passwordMinLength6,
                 style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
               ),
 
@@ -172,7 +175,9 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                         )
                       : const Icon(Icons.lock_reset),
                   label: Text(
-                    isSaving ? 'Actualitzant...' : 'Canviar contrasenya',
+                    isSaving
+                        ? ProfileStrings.updating
+                        : ProfileStrings.changePasswordPageTitle,
                   ),
                 ),
               ),

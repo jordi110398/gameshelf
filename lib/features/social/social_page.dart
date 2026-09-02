@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:gameshelf/core/navigation/page_transitions.dart';
+import 'package:gameshelf/core/strings/app_strings.dart';
+import 'package:gameshelf/core/strings/social_strings.dart';
 import 'package:gameshelf/core/widgets/app_logo.dart';
 import 'package:gameshelf/core/widgets/bookshelf_background.dart';
 import 'package:gameshelf/core/widgets/shelf_list.dart';
+import 'package:gameshelf/core/widgets/shimmer_box.dart';
 import 'package:gameshelf/core/widgets/wood_drawer_container.dart';
 import 'package:gameshelf/features/profile/user_profile_page.dart';
 import 'package:gameshelf/models/profile.dart';
@@ -19,10 +23,10 @@ class SocialPage extends StatefulWidget {
   const SocialPage({super.key});
 
   @override
-  State<SocialPage> createState() => _SocialPageState();
+  State<SocialPage> createState() => SocialPageState();
 }
 
-class _SocialPageState extends State<SocialPage> {
+class SocialPageState extends State<SocialPage> {
   late final ProfileRepository repository;
   late final TextEditingController searchController;
   late final ActivityRepository activityRepository;
@@ -100,7 +104,7 @@ class _SocialPageState extends State<SocialPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'No s\'han pogut buscar els usuaris: ${friendlyError(e)}',
+            '${SocialStrings.searchUsersFailedPrefix}${friendlyError(e)}',
           ),
         ),
       );
@@ -108,10 +112,7 @@ class _SocialPageState extends State<SocialPage> {
   }
 
   Future<void> openProfile(Profile profile) async {
-    await Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => UserProfilePage(profile: profile)),
-    );
+    await pushFade(context, (_) => UserProfilePage(profile: profile));
   }
 
   Future<void> loadSocialData() async {
@@ -140,7 +141,7 @@ class _SocialPageState extends State<SocialPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'No s\'han pogut carregar les dades socials: ${friendlyError(e)}',
+            '${SocialStrings.loadSocialFailedPrefix}${friendlyError(e)}',
           ),
         ),
       );
@@ -153,7 +154,7 @@ class _SocialPageState extends State<SocialPage> {
       appBar: AppBar(
         leadingWidth: AppLogo.width(context),
         leading: const AppLogo(),
-        title: const Text('Social'),
+        title: const Text(SocialStrings.appBarTitle),
       ),
       body: Stack(
         children: [
@@ -174,18 +175,17 @@ class _SocialPageState extends State<SocialPage> {
                       searchProfiles();
                     },
                     decoration: InputDecoration(
-                      hintText: 'Buscar usuaris...',
+                      hintText: SocialStrings.searchHint,
                       prefixIcon: const Icon(Icons.search),
                       suffixIcon: IconButton(
                         icon: const Icon(Icons.arrow_forward),
                         onPressed: searchProfiles,
                       ),
                       filled: true,
-                      fillColor: Theme.of(
-                        context,
-                      ).colorScheme.surfaceContainerHighest.withValues(
-                        alpha: 0.75,
-                      ),
+                      fillColor: Theme.of(context)
+                          .colorScheme
+                          .surfaceContainerHighest
+                          .withValues(alpha: 0.75),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(14),
                         borderSide: BorderSide.none,
@@ -216,12 +216,12 @@ class _SocialPageState extends State<SocialPage> {
           Icon(Icons.people_outline, size: 42, color: Colors.grey.shade500),
           const SizedBox(height: 12),
           Text(
-            'Encara no tens amics',
+            SocialStrings.emptyFriendsTitle,
             style: const TextStyle(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 4),
           Text(
-            'Busca altres usuaris de GameShelf per afegir-los.',
+            SocialStrings.emptyFriendsSubtitle,
             textAlign: TextAlign.center,
             style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
           ),
@@ -232,7 +232,7 @@ class _SocialPageState extends State<SocialPage> {
 
   Widget _buildResults() {
     if (isLoading || isSocialLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const _SocialSkeleton();
     }
 
     // ─────────────────────────────
@@ -250,7 +250,7 @@ class _SocialPageState extends State<SocialPage> {
     if (profiles.isEmpty) {
       return _buildEmptyState(
         icon: Icons.person_search,
-        text: 'No s\'han trobat usuaris',
+        text: SocialStrings.emptySearchResults,
       );
     }
 
@@ -283,7 +283,7 @@ class _SocialPageState extends State<SocialPage> {
         if (pendingRequests.isNotEmpty) ...[
           _buildSectionTile(
             icon: Icons.person_add_outlined,
-            title: 'Sol·licituds',
+            title: SocialStrings.sectionRequests,
             count: pendingRequests.length,
             isExpanded: isRequestsExpanded,
             onExpansionChanged: (value) {
@@ -308,7 +308,7 @@ class _SocialPageState extends State<SocialPage> {
         // ─────────────────────────────
         _buildSectionTile(
           icon: Icons.people_outline,
-          title: 'Amics',
+          title: SocialStrings.sectionFriends,
           count: friends.length,
           isExpanded: isFriendsExpanded,
           onExpansionChanged: (value) {
@@ -351,7 +351,7 @@ class _SocialPageState extends State<SocialPage> {
         if (activityFeed.isNotEmpty)
           _buildSectionTile(
             icon: Icons.dynamic_feed_outlined,
-            title: 'Resum activitats',
+            title: SocialStrings.sectionActivitySummary,
             count: activityFeed.length,
             isExpanded: isActivityExpanded,
             onExpansionChanged: (value) {
@@ -383,15 +383,13 @@ class _SocialPageState extends State<SocialPage> {
                           width: double.infinity,
                           child: TextButton.icon(
                             onPressed: () {
-                              Navigator.push(
+                              pushFade(
                                 context,
-                                MaterialPageRoute(
-                                  builder: (_) => const ActivityFeedPage(),
-                                ),
+                                (_) => const ActivityFeedPage(),
                               );
                             },
                             icon: const Icon(Icons.arrow_forward),
-                            label: const Text('Veure més'),
+                            label: const Text(SocialStrings.seeMore),
                           ),
                         ),
                       ),
@@ -481,7 +479,12 @@ class _SocialPageState extends State<SocialPage> {
         if (!snapshot.hasData) {
           return const SizedBox(
             height: 70,
-            child: Center(child: CircularProgressIndicator()),
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: 6),
+              child: ShimmerBox(
+                borderRadius: BorderRadius.all(Radius.circular(16)),
+              ),
+            ),
           );
         }
 
@@ -531,9 +534,7 @@ class _ProfileTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: woodDrawerDecoration(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      decoration: woodDrawerDecoration(borderRadius: BorderRadius.circular(16)),
       clipBehavior: Clip.antiAlias,
       child: Material(
         color: Colors.transparent,
@@ -547,12 +548,10 @@ class _ProfileTile extends StatelessWidget {
                 CircleAvatar(
                   radius: 28,
                   backgroundImage:
-                      profile.avatarUrl != null &&
-                          profile.avatarUrl!.isNotEmpty
+                      profile.avatarUrl != null && profile.avatarUrl!.isNotEmpty
                       ? NetworkImage(profile.avatarUrl!)
                       : null,
-                  child:
-                      profile.avatarUrl == null || profile.avatarUrl!.isEmpty
+                  child: profile.avatarUrl == null || profile.avatarUrl!.isEmpty
                       ? const Icon(Icons.person, size: 28)
                       : null,
                 ),
@@ -617,9 +616,7 @@ class _PendingRequestTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: woodDrawerDecoration(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      decoration: woodDrawerDecoration(borderRadius: BorderRadius.circular(16)),
       child: Padding(
         padding: const EdgeInsets.all(14),
         child: Row(
@@ -647,19 +644,48 @@ class _PendingRequestTile extends StatelessWidget {
             ),
 
             IconButton(
-              tooltip: 'Rebutjar',
+              tooltip: AppStrings.actionReject,
               onPressed: onReject,
               icon: const Icon(Icons.close),
             ),
 
             IconButton(
-              tooltip: 'Acceptar',
+              tooltip: AppStrings.actionAccept,
               onPressed: onAccept,
               icon: const Icon(Icons.check),
             ),
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Esquelet de càrrega de la pantalla social, en lloc d'un spinner genèric.
+class _SocialSkeleton extends StatelessWidget {
+  const _SocialSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      physics: const NeverScrollableScrollPhysics(),
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+      children: [
+        const ShimmerBox(
+          height: 72,
+          borderRadius: BorderRadius.all(Radius.circular(16)),
+        ),
+        const SizedBox(height: 20),
+        const ShimmerBox(
+          height: 160,
+          borderRadius: BorderRadius.all(Radius.circular(16)),
+        ),
+        const SizedBox(height: 20),
+        const ShimmerBox(
+          height: 220,
+          borderRadius: BorderRadius.all(Radius.circular(16)),
+        ),
+      ],
     );
   }
 }

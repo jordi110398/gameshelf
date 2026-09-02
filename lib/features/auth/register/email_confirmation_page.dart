@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:gameshelf/core/strings/auth_strings.dart';
 
 class EmailConfirmationPage extends StatelessWidget {
   final String email;
@@ -23,7 +24,7 @@ class EmailConfirmationPage extends StatelessWidget {
                   const SizedBox(height: 24),
 
                   const Text(
-                    'Confirma el teu email',
+                    AuthStrings.confirmEmailTitle,
                     textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
                   ),
@@ -31,7 +32,7 @@ class EmailConfirmationPage extends StatelessWidget {
                   const SizedBox(height: 16),
 
                   Text(
-                    'T\'hem enviat un correu de confirmació a:',
+                    AuthStrings.confirmEmailSentTo,
                     textAlign: TextAlign.center,
                     style: TextStyle(color: Colors.grey.shade600),
                   ),
@@ -47,7 +48,7 @@ class EmailConfirmationPage extends StatelessWidget {
                   const SizedBox(height: 16),
 
                   Text(
-                    'Obre el correu i fes clic a l\'enllaç per activar el teu compte.',
+                    AuthStrings.confirmEmailInstructions,
                     textAlign: TextAlign.center,
                     style: TextStyle(color: Colors.grey.shade600),
                   ),
@@ -58,7 +59,7 @@ class EmailConfirmationPage extends StatelessWidget {
                     width: double.infinity,
                     child: FilledButton(
                       onPressed: () => context.go('/'),
-                      child: const Text('Tornar a iniciar sessió'),
+                      child: const Text(AuthStrings.confirmEmailBackToLogin),
                     ),
                   ),
                 ],

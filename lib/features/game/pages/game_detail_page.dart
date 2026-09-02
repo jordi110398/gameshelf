@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gameshelf/core/navigation/page_transitions.dart';
 import 'package:gameshelf/core/widgets/rating_stars.dart';
 import 'package:gameshelf/features/game/pages/edit_game_page.dart';
 import 'package:gameshelf/models/game.dart';
@@ -7,6 +8,7 @@ import 'package:gameshelf/models/user_game.dart';
 import 'package:gameshelf/repositories/supabase_library_repository.dart';
 import 'package:gameshelf/repositories/activity_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:gameshelf/core/strings/game_strings.dart';
 import 'package:gameshelf/core/utils/error_messages.dart';
 import 'package:gameshelf/core/widgets/responsive_center.dart';
 
@@ -72,7 +74,7 @@ class _GameDetailPageState extends State<GameDetailPage> {
               const Padding(
                 padding: EdgeInsets.all(20),
                 child: Text(
-                  "Afegir a GameShelf",
+                  GameStrings.addToLibrarySheetTitle,
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
               ),
@@ -82,7 +84,7 @@ class _GameDetailPageState extends State<GameDetailPage> {
                   GameStatus.playing.icon,
                   color: GameStatus.playing.color,
                 ),
-                title: const Text("Playing"),
+                title: Text(GameStatus.playing.displayName),
                 onTap: () {
                   Navigator.pop(context, GameStatus.playing);
                 },
@@ -93,7 +95,7 @@ class _GameDetailPageState extends State<GameDetailPage> {
                   GameStatus.completed.icon,
                   color: GameStatus.completed.color,
                 ),
-                title: const Text("Completed"),
+                title: Text(GameStatus.completed.displayName),
                 onTap: () {
                   Navigator.pop(context, GameStatus.completed);
                 },
@@ -104,7 +106,7 @@ class _GameDetailPageState extends State<GameDetailPage> {
                   GameStatus.wantToPlay.icon,
                   color: GameStatus.wantToPlay.color,
                 ),
-                title: const Text("Want to Play"),
+                title: Text(GameStatus.wantToPlay.displayName),
                 onTap: () {
                   Navigator.pop(context, GameStatus.wantToPlay);
                 },
@@ -115,7 +117,7 @@ class _GameDetailPageState extends State<GameDetailPage> {
                   GameStatus.paused.icon,
                   color: GameStatus.paused.color,
                 ),
-                title: const Text("Paused"),
+                title: Text(GameStatus.paused.displayName),
                 onTap: () {
                   Navigator.pop(context, GameStatus.paused);
                 },
@@ -126,7 +128,7 @@ class _GameDetailPageState extends State<GameDetailPage> {
                   GameStatus.dropped.icon,
                   color: GameStatus.dropped.color,
                 ),
-                title: const Text("Dropped"),
+                title: Text(GameStatus.dropped.displayName),
                 onTap: () {
                   Navigator.pop(context, GameStatus.dropped);
                 },
@@ -153,7 +155,7 @@ class _GameDetailPageState extends State<GameDetailPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'No s\'ha pogut afegir el joc a la biblioteca: ${friendlyError(e)}',
+            '${GameStrings.addToLibraryFailedPrefix}${friendlyError(e)}',
           ),
         ),
       );
@@ -192,7 +194,7 @@ class _GameDetailPageState extends State<GameDetailPage> {
             mainAxisSize: MainAxisSize.min,
             children: [
               const Text(
-                "IGDB",
+                GameStrings.igdbLabel,
                 style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
               ),
               const SizedBox(width: 4),
@@ -366,7 +368,7 @@ class _GameDetailPageState extends State<GameDetailPage> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       const Text(
-                        "La meva review",
+                        GameStrings.myReviewTitle,
                         style: TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
@@ -420,7 +422,7 @@ class _GameDetailPageState extends State<GameDetailPage> {
                 const SizedBox(height: 24),
 
                 const Text(
-                  "Descripció",
+                  GameStrings.descriptionTitle,
                   style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                 ),
 
@@ -440,7 +442,11 @@ class _GameDetailPageState extends State<GameDetailPage> {
                 child: FilledButton.icon(
                   icon: Icon(inLibrary ? Icons.edit : Icons.add),
 
-                  label: Text(inLibrary ? "Editar" : "Afegir a la biblioteca"),
+                  label: Text(
+                    inLibrary
+                        ? GameStrings.editAction
+                        : GameStrings.addToLibraryAction,
+                  ),
 
                   onPressed: () async {
                     if (!inLibrary) {
@@ -448,15 +454,10 @@ class _GameDetailPageState extends State<GameDetailPage> {
                       return;
                     }
 
-                    final edited = await Navigator.push<bool>(
+                    final edited = await pushFade<bool>(
                       context,
-
-                      MaterialPageRoute(
-                        builder: (_) => EditGamePage(
-                          game: widget.game,
-                          userGame: userGame!,
-                        ),
-                      ),
+                      (_) =>
+                          EditGamePage(game: widget.game, userGame: userGame!),
                     );
 
                     if (edited == true) {

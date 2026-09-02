@@ -1,10 +1,12 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:gameshelf/core/navigation/page_transitions.dart';
 import 'package:gameshelf/models/game.dart';
 import 'package:gameshelf/repositories/igdb_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:gameshelf/features/game/pages/game_detail_page.dart';
+import 'package:gameshelf/core/strings/game_strings.dart';
 import 'package:gameshelf/core/widgets/responsive_center.dart';
 
 class SearchPage extends StatefulWidget {
@@ -76,7 +78,7 @@ class _SearchPageState extends State<SearchPage> {
             autofocus: true,
             onChanged: onSearchChanged,
             decoration: InputDecoration(
-              hintText: "Buscar jocs...",
+              hintText: GameStrings.searchHint,
               prefixIcon: const Icon(Icons.search, size: 20),
               filled: true,
               fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
@@ -113,7 +115,7 @@ class _SearchPageState extends State<SearchPage> {
         child: loading
             ? const Center(child: CircularProgressIndicator())
             : games.isEmpty
-            ? const Center(child: Text("Busca un joc per començar"))
+            ? const Center(child: Text(GameStrings.searchEmptyPrompt))
             : ListView.builder(
                 itemCount: games.length,
                 itemBuilder: (_, i) {
@@ -143,11 +145,9 @@ class _SearchPageState extends State<SearchPage> {
                     trailing: const Icon(Icons.chevron_right),
 
                     onTap: () async {
-                      final refresh = await Navigator.push<bool>(
+                      final refresh = await pushFade<bool>(
                         context,
-                        MaterialPageRoute(
-                          builder: (_) => GameDetailPage(game: game),
-                        ),
+                        (_) => GameDetailPage(game: game),
                       );
 
                       if (refresh == true && context.mounted) {
