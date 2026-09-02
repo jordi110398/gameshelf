@@ -274,132 +274,136 @@ class SocialPageState extends State<SocialPage> {
   }
 
   Widget _buildSocialHome() {
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
-      children: [
-        // ─────────────────────────────
-        // SOL·LICITUDS
-        // ─────────────────────────────
-        if (pendingRequests.isNotEmpty) ...[
-          _buildSectionTile(
-            icon: Icons.person_add_outlined,
-            title: SocialStrings.sectionRequests,
-            count: pendingRequests.length,
-            isExpanded: isRequestsExpanded,
-            onExpansionChanged: (value) {
-              setState(() => isRequestsExpanded = value);
-            },
-            body: Column(
-              children: pendingRequests
-                  .map(
-                    (request) => Padding(
-                      padding: const EdgeInsets.only(bottom: 8),
-                      child: _buildPendingRequest(request),
-                    ),
-                  )
-                  .toList(),
-            ),
-          ),
-          const SizedBox(height: 20),
-        ],
-
-        // ─────────────────────────────
-        // AMICS (en lleixes)
-        // ─────────────────────────────
-        _buildSectionTile(
-          icon: Icons.people_outline,
-          title: SocialStrings.sectionFriends,
-          count: friends.length,
-          isExpanded: isFriendsExpanded,
-          onExpansionChanged: (value) {
-            setState(() => isFriendsExpanded = value);
-          },
-          childrenPadding: EdgeInsets.zero,
-          body: friends.isEmpty
-              ? Padding(
-                  padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
-                  child: _buildEmptyFriends(),
-                )
-              : ClipRRect(
-                  borderRadius: const BorderRadius.vertical(
-                    bottom: Radius.circular(16),
-                  ),
-                  child: Stack(
-                    children: [
-                      const Positioned.fill(child: BookshelfBackground()),
-                      ShelfList<Profile>(
-                        items: friends,
-                        scrollable: false,
-                        minColumns: 1,
-                        minItemWidth: 99999,
-                        padding: const EdgeInsets.all(14),
-                        itemBuilder: (context, friend) => _ProfileTile(
-                          profile: friend,
-                          onTap: () => openProfile(friend),
-                        ),
+    return RefreshIndicator(
+      onRefresh: loadSocialData,
+      child: ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+        children: [
+          // ─────────────────────────────
+          // SOL·LICITUDS
+          // ─────────────────────────────
+          if (pendingRequests.isNotEmpty) ...[
+            _buildSectionTile(
+              icon: Icons.person_add_outlined,
+              title: SocialStrings.sectionRequests,
+              count: pendingRequests.length,
+              isExpanded: isRequestsExpanded,
+              onExpansionChanged: (value) {
+                setState(() => isRequestsExpanded = value);
+              },
+              body: Column(
+                children: pendingRequests
+                    .map(
+                      (request) => Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: _buildPendingRequest(request),
                       ),
-                    ],
-                  ),
-                ),
-        ),
+                    )
+                    .toList(),
+              ),
+            ),
+            const SizedBox(height: 20),
+          ],
 
-        const SizedBox(height: 20),
-
-        // ─────────────────────────────
-        // ACTIVITAT (una per prestatge)
-        // ─────────────────────────────
-        if (activityFeed.isNotEmpty)
+          // ─────────────────────────────
+          // AMICS (en lleixes)
+          // ─────────────────────────────
           _buildSectionTile(
-            icon: Icons.dynamic_feed_outlined,
-            title: SocialStrings.sectionActivitySummary,
-            count: activityFeed.length,
-            isExpanded: isActivityExpanded,
+            icon: Icons.people_outline,
+            title: SocialStrings.sectionFriends,
+            count: friends.length,
+            isExpanded: isFriendsExpanded,
             onExpansionChanged: (value) {
-              setState(() => isActivityExpanded = value);
+              setState(() => isFriendsExpanded = value);
             },
             childrenPadding: EdgeInsets.zero,
-            body: ClipRRect(
-              borderRadius: const BorderRadius.vertical(
-                bottom: Radius.circular(16),
-              ),
-              child: Stack(
-                children: [
-                  const Positioned.fill(child: BookshelfBackground()),
-                  Column(
-                    children: [
-                      ShelfList<ActivityItem>(
-                        items: activityFeed,
-                        scrollable: false,
-                        minColumns: 1,
-                        minItemWidth: 99999,
-                        padding: const EdgeInsets.all(14),
-                        itemBuilder: (context, item) =>
-                            ActivityCard(item: item),
-                      ),
-
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
-                        child: SizedBox(
-                          width: double.infinity,
-                          child: TextButton.icon(
-                            onPressed: () {
-                              pushFade(
-                                context,
-                                (_) => const ActivityFeedPage(),
-                              );
-                            },
-                            icon: const Icon(Icons.arrow_forward),
-                            label: const Text(SocialStrings.seeMore),
+            body: friends.isEmpty
+                ? Padding(
+                    padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
+                    child: _buildEmptyFriends(),
+                  )
+                : ClipRRect(
+                    borderRadius: const BorderRadius.vertical(
+                      bottom: Radius.circular(16),
+                    ),
+                    child: Stack(
+                      children: [
+                        const Positioned.fill(child: BookshelfBackground()),
+                        ShelfList<Profile>(
+                          items: friends,
+                          scrollable: false,
+                          minColumns: 1,
+                          minItemWidth: 99999,
+                          padding: const EdgeInsets.all(14),
+                          itemBuilder: (context, friend) => _ProfileTile(
+                            profile: friend,
+                            onTap: () => openProfile(friend),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ],
+          ),
+
+          const SizedBox(height: 20),
+
+          // ─────────────────────────────
+          // ACTIVITAT (una per prestatge)
+          // ─────────────────────────────
+          if (activityFeed.isNotEmpty)
+            _buildSectionTile(
+              icon: Icons.dynamic_feed_outlined,
+              title: SocialStrings.sectionActivitySummary,
+              count: activityFeed.length,
+              isExpanded: isActivityExpanded,
+              onExpansionChanged: (value) {
+                setState(() => isActivityExpanded = value);
+              },
+              childrenPadding: EdgeInsets.zero,
+              body: ClipRRect(
+                borderRadius: const BorderRadius.vertical(
+                  bottom: Radius.circular(16),
+                ),
+                child: Stack(
+                  children: [
+                    const Positioned.fill(child: BookshelfBackground()),
+                    Column(
+                      children: [
+                        ShelfList<ActivityItem>(
+                          items: activityFeed,
+                          scrollable: false,
+                          minColumns: 1,
+                          minItemWidth: 99999,
+                          padding: const EdgeInsets.all(14),
+                          itemBuilder: (context, item) =>
+                              ActivityCard(item: item),
+                        ),
+
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
+                          child: SizedBox(
+                            width: double.infinity,
+                            child: TextButton.icon(
+                              onPressed: () {
+                                pushFade(
+                                  context,
+                                  (_) => const ActivityFeedPage(),
+                                );
+                              },
+                              icon: const Icon(Icons.arrow_forward),
+                              label: const Text(SocialStrings.seeMore),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-      ],
+        ],
+      ),
     );
   }
 
