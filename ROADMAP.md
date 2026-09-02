@@ -36,5 +36,12 @@
 - [ ] Col·leccions de 4/5 jocs personalitzables per mostrar al perfil
 - [ ] Playlists
 - [x] Escollir plataforma de joc i mostrar-la
+- [ ] Personalització estanteria
+- [ ] Desplegable escollir idioma
+- [ ] Apartat configuració
+- [ ] Animated handlers
+- [ ] More tags and more colors
+
+
 
 

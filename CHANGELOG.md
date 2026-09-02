@@ -4,7 +4,7 @@ Tots els canvis importants d'aquest projecte es documentaran en aquest fitxer.
 
 Aquest projecte segueix el format de Keep a Changelog.
 
-## [Unreleased]
+## [1.0.0] - 02-09-2026
 
 ### Added
 - Connexió amb Supabase.
@@ -20,7 +20,7 @@ Aquest projecte segueix el format de Keep a Changelog.
 - Banners i millora interfície.
 - Part social afegida.
 
-## [0.1.0] - 2026-07-28
+## [0.1.0] - 28-07-2026
 
 ### Added
 - Primera versió funcional de GameShelf.
