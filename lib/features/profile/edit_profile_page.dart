@@ -1,12 +1,14 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:gameshelf/models/profile.dart';
 import 'package:gameshelf/repositories/profile_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:gameshelf/core/services/auth_service.dart';
 import 'package:gameshelf/core/strings/app_strings.dart';
+import 'package:gameshelf/core/strings/legal_strings.dart';
 import 'package:gameshelf/core/strings/profile_strings.dart';
 import 'package:gameshelf/core/utils/error_messages.dart';
 
@@ -728,6 +730,33 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 onTap: isSaving || isDeletingAccount
                     ? null
                     : _showChangePasswordDialog,
+              ),
+            ),
+
+            const SizedBox(height: 32),
+
+            // ───────────────────────────────────
+            // INFORMACIÓ
+            // ───────────────────────────────────
+            const Text(
+              ProfileStrings.informationTitle,
+              style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+            ),
+
+            const SizedBox(height: 10),
+
+            Material(
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
+              borderRadius: BorderRadius.circular(14),
+
+              child: ListTile(
+                leading: const Icon(Icons.info_outline),
+                title: const Text(
+                  LegalStrings.aboutTitle,
+                  style: TextStyle(fontWeight: FontWeight.w600),
+                ),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => context.push('/about'),
               ),
             ),
 

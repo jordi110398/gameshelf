@@ -64,6 +64,8 @@ class ProfileStrings {
   static const saving = 'Guardant...';
   static const saveChanges = 'Guardar canvis';
 
+  static const informationTitle = 'Informació';
+
   static const securityTitle = 'Seguretat';
   static const changePasswordTitle = 'Canviar contrasenya';
   static const changePasswordSubtitle =
