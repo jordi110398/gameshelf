@@ -139,7 +139,11 @@ class _LoginPageState extends State<LoginPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.sports_esports, size: 80),
+                  const Image(
+                    image: AssetImage('assets/logo.png'),
+                    width: 96,
+                    height: 96,
+                  ),
 
                   const SizedBox(height: 24),
 
