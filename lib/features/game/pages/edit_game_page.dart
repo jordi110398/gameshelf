@@ -5,6 +5,7 @@ import 'package:gameshelf/models/game_status.dart';
 import 'package:gameshelf/repositories/supabase_library_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:gameshelf/core/strings/game_strings.dart';
+import 'package:gameshelf/core/widgets/date_field.dart';
 import 'package:gameshelf/core/widgets/responsive_center.dart';
 
 class EditGamePage extends StatefulWidget {
@@ -23,6 +24,12 @@ class _EditGamePageState extends State<EditGamePage> {
   late final TextEditingController hoursController;
   late bool favorite;
   late final TextEditingController reviewController;
+
+  late DateTime startedAt;
+  late DateTime completedAt;
+  late DateTime droppedAt;
+  late DateTime pausedAt;
+  late DateTime resumedAt;
 
   final repository = SupabaseLibraryRepository(Supabase.instance.client);
 
@@ -43,6 +50,14 @@ class _EditGamePageState extends State<EditGamePage> {
     reviewController = TextEditingController(
       text: widget.userGame.review ?? "",
     );
+
+    final now = DateTime.now();
+
+    startedAt = widget.userGame.startedAt ?? now;
+    completedAt = widget.userGame.completedAt ?? now;
+    droppedAt = widget.userGame.droppedAt ?? now;
+    pausedAt = widget.userGame.pausedAt ?? now;
+    resumedAt = widget.userGame.resumedAt ?? now;
   }
 
   bool get canReview {
@@ -51,6 +66,12 @@ class _EditGamePageState extends State<EditGamePage> {
 
   bool get canFavorite {
     return status == GameStatus.completed;
+  }
+
+  // El joc estava pausat i ara se li canvia l'estat: és una represa.
+  bool get isResuming {
+    return widget.userGame.status == GameStatus.paused &&
+        status != GameStatus.paused;
   }
 
   @override
@@ -86,8 +107,21 @@ class _EditGamePageState extends State<EditGamePage> {
                 : reviewController.text.trim()
           : null,
 
-      startedAt: widget.userGame.startedAt,
-      completedAt: widget.userGame.completedAt,
+      startedAt: isWantToPlay ? widget.userGame.startedAt : startedAt,
+
+      completedAt: status == GameStatus.completed
+          ? completedAt
+          : widget.userGame.completedAt,
+
+      droppedAt: status == GameStatus.dropped
+          ? droppedAt
+          : widget.userGame.droppedAt,
+
+      pausedAt: status == GameStatus.paused
+          ? pausedAt
+          : widget.userGame.pausedAt,
+
+      resumedAt: isResuming ? resumedAt : widget.userGame.resumedAt,
     );
 
     await repository.updateUserGame(updatedUserGame);
@@ -159,6 +193,53 @@ class _EditGamePageState extends State<EditGamePage> {
               // Només si NO és Want to Play
               // ───────────────────────────
               if (!isWantToPlay) ...[
+                // ───────────────────────────
+                // DATES
+                // ───────────────────────────
+                DateField(
+                  label: GameStrings.dateStartedLabel,
+                  value: startedAt,
+                  onChanged: (d) => setState(() => startedAt = d),
+                ),
+
+                if (status == GameStatus.completed) ...[
+                  const SizedBox(height: 16),
+                  DateField(
+                    label: GameStrings.dateCompletedLabel,
+                    value: completedAt,
+                    onChanged: (d) => setState(() => completedAt = d),
+                  ),
+                ],
+
+                if (status == GameStatus.dropped) ...[
+                  const SizedBox(height: 16),
+                  DateField(
+                    label: GameStrings.dateDroppedLabel,
+                    value: droppedAt,
+                    onChanged: (d) => setState(() => droppedAt = d),
+                  ),
+                ],
+
+                if (status == GameStatus.paused) ...[
+                  const SizedBox(height: 16),
+                  DateField(
+                    label: GameStrings.datePausedLabel,
+                    value: pausedAt,
+                    onChanged: (d) => setState(() => pausedAt = d),
+                  ),
+                ],
+
+                if (isResuming) ...[
+                  const SizedBox(height: 16),
+                  DateField(
+                    label: GameStrings.dateResumedLabel,
+                    value: resumedAt,
+                    onChanged: (d) => setState(() => resumedAt = d),
+                  ),
+                ],
+
+                const SizedBox(height: 24),
+
                 // ───────────────────────────
                 // VALORACIÓ
                 // Només Completed o Dropped

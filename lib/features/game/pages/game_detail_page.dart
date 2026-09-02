@@ -8,8 +8,10 @@ import 'package:gameshelf/models/user_game.dart';
 import 'package:gameshelf/repositories/supabase_library_repository.dart';
 import 'package:gameshelf/repositories/activity_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:gameshelf/core/strings/app_strings.dart';
 import 'package:gameshelf/core/strings/game_strings.dart';
 import 'package:gameshelf/core/utils/error_messages.dart';
+import 'package:gameshelf/core/widgets/date_field.dart';
 import 'package:gameshelf/core/widgets/responsive_center.dart';
 
 class GameDetailPage extends StatefulWidget {
@@ -143,8 +145,19 @@ class _GameDetailPageState extends State<GameDetailPage> {
 
     if (status == null) return;
 
+    final dates = await _promptForDates(status);
+
+    if (dates == null) return;
+
     try {
-      await repository.addToLibrary(widget.game, status: status);
+      await repository.addToLibrary(
+        widget.game,
+        status: status,
+        startedAt: dates['startedAt'],
+        completedAt: dates['completedAt'],
+        droppedAt: dates['droppedAt'],
+        pausedAt: dates['pausedAt'],
+      );
 
       hasChanges = true;
 
@@ -160,6 +173,90 @@ class _GameDetailPageState extends State<GameDetailPage> {
         ),
       );
     }
+  }
+
+  // ─────────────────────────────────────────────
+  // DATES SEGONS L'ESTAT TRIAT
+  // ─────────────────────────────────────────────
+
+  /// Demana les dates rellevants per a l'estat triat (cap si és "Want to
+  /// Play"). Retorna `null` si l'usuari cancel·la el diàleg.
+  Future<Map<String, DateTime>?> _promptForDates(GameStatus status) async {
+    if (status == GameStatus.wantToPlay) return {};
+
+    var startedAt = DateTime.now();
+    var completedAt = DateTime.now();
+    var droppedAt = DateTime.now();
+    var pausedAt = DateTime.now();
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: const Text(GameStrings.confirmDatesTitle),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  DateField(
+                    label: GameStrings.dateStartedLabel,
+                    value: startedAt,
+                    onChanged: (d) => setDialogState(() => startedAt = d),
+                  ),
+
+                  if (status == GameStatus.completed) ...[
+                    const SizedBox(height: 16),
+                    DateField(
+                      label: GameStrings.dateCompletedLabel,
+                      value: completedAt,
+                      onChanged: (d) => setDialogState(() => completedAt = d),
+                    ),
+                  ],
+
+                  if (status == GameStatus.dropped) ...[
+                    const SizedBox(height: 16),
+                    DateField(
+                      label: GameStrings.dateDroppedLabel,
+                      value: droppedAt,
+                      onChanged: (d) => setDialogState(() => droppedAt = d),
+                    ),
+                  ],
+
+                  if (status == GameStatus.paused) ...[
+                    const SizedBox(height: 16),
+                    DateField(
+                      label: GameStrings.datePausedLabel,
+                      value: pausedAt,
+                      onChanged: (d) => setDialogState(() => pausedAt = d),
+                    ),
+                  ],
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context, false),
+                  child: const Text(AppStrings.actionCancel),
+                ),
+                FilledButton(
+                  onPressed: () => Navigator.pop(context, true),
+                  child: const Text(GameStrings.addToLibraryAction),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+
+    if (confirmed != true) return null;
+
+    return {
+      'startedAt': startedAt,
+      if (status == GameStatus.completed) 'completedAt': completedAt,
+      if (status == GameStatus.dropped) 'droppedAt': droppedAt,
+      if (status == GameStatus.paused) 'pausedAt': pausedAt,
+    };
   }
 
   Widget buildGenreChips(BuildContext context) {

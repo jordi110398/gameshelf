@@ -99,6 +99,10 @@ class SupabaseLibraryRepository implements LibraryRepository {
   Future<void> addToLibrary(
     Game game, {
     GameStatus status = GameStatus.wantToPlay,
+    DateTime? startedAt,
+    DateTime? completedAt,
+    DateTime? droppedAt,
+    DateTime? pausedAt,
   }) async {
     final user = client.auth.currentUser;
 
@@ -116,8 +120,10 @@ class SupabaseLibraryRepository implements LibraryRepository {
       'hours_played': 0,
       'favorite': false,
       'review': null,
-      'started_at': null,
-      'completed_at': null,
+      'started_at': startedAt?.toIso8601String(),
+      'completed_at': completedAt?.toIso8601String(),
+      'dropped_at': droppedAt?.toIso8601String(),
+      'paused_at': pausedAt?.toIso8601String(),
     });
   }
 

@@ -9,6 +9,9 @@ class UserGame {
   final String? review;
   final DateTime? startedAt;
   final DateTime? completedAt;
+  final DateTime? droppedAt;
+  final DateTime? pausedAt;
+  final DateTime? resumedAt;
   final DateTime? createdAt;
 
   const UserGame({
@@ -20,6 +23,9 @@ class UserGame {
     this.review,
     this.startedAt,
     this.completedAt,
+    this.droppedAt,
+    this.pausedAt,
+    this.resumedAt,
     this.createdAt,
   });
 
@@ -68,6 +74,15 @@ class UserGame {
       completedAt: map["completed_at"] != null
           ? DateTime.parse(map["completed_at"])
           : null,
+      droppedAt: map["dropped_at"] != null
+          ? DateTime.parse(map["dropped_at"])
+          : null,
+      pausedAt: map["paused_at"] != null
+          ? DateTime.parse(map["paused_at"])
+          : null,
+      resumedAt: map["resumed_at"] != null
+          ? DateTime.parse(map["resumed_at"])
+          : null,
       createdAt: map["created_at"] != null
           ? DateTime.parse(map["created_at"])
           : null,
@@ -84,6 +99,9 @@ class UserGame {
       "review": review,
       "started_at": startedAt?.toIso8601String(),
       "completed_at": completedAt?.toIso8601String(),
+      "dropped_at": droppedAt?.toIso8601String(),
+      "paused_at": pausedAt?.toIso8601String(),
+      "resumed_at": resumedAt?.toIso8601String(),
     };
   }
 
