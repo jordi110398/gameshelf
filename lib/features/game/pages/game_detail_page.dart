@@ -11,8 +11,17 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:gameshelf/core/strings/app_strings.dart';
 import 'package:gameshelf/core/strings/game_strings.dart';
 import 'package:gameshelf/core/utils/error_messages.dart';
+import 'package:gameshelf/core/utils/platform_visuals.dart';
 import 'package:gameshelf/core/widgets/date_field.dart';
 import 'package:gameshelf/core/widgets/responsive_center.dart';
+
+typedef _GameDetails = ({
+  String? platform,
+  DateTime? startedAt,
+  DateTime? completedAt,
+  DateTime? droppedAt,
+  DateTime? pausedAt,
+});
 
 class GameDetailPage extends StatefulWidget {
   final Game game;
@@ -145,18 +154,19 @@ class _GameDetailPageState extends State<GameDetailPage> {
 
     if (status == null) return;
 
-    final dates = await _promptForDates(status);
+    final details = await _promptForDetails(status);
 
-    if (dates == null) return;
+    if (details == null) return;
 
     try {
       await repository.addToLibrary(
         widget.game,
         status: status,
-        startedAt: dates['startedAt'],
-        completedAt: dates['completedAt'],
-        droppedAt: dates['droppedAt'],
-        pausedAt: dates['pausedAt'],
+        platform: details.platform,
+        startedAt: details.startedAt,
+        completedAt: details.completedAt,
+        droppedAt: details.droppedAt,
+        pausedAt: details.pausedAt,
       );
 
       hasChanges = true;
@@ -176,14 +186,25 @@ class _GameDetailPageState extends State<GameDetailPage> {
   }
 
   // ─────────────────────────────────────────────
-  // DATES SEGONS L'ESTAT TRIAT
+  // PLATAFORMA I DATES SEGONS L'ESTAT TRIAT
   // ─────────────────────────────────────────────
 
-  /// Demana les dates rellevants per a l'estat triat (cap si és "Want to
-  /// Play"). Retorna `null` si l'usuari cancel·la el diàleg.
-  Future<Map<String, DateTime>?> _promptForDates(GameStatus status) async {
-    if (status == GameStatus.wantToPlay) return {};
+  /// Demana la plataforma i les dates rellevants per a l'estat triat (cap
+  /// si és "Want to Play"). Retorna `null` si l'usuari cancel·la el diàleg.
+  Future<_GameDetails?> _promptForDetails(GameStatus status) async {
+    if (status == GameStatus.wantToPlay) {
+      return const (
+        platform: null,
+        startedAt: null,
+        completedAt: null,
+        droppedAt: null,
+        pausedAt: null,
+      );
+    }
 
+    final platformOptions = [...widget.game.platforms, platformNotSpecified];
+
+    var platform = platformOptions.first;
     var startedAt = DateTime.now();
     var completedAt = DateTime.now();
     var droppedAt = DateTime.now();
@@ -196,42 +217,62 @@ class _GameDetailPageState extends State<GameDetailPage> {
           builder: (context, setDialogState) {
             return AlertDialog(
               title: const Text(GameStrings.confirmDatesTitle),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  DateField(
-                    label: GameStrings.dateStartedLabel,
-                    value: startedAt,
-                    onChanged: (d) => setDialogState(() => startedAt = d),
-                  ),
-
-                  if (status == GameStatus.completed) ...[
-                    const SizedBox(height: 16),
-                    DateField(
-                      label: GameStrings.dateCompletedLabel,
-                      value: completedAt,
-                      onChanged: (d) => setDialogState(() => completedAt = d),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    DropdownButtonFormField<String>(
+                      initialValue: platform,
+                      decoration: const InputDecoration(
+                        labelText: GameStrings.platformLabel,
+                        border: OutlineInputBorder(),
+                      ),
+                      items: platformOptions.map((p) {
+                        return DropdownMenuItem(value: p, child: Text(p));
+                      }).toList(),
+                      onChanged: (value) {
+                        if (value == null) return;
+                        setDialogState(() => platform = value);
+                      },
                     ),
-                  ],
 
-                  if (status == GameStatus.dropped) ...[
                     const SizedBox(height: 16),
-                    DateField(
-                      label: GameStrings.dateDroppedLabel,
-                      value: droppedAt,
-                      onChanged: (d) => setDialogState(() => droppedAt = d),
-                    ),
-                  ],
 
-                  if (status == GameStatus.paused) ...[
-                    const SizedBox(height: 16),
                     DateField(
-                      label: GameStrings.datePausedLabel,
-                      value: pausedAt,
-                      onChanged: (d) => setDialogState(() => pausedAt = d),
+                      label: GameStrings.dateStartedLabel,
+                      value: startedAt,
+                      onChanged: (d) => setDialogState(() => startedAt = d),
                     ),
+
+                    if (status == GameStatus.completed) ...[
+                      const SizedBox(height: 16),
+                      DateField(
+                        label: GameStrings.dateCompletedLabel,
+                        value: completedAt,
+                        onChanged: (d) =>
+                            setDialogState(() => completedAt = d),
+                      ),
+                    ],
+
+                    if (status == GameStatus.dropped) ...[
+                      const SizedBox(height: 16),
+                      DateField(
+                        label: GameStrings.dateDroppedLabel,
+                        value: droppedAt,
+                        onChanged: (d) => setDialogState(() => droppedAt = d),
+                      ),
+                    ],
+
+                    if (status == GameStatus.paused) ...[
+                      const SizedBox(height: 16),
+                      DateField(
+                        label: GameStrings.datePausedLabel,
+                        value: pausedAt,
+                        onChanged: (d) => setDialogState(() => pausedAt = d),
+                      ),
+                    ],
                   ],
-                ],
+                ),
               ),
               actions: [
                 TextButton(
@@ -251,12 +292,13 @@ class _GameDetailPageState extends State<GameDetailPage> {
 
     if (confirmed != true) return null;
 
-    return {
-      'startedAt': startedAt,
-      if (status == GameStatus.completed) 'completedAt': completedAt,
-      if (status == GameStatus.dropped) 'droppedAt': droppedAt,
-      if (status == GameStatus.paused) 'pausedAt': pausedAt,
-    };
+    return (
+      platform: platform == platformNotSpecified ? null : platform,
+      startedAt: startedAt,
+      completedAt: status == GameStatus.completed ? completedAt : null,
+      droppedAt: status == GameStatus.dropped ? droppedAt : null,
+      pausedAt: status == GameStatus.paused ? pausedAt : null,
+    );
   }
 
   Widget buildGenreChips(BuildContext context) {

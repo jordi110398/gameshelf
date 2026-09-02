@@ -7,6 +7,7 @@ class UserGame {
   final int hoursPlayed;
   final bool favorite;
   final String? review;
+  final String? platform;
   final DateTime? startedAt;
   final DateTime? completedAt;
   final DateTime? droppedAt;
@@ -21,6 +22,7 @@ class UserGame {
     required this.hoursPlayed,
     required this.favorite,
     this.review,
+    this.platform,
     this.startedAt,
     this.completedAt,
     this.droppedAt,
@@ -68,6 +70,7 @@ class UserGame {
       hoursPlayed: map["hours_played"] ?? 0,
       favorite: map["favorite"] ?? false,
       review: map["review"],
+      platform: map["platform"],
       startedAt: map["started_at"] != null
           ? DateTime.parse(map["started_at"])
           : null,
@@ -97,6 +100,7 @@ class UserGame {
       "hours_played": hoursPlayed,
       "favorite": favorite,
       "review": review,
+      "platform": platform,
       "started_at": startedAt?.toIso8601String(),
       "completed_at": completedAt?.toIso8601String(),
       "dropped_at": droppedAt?.toIso8601String(),

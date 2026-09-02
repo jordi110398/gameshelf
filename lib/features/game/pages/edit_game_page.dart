@@ -5,6 +5,7 @@ import 'package:gameshelf/models/game_status.dart';
 import 'package:gameshelf/repositories/supabase_library_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:gameshelf/core/strings/game_strings.dart';
+import 'package:gameshelf/core/utils/platform_visuals.dart';
 import 'package:gameshelf/core/widgets/date_field.dart';
 import 'package:gameshelf/core/widgets/responsive_center.dart';
 
@@ -24,6 +25,8 @@ class _EditGamePageState extends State<EditGamePage> {
   late final TextEditingController hoursController;
   late bool favorite;
   late final TextEditingController reviewController;
+
+  late String platform;
 
   late DateTime startedAt;
   late DateTime completedAt;
@@ -51,6 +54,10 @@ class _EditGamePageState extends State<EditGamePage> {
       text: widget.userGame.review ?? "",
     );
 
+    platform = platformOptions.contains(widget.userGame.platform)
+        ? widget.userGame.platform!
+        : platformNotSpecified;
+
     final now = DateTime.now();
 
     startedAt = widget.userGame.startedAt ?? now;
@@ -58,6 +65,10 @@ class _EditGamePageState extends State<EditGamePage> {
     droppedAt = widget.userGame.droppedAt ?? now;
     pausedAt = widget.userGame.pausedAt ?? now;
     resumedAt = widget.userGame.resumedAt ?? now;
+  }
+
+  List<String> get platformOptions {
+    return [...widget.game.platforms, platformNotSpecified];
   }
 
   bool get canReview {
@@ -90,6 +101,10 @@ class _EditGamePageState extends State<EditGamePage> {
       igdbId: widget.userGame.igdbId,
 
       status: status,
+
+      platform: isWantToPlay
+          ? widget.userGame.platform
+          : (platform == platformNotSpecified ? null : platform),
 
       // Només Completed o Dropped
       rating: canReview ? rating : null,
@@ -193,6 +208,32 @@ class _EditGamePageState extends State<EditGamePage> {
               // Només si NO és Want to Play
               // ───────────────────────────
               if (!isWantToPlay) ...[
+                // ───────────────────────────
+                // PLATAFORMA
+                // ───────────────────────────
+                DropdownButtonFormField<String>(
+                  initialValue: platform,
+
+                  decoration: const InputDecoration(
+                    labelText: GameStrings.platformLabel,
+                    border: OutlineInputBorder(),
+                  ),
+
+                  items: platformOptions.map((p) {
+                    return DropdownMenuItem(value: p, child: Text(p));
+                  }).toList(),
+
+                  onChanged: (value) {
+                    if (value == null) return;
+
+                    setState(() {
+                      platform = value;
+                    });
+                  },
+                ),
+
+                const SizedBox(height: 16),
+
                 // ───────────────────────────
                 // DATES
                 // ───────────────────────────

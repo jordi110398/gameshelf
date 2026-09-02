@@ -35,5 +35,6 @@
 - [ ] Recomanació de jocs/llistes/jugadors
 - [ ] Col·leccions de 4/5 jocs personalitzables per mostrar al perfil
 - [ ] Playlists
+- [x] Escollir plataforma de joc i mostrar-la
 
 

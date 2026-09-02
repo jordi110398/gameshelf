@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gameshelf/core/navigation/page_transitions.dart';
+import 'package:gameshelf/core/utils/platform_visuals.dart';
 import 'package:gameshelf/core/widgets/star_burst.dart';
 import 'package:gameshelf/features/game/pages/game_detail_page.dart';
 import 'package:gameshelf/models/library_game.dart';
@@ -68,6 +69,9 @@ class _GameCardState extends State<GameCard> {
     final game = widget.libraryGame.game;
     final status = widget.libraryGame.userGame.status;
     final statusColor = status.color;
+    final platformVisual = platformVisualFor(
+      widget.libraryGame.userGame.platform,
+    );
 
     final isMobile = MediaQuery.of(context).size.width < 600;
 
@@ -193,6 +197,37 @@ class _GameCardState extends State<GameCard> {
                           ),
                         ),
                       ),
+
+                      // Insígnia de plataforma, mateix tractament que la
+                      // d'estat però a l'altra cantonada.
+                      if (platformVisual != null)
+                        Positioned(
+                          top: 8,
+                          right: 8,
+                          child: AnimatedOpacity(
+                            opacity: isActive ? 0 : 1,
+                            duration: const Duration(milliseconds: 200),
+                            child: Container(
+                              width: 26,
+                              height: 26,
+                              decoration: BoxDecoration(
+                                color: platformVisual.color,
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.4),
+                                    blurRadius: 4,
+                                  ),
+                                ],
+                              ),
+                              child: Icon(
+                                platformVisual.icon,
+                                color: Colors.white,
+                                size: 15,
+                              ),
+                            ),
+                          ),
+                        ),
                     ],
                   ),
                 ),

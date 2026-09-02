@@ -79,6 +79,17 @@ function validateGame(body: unknown): Record<string, unknown> | null {
     genres = b.genres as string[];
   }
 
+  let platforms: string[] = [];
+  if (b.platforms !== null && b.platforms !== undefined) {
+    if (
+      !Array.isArray(b.platforms) ||
+      !b.platforms.every((p) => typeof p === "string")
+    ) {
+      return null;
+    }
+    platforms = b.platforms as string[];
+  }
+
   // Objecte explícit: mai fem spread del body cru.
   return {
     igdb_id: b.igdb_id,
@@ -92,6 +103,7 @@ function validateGame(body: unknown): Record<string, unknown> | null {
     rating_count: b.rating_count ?? null,
     slug: b.slug ?? null,
     genres,
+    platforms,
   };
 }
 

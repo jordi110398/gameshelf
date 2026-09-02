@@ -19,6 +19,7 @@ class GameStrings {
   static const editAction = 'Editar';
   static const addToLibraryAction = 'Afegir a la biblioteca';
 
+  static const platformLabel = 'Plataforma';
   static const confirmDatesTitle = 'Quan?';
   static const dateStartedLabel = 'Data d\'inici';
   static const dateCompletedLabel = 'Data de finalització';

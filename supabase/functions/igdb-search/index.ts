@@ -99,7 +99,8 @@ fields
   rating,
   rating_count,
   cover.url,
-  genres.name;
+  genres.name,
+  platforms.name;
 limit 20;
 `,
       },
@@ -132,6 +133,9 @@ limit 20;
         : null,
       genres: Array.isArray(game.genres)
         ? game.genres.map((g: { name: string }) => g.name)
+        : [],
+      platforms: Array.isArray(game.platforms)
+        ? game.platforms.map((p: { name: string }) => p.name)
         : [],
     }));
 
