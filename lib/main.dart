@@ -10,6 +10,24 @@ Future<void> main() async {
 
   usePathUrlStrategy();
 
+  // Flutter amaga el missatge d'error real en release i el substitueix per
+  // una caixa grisa buida, cosa que fa que un error de renderització
+  // localitzat sembli que un tros de la pantalla "desapareix" sense cap
+  // pista. Mostrem el missatge també en producció perquè, si torna a
+  // passar, es pugui saber quin és l'error real.
+  ErrorWidget.builder = (details) {
+    return Container(
+      color: Colors.black87,
+      padding: const EdgeInsets.all(8),
+      alignment: Alignment.center,
+      child: Text(
+        details.exceptionAsString(),
+        style: const TextStyle(color: Colors.redAccent, fontSize: 11),
+        textAlign: TextAlign.center,
+      ),
+    );
+  };
+
   // Registra el català per a timeago
   timeago.setLocaleMessages('ca', timeago.CaMessages());
 
