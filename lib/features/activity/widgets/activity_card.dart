@@ -97,17 +97,32 @@ class _ActivityCardState extends State<ActivityCard> {
   // ─────────────────────────────────────────────
 
   void _handleLikeTap(TapDownDetails details) {
-    // Convertim la posició global del tap a coordenades locals de
-    // l'`StarBurst` (que embolcalla tota la card), ja que el tap ve d'un
-    // widget imbricat molt més petit (la fila de l'estrella).
-    final starBurstBox =
-        _starBurstKey.currentContext?.findRenderObject() as RenderBox?;
+    // Posició per defecte: relativa al propi widget tocat (la fila de
+    // l'estrella), no exactament on cal dins l'`StarBurst` (que embolcalla
+    // tota la card), però mai falla.
+    var burstPosition = details.localPosition;
 
-    if (starBurstBox != null) {
-      _starBurstKey.currentState?.burst(
-        starBurstBox.globalToLocal(details.globalPosition),
-      );
+    // Intentem millorar-la convertint-la a coordenades locals de l'
+    // `StarBurst`; si l'`RenderBox` encara no està llest (per exemple,
+    // durant una reconstrucció o una capa sense adjuntar), ens quedem amb
+    // l'aproximació de dalt en lloc de deixar-ho petar -- és només
+    // l'origen d'una animació decorativa, mai val la pena que trenqui res.
+    try {
+      final starBurstRenderObject = _starBurstKey.currentContext
+          ?.findRenderObject();
+
+      if (starBurstRenderObject is RenderBox &&
+          starBurstRenderObject.attached &&
+          starBurstRenderObject.hasSize) {
+        burstPosition = starBurstRenderObject.globalToLocal(
+          details.globalPosition,
+        );
+      }
+    } catch (_) {
+      // Ens quedem amb l'aproximació.
     }
+
+    _starBurstKey.currentState?.burst(burstPosition);
 
     _toggleLike();
   }
