@@ -33,6 +33,18 @@
   <title>GameShelf</title>
   <link rel="manifest" href="manifest.json">
 
+  <!-- Evita que el navegador (Safari/Chrome mòbil) intercepti els gestos
+       d'arrossegar com a "endarrere/endavant" (swipe horitzontal) o
+       "pull-to-refresh" natiu (swipe vertical des de dalt), perquè
+       Flutter els pugui rebre ell mateix (p. ex. el nostre propi
+       RefreshIndicator). Sense això, un swipe lateral pot fer que el
+       navegador navegui l'historial en lloc de l'app. -->
+  <style>
+    html, body {
+      overscroll-behavior: none;
+    }
+  </style>
+
   <!-- Captura l'esdeveniment natiu d'instal·lació PWA (Android/Chrome/Edge)
        perquè l'app pugui oferir un botó propi "Instal·la l'app" en lloc de
        dependre que l'usuari trobi l'opció amagada al menú del navegador. -->

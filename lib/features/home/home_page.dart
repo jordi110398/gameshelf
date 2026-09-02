@@ -670,16 +670,22 @@ class HomePageState extends State<HomePage> {
                   Expanded(
                     child: filteredGames.isEmpty
                         ? _buildEmptyState(context)
-                        : GameGrid(
-                            games: filteredGames,
-                            onLibraryChanged: refresh,
-                            onGameDeleted: (libraryGame) async {
-                              await repository.removeGame(
-                                libraryGame.game.igdbId,
-                              );
-
+                        : RefreshIndicator(
+                            onRefresh: () async {
                               refresh();
+                              await libraryFuture;
                             },
+                            child: GameGrid(
+                              games: filteredGames,
+                              onLibraryChanged: refresh,
+                              onGameDeleted: (libraryGame) async {
+                                await repository.removeGame(
+                                  libraryGame.game.igdbId,
+                                );
+
+                                refresh();
+                              },
+                            ),
                           ),
                   ),
                 ],

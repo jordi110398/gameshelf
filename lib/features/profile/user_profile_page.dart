@@ -809,185 +809,192 @@ class _UserProfilePageState extends State<UserProfilePage> {
   Widget _buildContent() {
     final currentStats = stats!;
 
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // ─────────────────────────────────────
-          // CAPÇALERA (degradat + avatar flotant)
-          // ─────────────────────────────────────
-          _buildHeader(context),
+    return RefreshIndicator(
+      onRefresh: loadProfile,
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // ─────────────────────────────────────
+            // CAPÇALERA (degradat + avatar flotant)
+            // ─────────────────────────────────────
+            _buildHeader(context),
 
-          Padding(
-            padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                const SizedBox(height: 12),
-
-                // ─────────────────────────────────────
-                // NICKNAME
-                // ─────────────────────────────────────
-                Text(
-                  '@${currentProfile.nickname}',
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.w800,
-                    shadows: [
-                      Shadow(color: Colors.black87, blurRadius: 6),
-                      Shadow(color: Colors.black54, blurRadius: 12),
-                    ],
-                  ),
-                ),
-
-                // ─────────────────────────────────────
-                // TAGS
-                // ─────────────────────────────────────
-                if (userTags.isNotEmpty) ...[
-                  const SizedBox(height: 10),
-                  UserTagsRow(games: games),
-                ],
-
-                // ─────────────────────────────────────
-                // BIO
-                // ─────────────────────────────────────
-                if (currentProfile.bio != null &&
-                    currentProfile.bio!.trim().isNotEmpty) ...[
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
                   const SizedBox(height: 12),
+
+                  // ─────────────────────────────────────
+                  // NICKNAME
+                  // ─────────────────────────────────────
                   Text(
-                    currentProfile.bio!,
+                    '@${currentProfile.nickname}',
                     textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 15, color: Colors.grey.shade600),
-                  ),
-                ],
-
-                const SizedBox(height: 26),
-
-                // ─────────────────────────────────────
-                // ESTADÍSTIQUES
-                // ─────────────────────────────────────
-                WoodDrawerContainer(
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 12,
-                    horizontal: 8,
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: _ProfileStat(
-                          value: currentStats.games.toString(),
-                          label: ProfileStrings.statGames,
-                        ),
-                      ),
-                      _statDivider(context),
-                      Expanded(
-                        child: _ProfileStat(
-                          value: currentStats.completed.toString(),
-                          label: ProfileStrings.statCompleted,
-                        ),
-                      ),
-                      _statDivider(context),
-                      Expanded(
-                        child: _ProfileStat(
-                          value: currentStats.reviews.toString(),
-                          label: ProfileStrings.statReviews,
-                        ),
-                      ),
-                      _statDivider(context),
-                      Expanded(
-                        child: _ProfileStat(
-                          value: '${currentStats.hours}h',
-                          label: ProfileStrings.statHours,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                // ─────────────────────────────────────
-                // PREFERITS
-                // ─────────────────────────────────────
-                if (favoriteGames.isNotEmpty) ...[
-                  const SizedBox(height: 28),
-                  _buildFavoritesShelf(),
-                ],
-
-                // ─────────────────────────────────────
-                // RESUM DE REVIEWS
-                // NOMÉS EL MEU PERFIL
-                // ─────────────────────────────────────
-                if (isMyProfile) ...[
-                  const SizedBox(height: 36),
-
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: const Text(
-                      ProfileStrings.myReviewsTitle,
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w800,
+                      shadows: [
+                        Shadow(color: Colors.black87, blurRadius: 6),
+                        Shadow(color: Colors.black54, blurRadius: 12),
+                      ],
                     ),
                   ),
 
-                  const SizedBox(height: 14),
-
-                  _buildReviewsSummary(),
+                  // ─────────────────────────────────────
+                  // TAGS
+                  // ─────────────────────────────────────
+                  if (userTags.isNotEmpty) ...[
+                    const SizedBox(height: 10),
+                    UserTagsRow(games: games),
+                  ],
 
                   // ─────────────────────────────────────
-                  // COMPLETATS AGRUPATS PER MES
+                  // BIO
                   // ─────────────────────────────────────
-                  if (completedByMonth.isNotEmpty) ...[
-                    const SizedBox(height: 32),
-                    _buildCompletedByMonth(),
+                  if (currentProfile.bio != null &&
+                      currentProfile.bio!.trim().isNotEmpty) ...[
+                    const SizedBox(height: 12),
+                    Text(
+                      currentProfile.bio!,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 15,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+                  ],
+
+                  const SizedBox(height: 26),
+
+                  // ─────────────────────────────────────
+                  // ESTADÍSTIQUES
+                  // ─────────────────────────────────────
+                  WoodDrawerContainer(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 12,
+                      horizontal: 8,
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: _ProfileStat(
+                            value: currentStats.games.toString(),
+                            label: ProfileStrings.statGames,
+                          ),
+                        ),
+                        _statDivider(context),
+                        Expanded(
+                          child: _ProfileStat(
+                            value: currentStats.completed.toString(),
+                            label: ProfileStrings.statCompleted,
+                          ),
+                        ),
+                        _statDivider(context),
+                        Expanded(
+                          child: _ProfileStat(
+                            value: currentStats.reviews.toString(),
+                            label: ProfileStrings.statReviews,
+                          ),
+                        ),
+                        _statDivider(context),
+                        Expanded(
+                          child: _ProfileStat(
+                            value: '${currentStats.hours}h',
+                            label: ProfileStrings.statHours,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // ─────────────────────────────────────
+                  // PREFERITS
+                  // ─────────────────────────────────────
+                  if (favoriteGames.isNotEmpty) ...[
+                    const SizedBox(height: 28),
+                    _buildFavoritesShelf(),
+                  ],
+
+                  // ─────────────────────────────────────
+                  // RESUM DE REVIEWS
+                  // NOMÉS EL MEU PERFIL
+                  // ─────────────────────────────────────
+                  if (isMyProfile) ...[
+                    const SizedBox(height: 36),
+
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: const Text(
+                        ProfileStrings.myReviewsTitle,
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 14),
+
+                    _buildReviewsSummary(),
+
+                    // ─────────────────────────────────────
+                    // COMPLETATS AGRUPATS PER MES
+                    // ─────────────────────────────────────
+                    if (completedByMonth.isNotEmpty) ...[
+                      const SizedBox(height: 32),
+                      _buildCompletedByMonth(),
+                    ],
+                  ],
+
+                  // ─────────────────────────────────────
+                  // GAMESHELF
+                  // NOMÉS ALTRES USUARIS
+                  // ─────────────────────────────────────
+                  if (!isMyProfile) ...[
+                    const SizedBox(height: 36),
+
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        ProfileStrings.gameshelfOf(currentProfile.nickname),
+                        style: const TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 14),
+
+                    // FILTRES
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: _buildStatusFilters(),
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    // JOCS
+                    if (filteredGames.isEmpty)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 30),
+                        child: Text(
+                          _emptyGamesText(),
+                          style: TextStyle(color: Colors.grey.shade600),
+                        ),
+                      )
+                    else
+                      _buildGameGrid(),
                   ],
                 ],
-
-                // ─────────────────────────────────────
-                // GAMESHELF
-                // NOMÉS ALTRES USUARIS
-                // ─────────────────────────────────────
-                if (!isMyProfile) ...[
-                  const SizedBox(height: 36),
-
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      ProfileStrings.gameshelfOf(currentProfile.nickname),
-                      style: const TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 14),
-
-                  // FILTRES
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: _buildStatusFilters(),
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  // JOCS
-                  if (filteredGames.isEmpty)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 30),
-                      child: Text(
-                        _emptyGamesText(),
-                        style: TextStyle(color: Colors.grey.shade600),
-                      ),
-                    )
-                  else
-                    _buildGameGrid(),
-                ],
-              ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

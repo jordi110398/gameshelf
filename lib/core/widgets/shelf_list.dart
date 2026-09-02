@@ -114,6 +114,10 @@ class ShelfList<T> extends StatelessWidget {
 
         if (scrollable) {
           return ListView.builder(
+            // Sempre "always scrollable": encara que hi hagi pocs elements
+            // i no calgui desplaçament, cal poder-la arrossegar per activar
+            // un `RefreshIndicator` que l'envolti.
+            physics: const AlwaysScrollableScrollPhysics(),
             padding: padding,
             itemCount: rows.length,
             itemBuilder: (context, index) =>
