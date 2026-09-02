@@ -828,6 +828,10 @@ class _UserProfilePageState extends State<UserProfilePage> {
                   style: const TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.w800,
+                    shadows: [
+                      Shadow(color: Colors.black87, blurRadius: 6),
+                      Shadow(color: Colors.black54, blurRadius: 12),
+                    ],
                   ),
                 ),
 
