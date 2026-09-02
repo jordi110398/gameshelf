@@ -4,8 +4,7 @@
 class LegalStrings {
   const LegalStrings._();
 
-  // TODO: substituir per l'email definitiu un cop creat.
-  static const contactEmail = 'privacitat@gameshelf.app';
+  static const contactEmail = 'contacte@gameshelfapp.net';
 
   static const lastUpdated = 'Última actualització: setembre de 2026.';
 
@@ -186,4 +185,17 @@ class LegalStrings {
       'd\'IGDB.';
 
   static const aboutLegalDocumentsTitle = 'Documents legals';
+
+  static const installAppTitle = 'Instal·la l\'app';
+  static const installAppSubtitle =
+      'Afegeix GameShelf a la pantalla d\'inici del teu mòbil';
+  static const installAppDialogTitle = 'Com instal·lar-la';
+  static const installAppDialogBody =
+      'A Safari (iPhone/iPad): toca la icona de Compartir i selecciona '
+      '"Afegeix a la pantalla d\'inici".\n\n'
+      'Al navegador de l\'ordinador o a Chrome/Edge per Android: busca la '
+      'icona d\'instal·lar a la barra d\'adreces, o l\'opció "Instal·la '
+      'GameShelf" al menú (⋮).';
+  static const installAppAcceptedMessage =
+      'GameShelf s\'ha afegit a la teva pantalla d\'inici!';
 }

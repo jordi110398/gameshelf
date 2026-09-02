@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:gameshelf/core/services/pwa_install_service.dart';
+import 'package:gameshelf/core/strings/app_strings.dart';
 import 'package:gameshelf/core/strings/legal_strings.dart';
 import 'package:gameshelf/features/legal/widgets/legal_page_scaffold.dart';
 
@@ -8,6 +10,38 @@ const _appVersion = '1.0.0';
 
 class AboutPage extends StatelessWidget {
   const AboutPage({super.key});
+
+  static const _installService = PwaInstallService();
+
+  Future<void> _handleInstallTap(BuildContext context) async {
+    if (_installService.isNativePromptAvailable) {
+      final accepted = await _installService.promptInstall();
+
+      if (!context.mounted || !accepted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text(LegalStrings.installAppAcceptedMessage)),
+      );
+
+      return;
+    }
+
+    await showDialog<void>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text(LegalStrings.installAppDialogTitle),
+          content: const Text(LegalStrings.installAppDialogBody),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text(AppStrings.actionAccept),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +51,11 @@ class AboutPage extends StatelessWidget {
         const SizedBox(height: 8),
 
         const Center(
-          child: Icon(Icons.sports_esports, size: 64, color: Colors.deepPurple),
+          child: Image(
+            image: AssetImage('assets/logo.png'),
+            width: 88,
+            height: 88,
+          ),
         ),
 
         const SizedBox(height: 12),
@@ -76,6 +114,17 @@ class AboutPage extends StatelessWidget {
 
         const LegalSectionTitle(LegalStrings.aboutCatalogDataTitle),
         const LegalParagraph(LegalStrings.aboutCatalogDataBody),
+
+        if (!_installService.isStandalone) ...[
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            leading: const Icon(Icons.install_mobile_outlined),
+            title: const Text(LegalStrings.installAppTitle),
+            subtitle: const Text(LegalStrings.installAppSubtitle),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => _handleInstallTap(context),
+          ),
+        ],
 
         const LegalSectionTitle(LegalStrings.aboutLegalDocumentsTitle),
 

@@ -32,6 +32,35 @@
 
   <title>GameShelf</title>
   <link rel="manifest" href="manifest.json">
+
+  <!-- Captura l'esdeveniment natiu d'instal·lació PWA (Android/Chrome/Edge)
+       perquè l'app pugui oferir un botó propi "Instal·la l'app" en lloc de
+       dependre que l'usuari trobi l'opció amagada al menú del navegador. -->
+  <script>
+    window.gsDeferredInstallPrompt = null;
+
+    window.addEventListener('beforeinstallprompt', (event) => {
+      event.preventDefault();
+      window.gsDeferredInstallPrompt = event;
+    });
+
+    window.gsInstallAvailable = function () {
+      return window.gsDeferredInstallPrompt !== null;
+    };
+
+    window.gsPromptInstall = async function () {
+      if (!window.gsDeferredInstallPrompt) return false;
+      window.gsDeferredInstallPrompt.prompt();
+      const choice = await window.gsDeferredInstallPrompt.userChoice;
+      window.gsDeferredInstallPrompt = null;
+      return choice.outcome === 'accepted';
+    };
+
+    window.gsIsStandalone = function () {
+      return window.matchMedia('(display-mode: standalone)').matches ||
+        window.navigator.standalone === true;
+    };
+  </script>
 </head>
 <body>
   <!--

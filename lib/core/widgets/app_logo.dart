@@ -15,17 +15,15 @@ class AppLogo extends StatelessWidget {
   Widget build(BuildContext context) {
     final isMobile = MediaQuery.sizeOf(context).width < 600;
 
+    final logoSize = isMobile ? 26.0 : 32.0;
+
     return Padding(
       padding: const EdgeInsets.only(left: 12),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            Icons.sports_esports,
-            color: Colors.deepPurple,
-            size: isMobile ? 22 : 28,
-          ),
-          const SizedBox(width: 6),
+          Image.asset('assets/logo.png', width: logoSize, height: logoSize),
+          const SizedBox(width: 8),
           Text(
             isMobile ? "GS" : "GameShelf",
             style: TextStyle(
