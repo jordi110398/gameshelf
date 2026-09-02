@@ -4,6 +4,8 @@ import 'package:gameshelf/models/user_game.dart';
 import 'package:gameshelf/models/game_status.dart';
 import 'package:gameshelf/repositories/supabase_library_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:gameshelf/core/strings/game_strings.dart';
+import 'package:gameshelf/core/widgets/responsive_center.dart';
 
 class EditGamePage extends StatefulWidget {
   final Game game;
@@ -102,184 +104,187 @@ class _EditGamePageState extends State<EditGamePage> {
         status == GameStatus.completed || status == GameStatus.dropped;
 
     return Scaffold(
-      appBar: AppBar(title: Text("Editar ${widget.game.title}")),
+      appBar: AppBar(title: Text(GameStrings.editTitle(widget.game.title))),
 
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
+      body: ResponsiveCenter(
+        maxWidth: 480,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
 
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
 
-          children: [
-            // ───────────────────────────
-            // ESTAT
-            // ───────────────────────────
-            const Text(
-              "Estat",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-
-            const SizedBox(height: 12),
-
-            DropdownButtonFormField<GameStatus>(
-              initialValue: status,
-
-              decoration: const InputDecoration(border: OutlineInputBorder()),
-
-              items: GameStatus.values.map((value) {
-                return DropdownMenuItem(
-                  value: value,
-                  child: Row(
-                    children: [
-                      Icon(value.icon, color: value.color, size: 20),
-                      const SizedBox(width: 8),
-                      Text(value.displayName),
-                    ],
-                  ),
-                );
-              }).toList(),
-
-              onChanged: (value) {
-                if (value == null) return;
-
-                setState(() {
-                  status = value;
-                });
-              },
-            ),
-
-            const SizedBox(height: 24),
-
-            // ───────────────────────────
-            // INFORMACIÓ DE JOC
-            // Només si NO és Want to Play
-            // ───────────────────────────
-            if (!isWantToPlay) ...[
+            children: [
               // ───────────────────────────
-              // VALORACIÓ
-              // Només Completed o Dropped
-              // ───────────────────────────
-              if (canReview) ...[
-                const Text(
-                  "La meva valoració",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-
-                const SizedBox(height: 12),
-
-                Row(
-                  children: List.generate(
-                    5,
-                    (index) => IconButton(
-                      onPressed: () {
-                        setState(() {
-                          rating = index + 1;
-                        });
-                      },
-                      icon: Icon(
-                        index < rating ? Icons.star : Icons.star_border,
-                        color: Colors.amber,
-                      ),
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 24),
-              ],
-
-              // ───────────────────────────
-              // FAVORIT
-              // ───────────────────────────
-              if (canFavorite) ...[
-                SwitchListTile(
-                  contentPadding: EdgeInsets.zero,
-
-                  value: favorite,
-
-                  title: const Text("Marcar com a favorit"),
-
-                  secondary: Icon(
-                    favorite ? Icons.favorite : Icons.favorite_border,
-                    color: favorite ? Colors.red : null,
-                  ),
-
-                  onChanged: (value) {
-                    setState(() {
-                      favorite = value;
-                    });
-                  },
-                ),
-
-                const SizedBox(height: 24),
-              ],
-
-              // ───────────────────────────
-              // HORES
+              // ESTAT
               // ───────────────────────────
               const Text(
-                "Hores jugades",
+                GameStrings.statusTitle,
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
 
               const SizedBox(height: 12),
 
-              TextFormField(
-                controller: hoursController,
-                keyboardType: TextInputType.number,
+              DropdownButtonFormField<GameStatus>(
+                initialValue: status,
 
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  hintText: "0",
-                  suffixText: "hores",
-                ),
+                decoration: const InputDecoration(border: OutlineInputBorder()),
+
+                items: GameStatus.values.map((value) {
+                  return DropdownMenuItem(
+                    value: value,
+                    child: Row(
+                      children: [
+                        Icon(value.icon, color: value.color, size: 20),
+                        const SizedBox(width: 8),
+                        Text(value.displayName),
+                      ],
+                    ),
+                  );
+                }).toList(),
+
+                onChanged: (value) {
+                  if (value == null) return;
+
+                  setState(() {
+                    status = value;
+                  });
+                },
               ),
 
               const SizedBox(height: 24),
 
               // ───────────────────────────
-              // REVIEW
-              // Només Completed o Dropped
+              // INFORMACIÓ DE JOC
+              // Només si NO és Want to Play
               // ───────────────────────────
-              if (canReview) ...[
+              if (!isWantToPlay) ...[
+                // ───────────────────────────
+                // VALORACIÓ
+                // Només Completed o Dropped
+                // ───────────────────────────
+                if (canReview) ...[
+                  const Text(
+                    GameStrings.myRatingTitle,
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  Row(
+                    children: List.generate(
+                      5,
+                      (index) => IconButton(
+                        onPressed: () {
+                          setState(() {
+                            rating = index + 1;
+                          });
+                        },
+                        icon: Icon(
+                          index < rating ? Icons.star : Icons.star_border,
+                          color: Colors.amber,
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 24),
+                ],
+
+                // ───────────────────────────
+                // FAVORIT
+                // ───────────────────────────
+                if (canFavorite) ...[
+                  SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+
+                    value: favorite,
+
+                    title: const Text(GameStrings.markAsFavorite),
+
+                    secondary: Icon(
+                      favorite ? Icons.star : Icons.star_border,
+                      color: favorite ? Colors.amber : null,
+                    ),
+
+                    onChanged: (value) {
+                      setState(() {
+                        favorite = value;
+                      });
+                    },
+                  ),
+
+                  const SizedBox(height: 24),
+                ],
+
+                // ───────────────────────────
+                // HORES
+                // ───────────────────────────
                 const Text(
-                  "La meva review",
+                  GameStrings.hoursPlayedTitle,
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
 
                 const SizedBox(height: 12),
 
                 TextFormField(
-                  controller: reviewController,
-                  minLines: 5,
-                  maxLines: 8,
-                  maxLength: 500,
+                  controller: hoursController,
+                  keyboardType: TextInputType.number,
 
                   decoration: const InputDecoration(
                     border: OutlineInputBorder(),
-                    hintText: "Escriu la teva opinió...",
-                    alignLabelWithHint: true,
+                    hintText: "0",
+                    suffixText: GameStrings.hoursSuffix,
                   ),
                 ),
 
                 const SizedBox(height: 24),
+
+                // ───────────────────────────
+                // REVIEW
+                // Només Completed o Dropped
+                // ───────────────────────────
+                if (canReview) ...[
+                  const Text(
+                    GameStrings.myReviewTitle,
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  TextFormField(
+                    controller: reviewController,
+                    minLines: 5,
+                    maxLines: 8,
+                    maxLength: 500,
+
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      hintText: GameStrings.reviewHint,
+                      alignLabelWithHint: true,
+                    ),
+                  ),
+
+                  const SizedBox(height: 24),
+                ],
               ],
-            ],
 
-            // ───────────────────────────
-            // GUARDAR
-            // ───────────────────────────
-            SizedBox(
-              width: double.infinity,
+              // ───────────────────────────
+              // GUARDAR
+              // ───────────────────────────
+              SizedBox(
+                width: double.infinity,
 
-              child: FilledButton.icon(
-                onPressed: save,
+                child: FilledButton.icon(
+                  onPressed: save,
 
-                icon: const Icon(Icons.save),
+                  icon: const Icon(Icons.save),
 
-                label: const Text("Guardar"),
+                  label: const Text(GameStrings.saveAction),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

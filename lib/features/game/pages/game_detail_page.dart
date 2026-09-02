@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:gameshelf/core/navigation/page_transitions.dart';
 import 'package:gameshelf/core/widgets/rating_stars.dart';
 import 'package:gameshelf/features/game/pages/edit_game_page.dart';
 import 'package:gameshelf/models/game.dart';
 import 'package:gameshelf/models/game_status.dart';
 import 'package:gameshelf/models/user_game.dart';
 import 'package:gameshelf/repositories/supabase_library_repository.dart';
+import 'package:gameshelf/repositories/activity_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:gameshelf/core/strings/game_strings.dart';
+import 'package:gameshelf/core/utils/error_messages.dart';
+import 'package:gameshelf/core/widgets/responsive_center.dart';
 
 class GameDetailPage extends StatefulWidget {
   final Game game;
@@ -19,14 +24,17 @@ class GameDetailPage extends StatefulWidget {
 class _GameDetailPageState extends State<GameDetailPage> {
   UserGame? userGame;
   bool hasChanges = false;
+  ReviewLikes? reviewLikes;
 
   late final SupabaseLibraryRepository repository;
+  late final ActivityRepository activityRepository;
 
   @override
   void initState() {
     super.initState();
 
     repository = SupabaseLibraryRepository(Supabase.instance.client);
+    activityRepository = ActivityRepository(Supabase.instance.client);
 
     loadUserGame();
   }
@@ -39,6 +47,20 @@ class _GameDetailPageState extends State<GameDetailPage> {
     setState(() {
       userGame = game;
     });
+
+    if (game != null && (game.review ?? '').trim().isNotEmpty) {
+      final likes = await activityRepository.getMyReviewLikes([
+        widget.game.igdbId,
+      ]);
+
+      if (!mounted) return;
+
+      setState(() {
+        reviewLikes = likes[widget.game.igdbId];
+      });
+    } else {
+      reviewLikes = null;
+    }
   }
 
   Future<void> showAddToLibrarySheet() async {
@@ -52,7 +74,7 @@ class _GameDetailPageState extends State<GameDetailPage> {
               const Padding(
                 padding: EdgeInsets.all(20),
                 child: Text(
-                  "Afegir a GameShelf",
+                  GameStrings.addToLibrarySheetTitle,
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
               ),
@@ -62,7 +84,7 @@ class _GameDetailPageState extends State<GameDetailPage> {
                   GameStatus.playing.icon,
                   color: GameStatus.playing.color,
                 ),
-                title: const Text("Playing"),
+                title: Text(GameStatus.playing.displayName),
                 onTap: () {
                   Navigator.pop(context, GameStatus.playing);
                 },
@@ -73,7 +95,7 @@ class _GameDetailPageState extends State<GameDetailPage> {
                   GameStatus.completed.icon,
                   color: GameStatus.completed.color,
                 ),
-                title: const Text("Completed"),
+                title: Text(GameStatus.completed.displayName),
                 onTap: () {
                   Navigator.pop(context, GameStatus.completed);
                 },
@@ -84,7 +106,7 @@ class _GameDetailPageState extends State<GameDetailPage> {
                   GameStatus.wantToPlay.icon,
                   color: GameStatus.wantToPlay.color,
                 ),
-                title: const Text("Want to Play"),
+                title: Text(GameStatus.wantToPlay.displayName),
                 onTap: () {
                   Navigator.pop(context, GameStatus.wantToPlay);
                 },
@@ -95,7 +117,7 @@ class _GameDetailPageState extends State<GameDetailPage> {
                   GameStatus.paused.icon,
                   color: GameStatus.paused.color,
                 ),
-                title: const Text("Paused"),
+                title: Text(GameStatus.paused.displayName),
                 onTap: () {
                   Navigator.pop(context, GameStatus.paused);
                 },
@@ -106,7 +128,7 @@ class _GameDetailPageState extends State<GameDetailPage> {
                   GameStatus.dropped.icon,
                   color: GameStatus.dropped.color,
                 ),
-                title: const Text("Dropped"),
+                title: Text(GameStatus.dropped.displayName),
                 onTap: () {
                   Navigator.pop(context, GameStatus.dropped);
                 },
@@ -121,11 +143,23 @@ class _GameDetailPageState extends State<GameDetailPage> {
 
     if (status == null) return;
 
-    await repository.addToLibrary(widget.game, status: status);
+    try {
+      await repository.addToLibrary(widget.game, status: status);
 
-    hasChanges = true;
+      hasChanges = true;
 
-    await loadUserGame();
+      await loadUserGame();
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            '${GameStrings.addToLibraryFailedPrefix}${friendlyError(e)}',
+          ),
+        ),
+      );
+    }
   }
 
   Widget buildGenreChips(BuildContext context) {
@@ -160,7 +194,7 @@ class _GameDetailPageState extends State<GameDetailPage> {
             mainAxisSize: MainAxisSize.min,
             children: [
               const Text(
-                "IGDB",
+                GameStrings.igdbLabel,
                 style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
               ),
               const SizedBox(width: 4),
@@ -214,198 +248,228 @@ class _GameDetailPageState extends State<GameDetailPage> {
         title: Text(widget.game.title),
       ),
 
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
+      body: ResponsiveCenter(
+        maxWidth: 720,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
 
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // ─────────────────────────────
-            // PORTADA BANNER
-            // ─────────────────────────────
-            Hero(
-              tag: widget.game.igdbId,
-              child: ClipRRect(
-                borderRadius: const BorderRadius.only(
-                  bottomLeft: Radius.circular(20),
-                  bottomRight: Radius.circular(20),
-                ),
-                child: AspectRatio(
-                  aspectRatio: 16 / 8,
-                  child: widget.game.artworkUrl != null
-                      ? Image.network(
-                          widget.game.artworkUrl!,
-                          fit: BoxFit.cover,
-                        )
-                      : widget.game.coverUrl != null
-                      ? Image.network(widget.game.coverUrl!, fit: BoxFit.cover)
-                      : const ColoredBox(color: Colors.grey),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // ─────────────────────────────
+              // PORTADA BANNER
+              // ─────────────────────────────
+              Hero(
+                tag: widget.game.igdbId,
+                child: ClipRRect(
+                  borderRadius: const BorderRadius.only(
+                    bottomLeft: Radius.circular(20),
+                    bottomRight: Radius.circular(20),
+                  ),
+                  child: AspectRatio(
+                    aspectRatio: 16 / 8,
+                    child: widget.game.artworkUrl != null
+                        ? Image.network(
+                            widget.game.artworkUrl!,
+                            fit: BoxFit.cover,
+                          )
+                        : widget.game.coverUrl != null
+                        ? Image.network(
+                            widget.game.coverUrl!,
+                            fit: BoxFit.cover,
+                          )
+                        : const ColoredBox(color: Colors.grey),
+                  ),
                 ),
               ),
-            ),
 
-            const SizedBox(height: 24),
+              const SizedBox(height: 24),
 
-            // ─────────────────────────────
-            // THUMBNAIL I TÍTOL
-            // ─────────────────────────────
-            const SizedBox(height: 20),
+              // ─────────────────────────────
+              // THUMBNAIL I TÍTOL
+              // ─────────────────────────────
+              const SizedBox(height: 20),
 
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(6),
-                  child: widget.game.coverUrl != null
-                      ? Image.network(
-                          widget.game.coverUrl!,
-                          width: 48,
-                          height: 68,
-                          fit: BoxFit.cover,
-                        )
-                      : const SizedBox(
-                          width: 48,
-                          height: 68,
-                          child: ColoredBox(color: Colors.grey),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(6),
+                    child: widget.game.coverUrl != null
+                        ? Image.network(
+                            widget.game.coverUrl!,
+                            width: 48,
+                            height: 68,
+                            fit: BoxFit.cover,
+                          )
+                        : const SizedBox(
+                            width: 48,
+                            height: 68,
+                            child: ColoredBox(color: Colors.grey),
+                          ),
+                  ),
+
+                  const SizedBox(width: 14),
+
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          widget.game.title,
+                          style: const TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                ),
 
-                const SizedBox(width: 14),
+                        if (widget.game.releaseDate != null)
+                          Text(
+                            widget.game.releaseDate!.year.toString(),
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.grey.shade400,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              // ─────────────────────────────
+              // GÈNERES
+              // ─────────────────────────────
+              if (widget.game.genres.isNotEmpty) ...[
+                const SizedBox(height: 16),
 
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                buildGenreChips(context),
+              ],
+              // ─────────────────────────────
+              // INFORMACIÓ PERSONAL
+              // ─────────────────────────────
+              if (inLibrary) ...[
+                const SizedBox(height: 16),
+
+                buildUserGameInfo(context),
+
+                // ───────────────────────────
+                // REVIEW
+                // ───────────────────────────
+                // ───────────────────────────
+                // REVIEW
+                // ───────────────────────────
+                if (userGame!.status != GameStatus.wantToPlay) ...[
+                  const SizedBox(height: 24),
+                  const Divider(),
+                  const SizedBox(height: 16),
+
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Text(
-                        widget.game.title,
-                        style: const TextStyle(
-                          fontSize: 28,
+                      const Text(
+                        GameStrings.myReviewTitle,
+                        style: TextStyle(
+                          fontSize: 22,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
 
-                      if (widget.game.releaseDate != null)
-                        Text(
-                          widget.game.releaseDate!.year.toString(),
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.grey.shade400,
-                          ),
-                        ),
+                      RatingStars(rating: userGame!.rating ?? 0, size: 22),
                     ],
                   ),
-                ),
-              ],
-            ),
-            // ─────────────────────────────
-            // GÈNERES
-            // ─────────────────────────────
-            if (widget.game.genres.isNotEmpty) ...[
-              const SizedBox(height: 16),
 
-              buildGenreChips(context),
-            ],
-            // ─────────────────────────────
-            // INFORMACIÓ PERSONAL
-            // ─────────────────────────────
-            if (inLibrary) ...[
-              const SizedBox(height: 16),
+                  if (userGame!.review != null &&
+                      userGame!.review!.isNotEmpty) ...[
+                    const SizedBox(height: 12),
 
-              buildUserGameInfo(context),
+                    Text(userGame!.review!),
 
-              // ───────────────────────────
-              // REVIEW
-              // ───────────────────────────
-              // ───────────────────────────
-              // REVIEW
-              // ───────────────────────────
-              if (userGame!.status != GameStatus.wantToPlay) ...[
-                const SizedBox(height: 24),
-                const Divider(),
-                const SizedBox(height: 16),
-
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    const Text(
-                      "La meva review",
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
+                    if (reviewLikes != null && reviewLikes!.likeCount > 0) ...[
+                      const SizedBox(height: 10),
+                      Row(
+                        children: [
+                          Icon(
+                            reviewLikes!.likedByMe
+                                ? Icons.star
+                                : Icons.star_border,
+                            size: 17,
+                            color: Colors.amber,
+                          ),
+                          const SizedBox(width: 5),
+                          Text(
+                            '${reviewLikes!.likeCount}',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: Colors.amber,
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-
-                    RatingStars(rating: userGame!.rating ?? 0, size: 22),
+                    ],
                   ],
-                ),
-
-                if (userGame!.review != null &&
-                    userGame!.review!.isNotEmpty) ...[
-                  const SizedBox(height: 12),
-
-                  Text(userGame!.review!),
                 ],
               ],
-            ],
 
-            // ─────────────────────────────
-            // DESCRIPCIÓ
-            // ─────────────────────────────
-            if (widget.game.summary != null) ...[
-              const SizedBox(height: 32),
+              // ─────────────────────────────
+              // DESCRIPCIÓ
+              // ─────────────────────────────
+              if (widget.game.summary != null) ...[
+                const SizedBox(height: 32),
 
-              const Divider(),
+                const Divider(),
 
-              const SizedBox(height: 24),
+                const SizedBox(height: 24),
 
-              const Text(
-                "Descripció",
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-              ),
+                const Text(
+                  GameStrings.descriptionTitle,
+                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                ),
 
-              const SizedBox(height: 12),
+                const SizedBox(height: 12),
 
-              Text(widget.game.summary!),
-            ],
+                Text(widget.game.summary!),
+              ],
 
-            const SizedBox(height: 40),
+              const SizedBox(height: 40),
 
-            // ─────────────────────────────
-            // BOTÓ
-            // ─────────────────────────────
-            SizedBox(
-              width: double.infinity,
+              // ─────────────────────────────
+              // BOTÓ
+              // ─────────────────────────────
+              SizedBox(
+                width: double.infinity,
 
-              child: FilledButton.icon(
-                icon: Icon(inLibrary ? Icons.edit : Icons.add),
+                child: FilledButton.icon(
+                  icon: Icon(inLibrary ? Icons.edit : Icons.add),
 
-                label: Text(inLibrary ? "Editar" : "Afegir a la biblioteca"),
+                  label: Text(
+                    inLibrary
+                        ? GameStrings.editAction
+                        : GameStrings.addToLibraryAction,
+                  ),
 
-                onPressed: () async {
-                  if (!inLibrary) {
-                    await showAddToLibrarySheet();
-                    return;
-                  }
+                  onPressed: () async {
+                    if (!inLibrary) {
+                      await showAddToLibrarySheet();
+                      return;
+                    }
 
-                  final edited = await Navigator.push<bool>(
-                    context,
-
-                    MaterialPageRoute(
-                      builder: (_) =>
+                    final edited = await pushFade<bool>(
+                      context,
+                      (_) =>
                           EditGamePage(game: widget.game, userGame: userGame!),
-                    ),
-                  );
+                    );
 
-                  if (edited == true) {
-                    hasChanges = true;
-                  }
+                    if (edited == true) {
+                      hasChanges = true;
+                    }
 
-                  await loadUserGame();
-                },
+                    await loadUserGame();
+                  },
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

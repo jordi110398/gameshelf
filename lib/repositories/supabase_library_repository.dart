@@ -32,16 +32,11 @@ class SupabaseLibraryRepository implements LibraryRepository {
         .eq('user_id', user.id);
 
     return response.map((row) {
-      final game = Game.fromMap(
-        row['games'] as Map<String, dynamic>,
-      );
+      final game = Game.fromMap(row['games'] as Map<String, dynamic>);
 
       final userGame = UserGame.fromMap(row);
 
-      return LibraryGame(
-        game: game,
-        userGame: userGame,
-      );
+      return LibraryGame(game: game, userGame: userGame);
     }).toList();
   }
 
@@ -87,12 +82,14 @@ class SupabaseLibraryRepository implements LibraryRepository {
   // ─────────────────────────────────────────────
 
   Future<void> saveGame(Game game) async {
-    await client
-        .from('games')
-        .upsert(
-          game.toMap(),
-          onConflict: 'igdb_id',
-        );
+    final response = await client.functions.invoke(
+      'save-game',
+      body: game.toMap(),
+    );
+
+    if (response.status != 200) {
+      throw Exception('No s\'ha pogut desar el joc');
+    }
   }
 
   // ─────────────────────────────────────────────
@@ -181,16 +178,11 @@ class SupabaseLibraryRepository implements LibraryRepository {
         .eq('user_id', userId);
 
     return response.map((row) {
-      final game = Game.fromMap(
-        row['games'] as Map<String, dynamic>,
-      );
+      final game = Game.fromMap(row['games'] as Map<String, dynamic>);
 
       final userGame = UserGame.fromMap(row);
 
-      return LibraryGame(
-        game: game,
-        userGame: userGame,
-      );
+      return LibraryGame(game: game, userGame: userGame);
     }).toList();
   }
 }

@@ -4,7 +4,10 @@ class Profile {
   final String? avatarUrl;
   final String? bio;
   final DateTime? createdAt;
-  final String email;
+
+  // Només ve informat quan el perfil és el de l'usuari autenticat
+  // (profiles_public, usat per veure altres usuaris, no exposa l'email).
+  final String? email;
 
   const Profile({
     required this.id,
@@ -12,7 +15,7 @@ class Profile {
     this.avatarUrl,
     this.bio,
     this.createdAt,
-    required this.email,
+    this.email,
   });
 
   factory Profile.fromMap(Map<String, dynamic> map) {
@@ -24,7 +27,7 @@ class Profile {
       createdAt: map['created_at'] != null
           ? DateTime.parse(map['created_at'] as String)
           : null,
-      email: map['email'] as String,
+      email: map['email'] as String?,
     );
   }
 

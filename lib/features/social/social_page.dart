@@ -1,4 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:gameshelf/core/navigation/page_transitions.dart';
+import 'package:gameshelf/core/strings/app_strings.dart';
+import 'package:gameshelf/core/strings/social_strings.dart';
+import 'package:gameshelf/core/widgets/app_logo.dart';
+import 'package:gameshelf/core/widgets/bookshelf_background.dart';
+import 'package:gameshelf/core/widgets/shelf_list.dart';
+import 'package:gameshelf/core/widgets/shimmer_box.dart';
+import 'package:gameshelf/core/widgets/wood_drawer_container.dart';
 import 'package:gameshelf/features/profile/user_profile_page.dart';
 import 'package:gameshelf/models/profile.dart';
 import 'package:gameshelf/repositories/profile_repository.dart';
@@ -8,15 +16,17 @@ import 'package:gameshelf/models/activity_item.dart';
 import 'package:gameshelf/repositories/activity_repository.dart';
 import 'package:gameshelf/features/activity/widgets/activity_card.dart';
 import 'package:gameshelf/features/activity/activity_feed_page.dart';
+import 'package:gameshelf/core/utils/error_messages.dart';
+import 'package:gameshelf/core/widgets/responsive_center.dart';
 
 class SocialPage extends StatefulWidget {
   const SocialPage({super.key});
 
   @override
-  State<SocialPage> createState() => _SocialPageState();
+  State<SocialPage> createState() => SocialPageState();
 }
 
-class _SocialPageState extends State<SocialPage> {
+class SocialPageState extends State<SocialPage> {
   late final ProfileRepository repository;
   late final TextEditingController searchController;
   late final ActivityRepository activityRepository;
@@ -92,16 +102,17 @@ class _SocialPageState extends State<SocialPage> {
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('No s\'han pogut buscar els usuaris: $e')),
+        SnackBar(
+          content: Text(
+            '${SocialStrings.searchUsersFailedPrefix}${friendlyError(e)}',
+          ),
+        ),
       );
     }
   }
 
   Future<void> openProfile(Profile profile) async {
-    await Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => UserProfilePage(profile: profile)),
-    );
+    await pushFade(context, (_) => UserProfilePage(profile: profile));
   }
 
   Future<void> loadSocialData() async {
@@ -129,7 +140,9 @@ class _SocialPageState extends State<SocialPage> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('No s\'han pogut carregar les dades socials: $e'),
+          content: Text(
+            '${SocialStrings.loadSocialFailedPrefix}${friendlyError(e)}',
+          ),
         ),
       );
     }
@@ -138,43 +151,56 @@ class _SocialPageState extends State<SocialPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Social')),
-      body: Column(
+      appBar: AppBar(
+        leadingWidth: AppLogo.width(context),
+        leading: const AppLogo(),
+        title: const Text(SocialStrings.appBarTitle),
+      ),
+      body: Stack(
         children: [
-          // ─────────────────────────────
-          // CERCADOR
-          // ─────────────────────────────
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
-            child: TextField(
-              controller: searchController,
-              textInputAction: TextInputAction.search,
-              onSubmitted: (_) {
-                searchProfiles();
-              },
-              decoration: InputDecoration(
-                hintText: 'Buscar usuaris...',
-                prefixIcon: const Icon(Icons.search),
-                suffixIcon: IconButton(
-                  icon: const Icon(Icons.arrow_forward),
-                  onPressed: searchProfiles,
+          const Positioned.fill(child: BookshelfBackground()),
+          ResponsiveCenter(
+            maxWidth: 640,
+            child: Column(
+              children: [
+                // ─────────────────────────────
+                // CERCADOR
+                // ─────────────────────────────
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
+                  child: TextField(
+                    controller: searchController,
+                    textInputAction: TextInputAction.search,
+                    onSubmitted: (_) {
+                      searchProfiles();
+                    },
+                    decoration: InputDecoration(
+                      hintText: SocialStrings.searchHint,
+                      prefixIcon: const Icon(Icons.search),
+                      suffixIcon: IconButton(
+                        icon: const Icon(Icons.arrow_forward),
+                        onPressed: searchProfiles,
+                      ),
+                      filled: true,
+                      fillColor: Theme.of(context)
+                          .colorScheme
+                          .surfaceContainerHighest
+                          .withValues(alpha: 0.75),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        borderSide: BorderSide.none,
+                      ),
+                    ),
+                  ),
                 ),
-                filled: true,
-                fillColor: Theme.of(
-                  context,
-                ).colorScheme.surfaceContainerHighest,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(14),
-                  borderSide: BorderSide.none,
-                ),
-              ),
+
+                // ─────────────────────────────
+                // RESULTATS
+                // ─────────────────────────────
+                Expanded(child: _buildResults()),
+              ],
             ),
           ),
-
-          // ─────────────────────────────
-          // RESULTATS
-          // ─────────────────────────────
-          Expanded(child: _buildResults()),
         ],
       ),
     );
@@ -184,21 +210,18 @@ class _SocialPageState extends State<SocialPage> {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(28),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(16),
-      ),
+      decoration: woodDrawerDecoration(),
       child: Column(
         children: [
           Icon(Icons.people_outline, size: 42, color: Colors.grey.shade500),
           const SizedBox(height: 12),
           Text(
-            'Encara no tens amics',
+            SocialStrings.emptyFriendsTitle,
             style: const TextStyle(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 4),
           Text(
-            'Busca altres usuaris de GameShelf per afegir-los.',
+            SocialStrings.emptyFriendsSubtitle,
             textAlign: TextAlign.center,
             style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
           ),
@@ -209,7 +232,7 @@ class _SocialPageState extends State<SocialPage> {
 
   Widget _buildResults() {
     if (isLoading || isSocialLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const _SocialSkeleton();
     }
 
     // ─────────────────────────────
@@ -227,14 +250,14 @@ class _SocialPageState extends State<SocialPage> {
     if (profiles.isEmpty) {
       return _buildEmptyState(
         icon: Icons.person_search,
-        text: 'No s\'han trobat usuaris',
+        text: SocialStrings.emptySearchResults,
       );
     }
 
     return ListView.separated(
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
       itemCount: profiles.length,
-      separatorBuilder: (_, __) {
+      separatorBuilder: (_, _) {
         return const SizedBox(height: 8);
       },
       itemBuilder: (context, index) {
@@ -260,90 +283,121 @@ class _SocialPageState extends State<SocialPage> {
         if (pendingRequests.isNotEmpty) ...[
           _buildSectionTile(
             icon: Icons.person_add_outlined,
-            title: 'Sol·licituds',
+            title: SocialStrings.sectionRequests,
             count: pendingRequests.length,
             isExpanded: isRequestsExpanded,
             onExpansionChanged: (value) {
               setState(() => isRequestsExpanded = value);
             },
-            children: pendingRequests
-                .map(
-                  (request) => Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: _buildPendingRequest(request),
-                  ),
-                )
-                .toList(),
+            body: Column(
+              children: pendingRequests
+                  .map(
+                    (request) => Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: _buildPendingRequest(request),
+                    ),
+                  )
+                  .toList(),
+            ),
           ),
           const SizedBox(height: 20),
         ],
 
         // ─────────────────────────────
-        // AMICS
+        // AMICS (en lleixes)
         // ─────────────────────────────
         _buildSectionTile(
           icon: Icons.people_outline,
-          title: 'Amics',
+          title: SocialStrings.sectionFriends,
           count: friends.length,
           isExpanded: isFriendsExpanded,
           onExpansionChanged: (value) {
             setState(() => isFriendsExpanded = value);
           },
-          children: friends.isEmpty
-              ? [_buildEmptyFriends()]
-              : friends
-                    .map(
-                      (friend) => Padding(
-                        padding: const EdgeInsets.only(bottom: 8),
-                        child: _ProfileTile(
+          childrenPadding: EdgeInsets.zero,
+          body: friends.isEmpty
+              ? Padding(
+                  padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
+                  child: _buildEmptyFriends(),
+                )
+              : ClipRRect(
+                  borderRadius: const BorderRadius.vertical(
+                    bottom: Radius.circular(16),
+                  ),
+                  child: Stack(
+                    children: [
+                      const Positioned.fill(child: BookshelfBackground()),
+                      ShelfList<Profile>(
+                        items: friends,
+                        scrollable: false,
+                        minColumns: 1,
+                        minItemWidth: 99999,
+                        padding: const EdgeInsets.all(14),
+                        itemBuilder: (context, friend) => _ProfileTile(
                           profile: friend,
                           onTap: () => openProfile(friend),
                         ),
                       ),
-                    )
-                    .toList(),
+                    ],
+                  ),
+                ),
         ),
 
         const SizedBox(height: 20),
 
         // ─────────────────────────────
-        // ACTIVITAT
+        // ACTIVITAT (una per prestatge)
         // ─────────────────────────────
         if (activityFeed.isNotEmpty)
           _buildSectionTile(
             icon: Icons.dynamic_feed_outlined,
-            title: 'Resum activitats',
+            title: SocialStrings.sectionActivitySummary,
             count: activityFeed.length,
             isExpanded: isActivityExpanded,
             onExpansionChanged: (value) {
               setState(() => isActivityExpanded = value);
             },
-            children: [
-              ...activityFeed.map(
-                (item) => Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: ActivityCard(item: item),
-                ),
+            childrenPadding: EdgeInsets.zero,
+            body: ClipRRect(
+              borderRadius: const BorderRadius.vertical(
+                bottom: Radius.circular(16),
               ),
-
-              const SizedBox(height: 4),
-
-              SizedBox(
-                width: double.infinity,
-                child: TextButton.icon(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const ActivityFeedPage(),
+              child: Stack(
+                children: [
+                  const Positioned.fill(child: BookshelfBackground()),
+                  Column(
+                    children: [
+                      ShelfList<ActivityItem>(
+                        items: activityFeed,
+                        scrollable: false,
+                        minColumns: 1,
+                        minItemWidth: 99999,
+                        padding: const EdgeInsets.all(14),
+                        itemBuilder: (context, item) =>
+                            ActivityCard(item: item),
                       ),
-                    );
-                  },
-                  icon: const Icon(Icons.arrow_forward),
-                  label: const Text('Veure més'),
-                ),
+
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
+                        child: SizedBox(
+                          width: double.infinity,
+                          child: TextButton.icon(
+                            onPressed: () {
+                              pushFade(
+                                context,
+                                (_) => const ActivityFeedPage(),
+                              );
+                            },
+                            icon: const Icon(Icons.arrow_forward),
+                            label: const Text(SocialStrings.seeMore),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
       ],
     );
@@ -355,51 +409,62 @@ class _SocialPageState extends State<SocialPage> {
     required int count,
     required bool isExpanded,
     required ValueChanged<bool> onExpansionChanged,
-    required List<Widget> children,
+    required Widget body,
+    EdgeInsetsGeometry childrenPadding = const EdgeInsets.fromLTRB(
+      14,
+      0,
+      14,
+      14,
+    ),
   }) {
-    return Theme(
-      data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
-      child: Material(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(16),
-        clipBehavior: Clip.antiAlias,
-        child: ExpansionTile(
-          initiallyExpanded: isExpanded,
-          onExpansionChanged: onExpansionChanged,
-          tilePadding: const EdgeInsets.symmetric(horizontal: 14),
-          childrenPadding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
-          iconColor: Theme.of(context).colorScheme.primary,
-          collapsedIconColor: Colors.grey.shade500,
-          title: Row(
-            children: [
-              Icon(icon, size: 20),
-              const SizedBox(width: 8),
-              Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primary,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  '$count',
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.onPrimary,
-                    fontSize: 12,
+    return Container(
+      decoration: woodDrawerDecoration(),
+      clipBehavior: Clip.antiAlias,
+      child: Theme(
+        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+        child: Material(
+          color: Colors.transparent,
+          child: ExpansionTile(
+            initiallyExpanded: isExpanded,
+            onExpansionChanged: onExpansionChanged,
+            tilePadding: const EdgeInsets.symmetric(horizontal: 14),
+            childrenPadding: childrenPadding,
+            iconColor: Theme.of(context).colorScheme.primary,
+            collapsedIconColor: Colors.grey.shade500,
+            title: Row(
+              children: [
+                Icon(icon, size: 20),
+                const SizedBox(width: 8),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 16,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-              ),
-            ],
+                const SizedBox(width: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 2,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primary,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    '$count',
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onPrimary,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            children: [body],
           ),
-          children: children,
         ),
       ),
     );
@@ -414,7 +479,12 @@ class _SocialPageState extends State<SocialPage> {
         if (!snapshot.hasData) {
           return const SizedBox(
             height: 70,
-            child: Center(child: CircularProgressIndicator()),
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: 6),
+              child: ShimmerBox(
+                borderRadius: BorderRadius.all(Radius.circular(16)),
+              ),
+            ),
           );
         }
 
@@ -463,66 +533,68 @@ class _ProfileTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Theme.of(context).colorScheme.surfaceContainerHighest,
-      borderRadius: BorderRadius.circular(16),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(16),
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(14),
-          child: Row(
-            children: [
-              // AVATAR
-              CircleAvatar(
-                radius: 28,
-                backgroundImage:
-                    profile.avatarUrl != null && profile.avatarUrl!.isNotEmpty
-                    ? NetworkImage(profile.avatarUrl!)
-                    : null,
-                child: profile.avatarUrl == null || profile.avatarUrl!.isEmpty
-                    ? const Icon(Icons.person, size: 28)
-                    : null,
-              ),
+    return Container(
+      decoration: woodDrawerDecoration(borderRadius: BorderRadius.circular(16)),
+      clipBehavior: Clip.antiAlias,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.all(14),
+            child: Row(
+              children: [
+                // AVATAR
+                CircleAvatar(
+                  radius: 28,
+                  backgroundImage:
+                      profile.avatarUrl != null && profile.avatarUrl!.isNotEmpty
+                      ? NetworkImage(profile.avatarUrl!)
+                      : null,
+                  child: profile.avatarUrl == null || profile.avatarUrl!.isEmpty
+                      ? const Icon(Icons.person, size: 28)
+                      : null,
+                ),
 
-              const SizedBox(width: 14),
+                const SizedBox(width: 14),
 
-              // INFORMACIÓ
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '@${profile.nickname}',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-
-                    if (profile.bio != null &&
-                        profile.bio!.trim().isNotEmpty) ...[
-                      const SizedBox(height: 4),
+                // INFORMACIÓ
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                       Text(
-                        profile.bio!,
-                        maxLines: 2,
+                        '@${profile.nickname}',
+                        maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: Colors.grey.shade600,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
+
+                      if (profile.bio != null &&
+                          profile.bio!.trim().isNotEmpty) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          profile.bio!,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Colors.grey.shade600,
+                          ),
+                        ),
+                      ],
                     ],
-                  ],
+                  ),
                 ),
-              ),
 
-              const SizedBox(width: 8),
+                const SizedBox(width: 8),
 
-              const Icon(Icons.chevron_right, color: Colors.grey),
-            ],
+                const Icon(Icons.chevron_right, color: Colors.grey),
+              ],
+            ),
           ),
         ),
       ),
@@ -543,9 +615,8 @@ class _PendingRequestTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Theme.of(context).colorScheme.surfaceContainerHighest,
-      borderRadius: BorderRadius.circular(16),
+    return Container(
+      decoration: woodDrawerDecoration(borderRadius: BorderRadius.circular(16)),
       child: Padding(
         padding: const EdgeInsets.all(14),
         child: Row(
@@ -573,19 +644,48 @@ class _PendingRequestTile extends StatelessWidget {
             ),
 
             IconButton(
-              tooltip: 'Rebutjar',
+              tooltip: AppStrings.actionReject,
               onPressed: onReject,
               icon: const Icon(Icons.close),
             ),
 
             IconButton(
-              tooltip: 'Acceptar',
+              tooltip: AppStrings.actionAccept,
               onPressed: onAccept,
               icon: const Icon(Icons.check),
             ),
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Esquelet de càrrega de la pantalla social, en lloc d'un spinner genèric.
+class _SocialSkeleton extends StatelessWidget {
+  const _SocialSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      physics: const NeverScrollableScrollPhysics(),
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+      children: [
+        const ShimmerBox(
+          height: 72,
+          borderRadius: BorderRadius.all(Radius.circular(16)),
+        ),
+        const SizedBox(height: 20),
+        const ShimmerBox(
+          height: 160,
+          borderRadius: BorderRadius.all(Radius.circular(16)),
+        ),
+        const SizedBox(height: 20),
+        const ShimmerBox(
+          height: 220,
+          borderRadius: BorderRadius.all(Radius.circular(16)),
+        ),
+      ],
     );
   }
 }
