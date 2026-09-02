@@ -1,11 +1,11 @@
 {
-    "name": "gameshelf",
-    "short_name": "gameshelf",
+    "name": "GameShelf",
+    "short_name": "GameShelf",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#14101C",
+    "theme_color": "#8B5CF6",
+    "description": "Fes seguiment de la teva biblioteca de videojocs, escriu reviews i comparteix la teva activitat amb amics.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

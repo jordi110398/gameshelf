@@ -1,30 +1,69 @@
-import 'package:gameshelf/models/game_status.dart';
 class Game {
-  final int id;
+  final int igdbId;
 
-  // IGDB
   final String title;
-  final String cover;
-  final String platform;
+  final String? coverUrl;
+  final String? artworkUrl;
 
-  // Usuari
-  final int rating;          // 0-5
-  final int hoursPlayed;
-  final String review;
+  final String? summary;
+  final String? storyline;
 
-  final GameStatus status;
+  final DateTime? releaseDate;
 
-  final bool favorite;
+  final double? rating;
+  final int? ratingCount;
+
+  final String? slug;
+
+  final List<String> genres;
 
   const Game({
-    required this.id,
+    required this.igdbId,
     required this.title,
-    required this.cover,
-    required this.platform,
-    required this.rating,
-    required this.hoursPlayed,
-    required this.review,
-    required this.status,
-    required this.favorite,
+    this.coverUrl,
+    this.artworkUrl,
+    this.summary,
+    this.storyline,
+    this.releaseDate,
+    this.rating,
+    this.ratingCount,
+    this.slug,
+    this.genres = const [],
   });
+
+  factory Game.fromMap(Map<String, dynamic> map) {
+    return Game(
+      igdbId: map["igdb_id"] as int,
+      title: map["title"] as String,
+      coverUrl: map["cover_url"],
+      artworkUrl: map["artwork_url"],
+      summary: map["summary"],
+      storyline: map["storyline"],
+      releaseDate: map["release_date"] != null
+          ? DateTime.parse(map["release_date"])
+          : null,
+      rating: map["rating"]?.toDouble(),
+      ratingCount: map["rating_count"],
+      slug: map["slug"],
+      genres: map["genres"] != null
+          ? List<String>.from(map["genres"])
+          : const [],
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      "igdb_id": igdbId,
+      "title": title,
+      "cover_url": coverUrl,
+      "artwork_url": artworkUrl,
+      "summary": summary,
+      "storyline": storyline,
+      "release_date": releaseDate?.toIso8601String(),
+      "rating": rating,
+      "rating_count": ratingCount,
+      "slug": slug,
+      "genres": genres,
+    };
+  }
 }

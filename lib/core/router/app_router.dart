@@ -1,9 +1,18 @@
 import 'package:gameshelf/core/router/go_router_refresh_stream.dart';
+
 import 'package:gameshelf/features/auth/login/login_page.dart';
 import 'package:gameshelf/features/auth/register/register_page.dart';
-import 'package:gameshelf/features/home/home_page.dart';
-import 'package:gameshelf/features/profile/profile_page.dart';
+import 'package:gameshelf/features/auth/register/email_confirmation_page.dart';
+import 'package:gameshelf/features/auth/auth_callback_page.dart';
+import 'package:gameshelf/features/auth/forgot_password_page.dart';
+import 'package:gameshelf/features/auth/reset_password_page.dart';
+
+import 'package:gameshelf/features/shell/main_shell_page.dart';
 import 'package:gameshelf/features/search/search_page.dart';
+import 'package:gameshelf/features/legal/about_page.dart';
+import 'package:gameshelf/features/legal/privacy_policy_page.dart';
+import 'package:gameshelf/features/legal/cookies_policy_page.dart';
+
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -12,19 +21,39 @@ final supabase = Supabase.instance.client;
 final appRouter = GoRouter(
   initialLocation: "/",
 
-  refreshListenable: GoRouterRefreshStream(
-    supabase.auth.onAuthStateChange,
-  ),
+  refreshListenable: GoRouterRefreshStream(supabase.auth.onAuthStateChange),
 
   redirect: (context, state) {
     final loggedIn = supabase.auth.currentSession != null;
-    final isLogin = state.matchedLocation == "/";
-    final isRegister = state.matchedLocation == "/register";
+    final location = state.matchedLocation;
 
-    if (!loggedIn && !isLogin && !isRegister) {
+    final isLogin = location == "/";
+    final isRegister = location == "/register";
+    final isEmailConfirmation = location == "/email-confirmation";
+    final isForgotPassword = location == "/forgot-password";
+    final isResetPassword = location == "/auth/reset-password";
+    final isAuthCallback = location == "/auth/callback";
+    final isAbout = location == "/about";
+    final isLegal = location.startsWith("/legal/");
+
+    final isAuthRoute =
+        isLogin ||
+        isRegister ||
+        isEmailConfirmation ||
+        isForgotPassword ||
+        isResetPassword ||
+        isAuthCallback ||
+        isAbout ||
+        isLegal;
+
+    // Si no està autenticat, només pot accedir
+    // a les rutes d'autenticació.
+    if (!loggedIn && !isAuthRoute) {
       return "/";
     }
 
+    // Si està autenticat i intenta anar al login o registre,
+    // el portem a home.
     if (loggedIn && (isLogin || isRegister)) {
       return "/home";
     }
@@ -33,10 +62,7 @@ final appRouter = GoRouter(
   },
 
   routes: [
-    GoRoute(
-      path: "/",
-      builder: (context, state) => const LoginPage(),
-    ),
+    GoRoute(path: "/", builder: (context, state) => const LoginPage()),
 
     GoRoute(
       path: "/register",
@@ -44,18 +70,43 @@ final appRouter = GoRouter(
     ),
 
     GoRoute(
-      path: "/home",
-      builder: (context, state) => const HomePage(),
+      path: "/email-confirmation",
+      builder: (context, state) {
+        final email = state.extra as String;
+
+        return EmailConfirmationPage(email: email);
+      },
     ),
 
     GoRoute(
-      path: "/profile",
-      builder: (context, state) => const ProfilePage(),
+      path: "/auth/callback",
+      builder: (context, state) => const AuthCallbackPage(),
     ),
 
     GoRoute(
-      path: "/search",
-      builder: (context, state) => const SearchPage(),
+      path: "/forgot-password",
+      builder: (context, state) => const ForgotPasswordPage(),
+    ),
+
+    GoRoute(
+      path: "/auth/reset-password",
+      builder: (context, state) => const ResetPasswordPage(),
+    ),
+
+    GoRoute(path: "/home", builder: (context, state) => const MainShellPage()),
+
+    GoRoute(path: "/search", builder: (context, state) => const SearchPage()),
+
+    GoRoute(path: "/about", builder: (context, state) => const AboutPage()),
+
+    GoRoute(
+      path: "/legal/privacy",
+      builder: (context, state) => const PrivacyPolicyPage(),
+    ),
+
+    GoRoute(
+      path: "/legal/cookies",
+      builder: (context, state) => const CookiesPolicyPage(),
     ),
   ],
 );
