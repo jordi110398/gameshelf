@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:gameshelf/core/navigation/page_transitions.dart';
+import 'package:gameshelf/core/strings/home_strings.dart';
+import 'package:gameshelf/core/utils/error_messages.dart';
 import 'package:gameshelf/core/utils/platform_visuals.dart';
 import 'package:gameshelf/core/widgets/star_burst.dart';
 import 'package:gameshelf/features/game/pages/game_detail_page.dart';
 import 'package:gameshelf/models/library_game.dart';
 import 'package:gameshelf/models/game_status.dart';
+import 'package:gameshelf/models/user_game.dart';
+import 'package:gameshelf/repositories/supabase_library_repository.dart';
 import 'package:gameshelf/features/social/social_game_detail_page.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'game_overlay.dart';
 
 class GameCard extends StatefulWidget {
@@ -31,8 +36,26 @@ class GameCard extends StatefulWidget {
 
 class _GameCardState extends State<GameCard> {
   bool isHovered = false;
+  late bool _favorite;
 
   final _starBurstKey = GlobalKey<StarBurstState>();
+  final _repository = SupabaseLibraryRepository(Supabase.instance.client);
+
+  @override
+  void initState() {
+    super.initState();
+    _favorite = widget.libraryGame.userGame.favorite;
+  }
+
+  @override
+  void didUpdateWidget(covariant GameCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (oldWidget.libraryGame.userGame.favorite !=
+        widget.libraryGame.userGame.favorite) {
+      _favorite = widget.libraryGame.userGame.favorite;
+    }
+  }
 
   Future<void> openGameDetail() async {
     if (widget.socialNickname != null) {
@@ -58,10 +81,88 @@ class _GameCardState extends State<GameCard> {
   }
 
   void _maybeTriggerStarBurst(Offset localPosition) {
-    final isFavorite = widget.libraryGame.userGame.favorite;
-    if (!isFavorite) return;
+    if (!_favorite) return;
 
     _starBurstKey.currentState?.burst(localPosition);
+  }
+
+  // ─────────────────────────────────────────────
+  // PREFERIT (MANTENIR PREMUT)
+  // ─────────────────────────────────────────────
+
+  Future<void> _handleLongPress(LongPressStartDetails details) async {
+    // Només a la pròpia biblioteca (no al mirar el prestatge d'un altre
+    // usuari), i només als jocs completats -- mateixa regla que ja
+    // s'aplica a `edit_game_page.dart`.
+    if (widget.socialNickname != null) return;
+
+    final userGame = widget.libraryGame.userGame;
+
+    if (userGame.status != GameStatus.completed) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(HomeStrings.favoriteNotCompletedMessage),
+        ),
+      );
+      return;
+    }
+
+    final newFavorite = !_favorite;
+
+    setState(() {
+      _favorite = newFavorite;
+    });
+
+    if (newFavorite) {
+      _starBurstKey.currentState?.burst(details.localPosition);
+    }
+
+    try {
+      await _repository.updateUserGame(
+        UserGame(
+          igdbId: userGame.igdbId,
+          status: userGame.status,
+          rating: userGame.rating,
+          hoursPlayed: userGame.hoursPlayed,
+          favorite: newFavorite,
+          review: userGame.review,
+          platform: userGame.platform,
+          startedAt: userGame.startedAt,
+          completedAt: userGame.completedAt,
+          droppedAt: userGame.droppedAt,
+          pausedAt: userGame.pausedAt,
+          resumedAt: userGame.resumedAt,
+        ),
+      );
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            newFavorite
+                ? HomeStrings.favoriteAddedMessage
+                : HomeStrings.favoriteRemovedMessage,
+          ),
+        ),
+      );
+
+      widget.onLibraryChanged?.call();
+    } catch (e) {
+      if (!mounted) return;
+
+      setState(() {
+        _favorite = !newFavorite;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            '${HomeStrings.favoriteUpdateFailedPrefix}${friendlyError(e)}',
+          ),
+        ),
+      );
+    }
   }
 
   @override
@@ -81,6 +182,7 @@ class _GameCardState extends State<GameCard> {
       onTapUp: (details) {
         _maybeTriggerStarBurst(details.localPosition);
       },
+      onLongPressStart: _handleLongPress,
       onTap: () async {
         if (isMobile) {
           // Primer tap: activar aquesta card

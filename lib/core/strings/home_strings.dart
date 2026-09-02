@@ -68,4 +68,15 @@ class HomeStrings {
 
   static const addGameTooltip = 'Afegir joc';
   static const notificationsTooltip = 'Notificacions';
+
+  // ─────────────────────────────────────────────
+  // PREFERIT (MANTENIR PREMUT LA TARGETA)
+  // ─────────────────────────────────────────────
+
+  static const favoriteAddedMessage = 'Afegit als preferits';
+  static const favoriteRemovedMessage = 'Tret dels preferits';
+  static const favoriteNotCompletedMessage =
+      'Només es poden marcar com a preferits els jocs completats';
+  static const favoriteUpdateFailedPrefix =
+      'No s\'ha pogut actualitzar el preferit: ';
 }
