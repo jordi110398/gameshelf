@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gameshelf/core/navigation/page_transitions.dart';
 import 'package:gameshelf/core/strings/activity_strings.dart';
-import 'package:gameshelf/core/widgets/star_burst.dart';
 import 'package:gameshelf/core/widgets/wood_drawer_container.dart';
 import 'package:gameshelf/models/activity_item.dart';
 import 'package:gameshelf/repositories/profile_repository.dart';
@@ -23,17 +22,6 @@ class ActivityCard extends StatefulWidget {
 
 class _ActivityCardState extends State<ActivityCard> {
   final _repository = ActivityRepository(Supabase.instance.client);
-  final _starBurstKey = GlobalKey<StarBurstState>();
-
-  late bool _likedByMe;
-  late int _likeCount;
-
-  @override
-  void initState() {
-    super.initState();
-    _likedByMe = widget.item.likedByMe;
-    _likeCount = widget.item.likeCount;
-  }
 
   ({IconData icon, Color color}) get _typeStyle {
     switch (widget.item.type) {
@@ -91,69 +79,6 @@ class _ActivityCardState extends State<ActivityCard> {
 
   Future<void> _openProfile(BuildContext context) =>
       _openProfileById(context, widget.item.userId);
-
-  // ─────────────────────────────────────────────
-  // LIKE (tap sobre l'estrella)
-  // ─────────────────────────────────────────────
-
-  void _handleLikeTap(TapDownDetails details) {
-    // Posició per defecte: relativa al propi widget tocat (la fila de
-    // l'estrella), no exactament on cal dins l'`StarBurst` (que embolcalla
-    // tota la card), però mai falla.
-    var burstPosition = details.localPosition;
-
-    // Intentem millorar-la convertint-la a coordenades locals de l'
-    // `StarBurst`; si l'`RenderBox` encara no està llest (per exemple,
-    // durant una reconstrucció o una capa sense adjuntar), ens quedem amb
-    // l'aproximació de dalt en lloc de deixar-ho petar -- és només
-    // l'origen d'una animació decorativa, mai val la pena que trenqui res.
-    try {
-      final starBurstRenderObject = _starBurstKey.currentContext
-          ?.findRenderObject();
-
-      if (starBurstRenderObject is RenderBox &&
-          starBurstRenderObject.attached &&
-          starBurstRenderObject.hasSize) {
-        burstPosition = starBurstRenderObject.globalToLocal(
-          details.globalPosition,
-        );
-      }
-    } catch (_) {
-      // Ens quedem amb l'aproximació.
-    }
-
-    _starBurstKey.currentState?.burst(burstPosition);
-
-    _toggleLike();
-  }
-
-  Future<void> _toggleLike() async {
-    final wasLiked = _likedByMe;
-
-    setState(() {
-      _likedByMe = !_likedByMe;
-      _likeCount += _likedByMe ? 1 : -1;
-    });
-
-    try {
-      if (_likedByMe) {
-        await _repository.likeActivity(widget.item.id);
-      } else {
-        await _repository.unlikeActivity(widget.item.id);
-      }
-    } catch (e) {
-      if (!mounted) return;
-
-      setState(() {
-        _likedByMe = wasLiked;
-        _likeCount += wasLiked ? 1 : -1;
-      });
-
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(friendlyError(e))));
-    }
-  }
 
   Future<void> _showReview(BuildContext context) async {
     try {
@@ -399,175 +324,136 @@ class _ActivityCardState extends State<ActivityCard> {
   Widget build(BuildContext context) {
     final style = _typeStyle;
 
-    return StarBurst(
-      key: _starBurstKey,
-      child: Container(
-        padding: const EdgeInsets.all(14),
-        decoration: woodDrawerDecoration(
-          borderRadius: BorderRadius.circular(14),
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // AVATAR CLICABLE
-            GestureDetector(
-              onTap: () => _openProfile(context),
-              child: CircleAvatar(
-                radius: 20,
-                backgroundImage:
-                    widget.item.userAvatarUrl != null &&
-                        widget.item.userAvatarUrl!.isNotEmpty
-                    ? ResizeImage(
-                        NetworkImage(widget.item.userAvatarUrl!),
-                        width: 80,
-                      )
-                    : null,
-                child:
-                    widget.item.userAvatarUrl == null ||
-                        widget.item.userAvatarUrl!.isEmpty
-                    ? const Icon(Icons.person, size: 20)
-                    : null,
-              ),
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: woodDrawerDecoration(borderRadius: BorderRadius.circular(14)),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // AVATAR CLICABLE
+          GestureDetector(
+            onTap: () => _openProfile(context),
+            child: CircleAvatar(
+              radius: 20,
+              backgroundImage:
+                  widget.item.userAvatarUrl != null &&
+                      widget.item.userAvatarUrl!.isNotEmpty
+                  ? ResizeImage(
+                      NetworkImage(widget.item.userAvatarUrl!),
+                      width: 80,
+                    )
+                  : null,
+              child:
+                  widget.item.userAvatarUrl == null ||
+                      widget.item.userAvatarUrl!.isEmpty
+                  ? const Icon(Icons.person, size: 20)
+                  : null,
             ),
+          ),
 
-            const SizedBox(width: 12),
+          const SizedBox(width: 12),
 
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(style.icon, size: 16, color: style.color),
-                      const SizedBox(width: 6),
-                      Expanded(
-                        child: RichText(
-                          text: TextSpan(
-                            style: DefaultTextStyle.of(context).style,
-                            children:
-                                widget.item.type ==
-                                    ActivityType.friendshipFormed
-                                ? [
-                                    TextSpan(
-                                      text: '@${widget.item.userNickname} ',
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                      recognizer: TapGestureRecognizer()
-                                        ..onTap = () => _openProfile(context),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(style.icon, size: 16, color: style.color),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: RichText(
+                        text: TextSpan(
+                          style: DefaultTextStyle.of(context).style,
+                          children:
+                              widget.item.type == ActivityType.friendshipFormed
+                              ? [
+                                  TextSpan(
+                                    text: '@${widget.item.userNickname} ',
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
                                     ),
-                                    const TextSpan(
-                                      text: ActivityStrings
-                                          .friendshipFormedConnector,
+                                    recognizer: TapGestureRecognizer()
+                                      ..onTap = () => _openProfile(context),
+                                  ),
+                                  const TextSpan(
+                                    text: ActivityStrings
+                                        .friendshipFormedConnector,
+                                  ),
+                                  TextSpan(
+                                    text:
+                                        '@${widget.item.friendNickname ?? ActivityStrings.friendshipFormedUnknownFriend} ',
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
                                     ),
-                                    TextSpan(
-                                      text:
-                                          '@${widget.item.friendNickname ?? ActivityStrings.friendshipFormedUnknownFriend} ',
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                      recognizer: TapGestureRecognizer()
-                                        ..onTap = () {
-                                          final friendId = widget.item.friendId;
-                                          if (friendId != null) {
-                                            _openProfileById(context, friendId);
-                                          }
-                                        },
+                                    recognizer: TapGestureRecognizer()
+                                      ..onTap = () {
+                                        final friendId = widget.item.friendId;
+                                        if (friendId != null) {
+                                          _openProfileById(context, friendId);
+                                        }
+                                      },
+                                  ),
+                                  const TextSpan(
+                                    text:
+                                        ActivityStrings.friendshipFormedSuffix,
+                                  ),
+                                ]
+                              : [
+                                  TextSpan(
+                                    text: '@${widget.item.userNickname} ',
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
                                     ),
-                                    const TextSpan(
-                                      text: ActivityStrings
-                                          .friendshipFormedSuffix,
-                                    ),
-                                  ]
-                                : [
-                                    TextSpan(
-                                      text: '@${widget.item.userNickname} ',
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                      recognizer: TapGestureRecognizer()
-                                        ..onTap = () => _openProfile(context),
-                                    ),
-                                    TextSpan(text: _actionText),
-                                  ],
-                          ),
+                                    recognizer: TapGestureRecognizer()
+                                      ..onTap = () => _openProfile(context),
+                                  ),
+                                  TextSpan(text: _actionText),
+                                ],
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
+                ),
 
-                  const SizedBox(height: 4),
+                const SizedBox(height: 4),
 
+                Text(
+                  timeago.format(widget.item.createdAt, locale: 'ca'),
+                  style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
+                ),
+
+                if (widget.item.type == ActivityType.completed &&
+                    widget.item.rating != null) ...[
+                  const SizedBox(height: 6),
                   Text(
-                    timeago.format(widget.item.createdAt, locale: 'ca'),
-                    style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
-                  ),
-
-                  if (widget.item.type == ActivityType.completed &&
-                      widget.item.rating != null) ...[
-                    const SizedBox(height: 6),
-                    Text(
-                      '⭐ ${widget.item.rating}/5',
-                      style: const TextStyle(fontSize: 13),
-                    ),
-                  ],
-
-                  if (widget.item.type == ActivityType.review &&
-                      widget.item.reviewSnippet != null) ...[
-                    const SizedBox(height: 8),
-                    Text(
-                      '"${widget.item.reviewSnippet}"',
-                      style: TextStyle(
-                        fontStyle: FontStyle.italic,
-                        fontSize: 13,
-                        color: Colors.grey.shade400,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    TextButton(
-                      onPressed: () => _showReview(context),
-                      style: TextButton.styleFrom(padding: EdgeInsets.zero),
-                      child: const Text(ActivityStrings.seeReview),
-                    ),
-                  ],
-
-                  const SizedBox(height: 8),
-
-                  // Tap sobre l'estrella per donar/treure "m'agrada".
-                  GestureDetector(
-                    onTapDown: _handleLikeTap,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 4),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            _likedByMe ? Icons.star : Icons.star_border,
-                            size: 18,
-                            color: _likedByMe
-                                ? Colors.amber
-                                : Colors.grey.shade500,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            '$_likeCount',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              color: _likedByMe
-                                  ? Colors.amber
-                                  : Colors.grey.shade500,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                    '⭐ ${widget.item.rating}/5',
+                    style: const TextStyle(fontSize: 13),
                   ),
                 ],
-              ),
+
+                if (widget.item.type == ActivityType.review &&
+                    widget.item.reviewSnippet != null) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    '"${widget.item.reviewSnippet}"',
+                    style: TextStyle(
+                      fontStyle: FontStyle.italic,
+                      fontSize: 13,
+                      color: Colors.grey.shade400,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  TextButton(
+                    onPressed: () => _showReview(context),
+                    style: TextButton.styleFrom(padding: EdgeInsets.zero),
+                    child: const Text(ActivityStrings.seeReview),
+                  ),
+                ],
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

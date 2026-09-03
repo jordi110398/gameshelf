@@ -112,33 +112,6 @@ class ActivityRepository {
     return response?['review'] as String?;
   }
 
-  // ─────────────────────────────────────────────
-  // LIKES
-  // ─────────────────────────────────────────────
-
-  /// No s'encadena `.select()`: `activity_likes` no té cap manera de
-  /// tornar la fila igualment, i forçar-ho fa fallar la petició sencera.
-  Future<void> likeActivity(String activityId) async {
-    final userId = client.auth.currentUser?.id;
-    if (userId == null) return;
-
-    await client.from('activity_likes').insert({
-      'activity_id': activityId,
-      'user_id': userId,
-    });
-  }
-
-  Future<void> unlikeActivity(String activityId) async {
-    final userId = client.auth.currentUser?.id;
-    if (userId == null) return;
-
-    await client
-        .from('activity_likes')
-        .delete()
-        .eq('activity_id', activityId)
-        .eq('user_id', userId);
-  }
-
   /// Likes de les MEVES pròpies reviews, indexats per `igdb_id`. Fa servir
   /// `get_my_review_likes` perquè `get_activity_feed()` exclou expressament
   /// les pròpies activitats (només ensenya les dels altres).
