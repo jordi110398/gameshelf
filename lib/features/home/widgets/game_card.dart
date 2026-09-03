@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gameshelf/core/navigation/page_transitions.dart';
+import 'package:gameshelf/core/strings/app_strings.dart';
 import 'package:gameshelf/core/strings/home_strings.dart';
 import 'package:gameshelf/core/utils/error_messages.dart';
 import 'package:gameshelf/core/utils/platform_visuals.dart';
@@ -107,13 +108,43 @@ class _GameCardState extends State<GameCard> {
       return;
     }
 
-    final newFavorite = !_favorite;
+    final addingFavorite = !_favorite;
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(widget.libraryGame.game.title),
+          content: Text(
+            addingFavorite
+                ? HomeStrings.favoriteConfirmAddBody
+                : HomeStrings.favoriteConfirmRemoveBody,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text(AppStrings.actionCancel),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: Text(
+                addingFavorite
+                    ? HomeStrings.favoriteConfirmAddAction
+                    : HomeStrings.favoriteConfirmRemoveAction,
+              ),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed != true || !mounted) return;
 
     setState(() {
-      _favorite = newFavorite;
+      _favorite = addingFavorite;
     });
 
-    if (newFavorite) {
+    if (addingFavorite) {
       _starBurstKey.currentState?.burst(details.localPosition);
     }
 
@@ -124,7 +155,7 @@ class _GameCardState extends State<GameCard> {
           status: userGame.status,
           rating: userGame.rating,
           hoursPlayed: userGame.hoursPlayed,
-          favorite: newFavorite,
+          favorite: addingFavorite,
           review: userGame.review,
           platform: userGame.platform,
           startedAt: userGame.startedAt,
@@ -140,19 +171,17 @@ class _GameCardState extends State<GameCard> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            newFavorite
+            addingFavorite
                 ? HomeStrings.favoriteAddedMessage
                 : HomeStrings.favoriteRemovedMessage,
           ),
         ),
       );
-
-      widget.onLibraryChanged?.call();
     } catch (e) {
       if (!mounted) return;
 
       setState(() {
-        _favorite = !newFavorite;
+        _favorite = !addingFavorite;
       });
 
       ScaffoldMessenger.of(context).showSnackBar(

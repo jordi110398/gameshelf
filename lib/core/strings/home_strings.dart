@@ -79,4 +79,11 @@ class HomeStrings {
       'Només es poden marcar com a preferits els jocs completats';
   static const favoriteUpdateFailedPrefix =
       'No s\'ha pogut actualitzar el preferit: ';
+
+  static const favoriteConfirmAddBody =
+      'Vols afegir aquest joc als teus preferits?';
+  static const favoriteConfirmRemoveBody =
+      'Vols treure aquest joc dels teus preferits?';
+  static const favoriteConfirmAddAction = 'Afegir als preferits';
+  static const favoriteConfirmRemoveAction = 'Treure dels preferits';
 }

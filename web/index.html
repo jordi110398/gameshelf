@@ -72,6 +72,19 @@
       return window.matchMedia('(display-mode: standalone)').matches ||
         window.navigator.standalone === true;
     };
+
+    // Evita que un gest natiu d'"endarrere" (swipe de vora a iOS, gest de
+    // navegador/botó a Android) trenqui la navegació interna de l'app:
+    // la majoria de pantalles es naveguen amb `Navigator.push` pla, que
+    // no canvia la URL, així que un `history.back()` extern saltaria a
+    // l'única entrada real de l'historial i destruiria l'estat de l'app
+    // (per això es veia un flaix a Inici que es quedava penjat). La
+    // navegació real es fa sempre amb els controls propis (fletxa
+    // enrere, logo, etc.), mai amb l'historial del navegador.
+    history.pushState(null, '', location.href);
+    window.addEventListener('popstate', () => {
+      history.pushState(null, '', location.href);
+    });
   </script>
 </head>
 <body>
