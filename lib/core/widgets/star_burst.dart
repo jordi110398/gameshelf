@@ -158,11 +158,6 @@ class _GoldenStarsPainter extends CustomPainter {
     }
     path.close();
     canvas.drawPath(path, paint);
-
-    final glowPaint = Paint()
-      ..color = Colors.white.withValues(alpha: paint.color.a * 0.6)
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 5);
-    canvas.drawPath(path, glowPaint);
   }
 
   @override
