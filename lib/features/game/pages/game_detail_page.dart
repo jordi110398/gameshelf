@@ -411,11 +411,13 @@ class _GameDetailPageState extends State<GameDetailPage> {
                         ? Image.network(
                             widget.game.artworkUrl!,
                             fit: BoxFit.cover,
+                            cacheWidth: 900,
                           )
                         : widget.game.coverUrl != null
                         ? Image.network(
                             widget.game.coverUrl!,
                             fit: BoxFit.cover,
+                            cacheWidth: 900,
                           )
                         : const ColoredBox(color: Colors.grey),
                   ),
@@ -440,6 +442,7 @@ class _GameDetailPageState extends State<GameDetailPage> {
                             width: 48,
                             height: 68,
                             fit: BoxFit.cover,
+                            cacheWidth: 96,
                           )
                         : const SizedBox(
                             width: 48,

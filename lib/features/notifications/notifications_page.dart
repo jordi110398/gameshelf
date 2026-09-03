@@ -202,7 +202,10 @@ class _NotificationsPageState extends State<NotificationsPage> {
                                 backgroundImage:
                                     item.actorAvatarUrl != null &&
                                         item.actorAvatarUrl!.isNotEmpty
-                                    ? NetworkImage(item.actorAvatarUrl!)
+                                    ? ResizeImage(
+                                        NetworkImage(item.actorAvatarUrl!),
+                                        width: 80,
+                                      )
                                     : null,
                                 child:
                                     item.actorAvatarUrl == null ||

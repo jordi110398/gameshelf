@@ -555,7 +555,10 @@ class _ProfileTile extends StatelessWidget {
                   radius: 28,
                   backgroundImage:
                       profile.avatarUrl != null && profile.avatarUrl!.isNotEmpty
-                      ? NetworkImage(profile.avatarUrl!)
+                      ? ResizeImage(
+                          NetworkImage(profile.avatarUrl!),
+                          width: 112,
+                        )
                       : null,
                   child: profile.avatarUrl == null || profile.avatarUrl!.isEmpty
                       ? const Icon(Icons.person, size: 28)
@@ -631,7 +634,7 @@ class _PendingRequestTile extends StatelessWidget {
               radius: 24,
               backgroundImage:
                   profile.avatarUrl != null && profile.avatarUrl!.isNotEmpty
-                  ? NetworkImage(profile.avatarUrl!)
+                  ? ResizeImage(NetworkImage(profile.avatarUrl!), width: 96)
                   : null,
               child: profile.avatarUrl == null || profile.avatarUrl!.isEmpty
                   ? const Icon(Icons.person)

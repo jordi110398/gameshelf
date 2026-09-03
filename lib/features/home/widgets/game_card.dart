@@ -282,7 +282,11 @@ class _GameCardState extends State<GameCard> {
                         tag: game.igdbId,
 
                         child: game.coverUrl != null
-                            ? Image.network(game.coverUrl!, fit: BoxFit.cover)
+                            ? Image.network(
+                                game.coverUrl!,
+                                fit: BoxFit.cover,
+                                cacheWidth: 300,
+                              )
                             : Container(
                                 color: Colors.grey.shade800,
                                 child: const Icon(

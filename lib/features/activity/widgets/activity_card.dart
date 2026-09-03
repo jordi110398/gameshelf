@@ -201,6 +201,7 @@ class _ActivityCardState extends State<ActivityCard> {
                                 ? Image.network(
                                     widget.item.gameCoverUrl!,
                                     fit: BoxFit.cover,
+                                    cacheWidth: 140,
                                     errorBuilder: (_, _, _) {
                                       return Container(
                                         color: Theme.of(
@@ -323,7 +324,12 @@ class _ActivityCardState extends State<ActivityCard> {
                                 backgroundImage:
                                     widget.item.userAvatarUrl != null &&
                                         widget.item.userAvatarUrl!.isNotEmpty
-                                    ? NetworkImage(widget.item.userAvatarUrl!)
+                                    ? ResizeImage(
+                                        NetworkImage(
+                                          widget.item.userAvatarUrl!,
+                                        ),
+                                        width: 76,
+                                      )
                                     : null,
                                 child:
                                     widget.item.userAvatarUrl == null ||
@@ -411,7 +417,10 @@ class _ActivityCardState extends State<ActivityCard> {
                 backgroundImage:
                     widget.item.userAvatarUrl != null &&
                         widget.item.userAvatarUrl!.isNotEmpty
-                    ? NetworkImage(widget.item.userAvatarUrl!)
+                    ? ResizeImage(
+                        NetworkImage(widget.item.userAvatarUrl!),
+                        width: 80,
+                      )
                     : null,
                 child:
                     widget.item.userAvatarUrl == null ||

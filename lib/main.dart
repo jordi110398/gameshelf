@@ -1,9 +1,14 @@
+import 'dart:js_interop';
+
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 
 import 'app/app.dart';
+
+@JS('gsReload')
+external void _reloadPage();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,14 +21,32 @@ Future<void> main() async {
   // pista. Mostrem el missatge també en producció perquè, si torna a
   // passar, es pugui saber quin és l'error real.
   ErrorWidget.builder = (details) {
-    return Container(
-      color: Colors.black87,
-      padding: const EdgeInsets.all(8),
-      alignment: Alignment.center,
-      child: Text(
-        details.exceptionAsString(),
-        style: const TextStyle(color: Colors.redAccent, fontSize: 11),
-        textAlign: TextAlign.center,
+    return GestureDetector(
+      onTap: () => _reloadPage(),
+      child: Container(
+        color: Colors.black87,
+        padding: const EdgeInsets.all(8),
+        alignment: Alignment.center,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              details.exceptionAsString(),
+              style: const TextStyle(color: Colors.redAccent, fontSize: 11),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 6),
+            const Text(
+              'Toca per recarregar',
+              style: TextStyle(
+                color: Colors.white70,
+                fontSize: 11,
+                fontWeight: FontWeight.bold,
+                decoration: TextDecoration.underline,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   };

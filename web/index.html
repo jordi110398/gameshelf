@@ -73,6 +73,14 @@
         window.navigator.standalone === true;
     };
 
+    // Recàrrega completa de la pàgina -- necessària per recuperar-se d'un
+    // crash del renderitzador gràfic (CanvasKit), que un cop trencat es
+    // queda així fins que es recarrega tot (no n'hi ha prou amb refrescar
+    // dades ni navegar dins l'app).
+    window.gsReload = function () {
+      location.reload();
+    };
+
     // Evita que un gest natiu d'"endarrere" (swipe de vora a iOS, gest de
     // navegador/botó a Android) trenqui la navegació interna de l'app:
     // la majoria de pantalles es naveguen amb `Navigator.push` pla, que

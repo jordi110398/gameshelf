@@ -37,6 +37,7 @@ class SocialGameDetailPage extends StatelessWidget {
                         game.coverUrl!,
                         width: double.infinity,
                         fit: BoxFit.cover,
+                        cacheWidth: 700,
                       )
                     : Container(
                         height: 330,

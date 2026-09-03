@@ -130,6 +130,7 @@ class _SearchPageState extends State<SearchPage> {
                               width: 50,
                               height: 70,
                               fit: BoxFit.cover,
+                              cacheWidth: 100,
                             ),
                           )
                         : const SizedBox(

@@ -622,6 +622,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                             width: 65,
                             height: 95,
                             fit: BoxFit.cover,
+                            cacheWidth: 130,
                             errorBuilder: (_, _, _) {
                               return _buildReviewPlaceholder();
                             },
@@ -1084,6 +1085,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                     ? Image.network(
                         currentProfile.avatarUrl!,
                         fit: BoxFit.cover,
+                        cacheWidth: 200,
                         errorBuilder: (_, _, _) => _avatarPlaceholder(context),
                       )
                     : _avatarPlaceholder(context),
@@ -1431,6 +1433,7 @@ class _GameCoverTile extends StatelessWidget {
             ? Image.network(
                 game.coverUrl!,
                 fit: BoxFit.cover,
+                cacheWidth: 220,
                 errorBuilder: (_, _, _) => Container(
                   color: Theme.of(context).colorScheme.surfaceContainerHighest,
                   child: const Icon(Icons.videogame_asset),

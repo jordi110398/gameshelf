@@ -536,6 +536,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
         width: 130,
         height: 130,
         fit: BoxFit.cover,
+        cacheWidth: 260,
         errorBuilder: (_, _, _) {
           return const Icon(Icons.person, size: 65);
         },
