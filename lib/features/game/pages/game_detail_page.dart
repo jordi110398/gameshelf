@@ -17,6 +17,8 @@ import 'package:gameshelf/core/widgets/responsive_center.dart';
 
 typedef _GameDetails = ({
   String? platform,
+  int? rating,
+  String? review,
   DateTime? startedAt,
   DateTime? completedAt,
   DateTime? droppedAt,
@@ -163,6 +165,8 @@ class _GameDetailPageState extends State<GameDetailPage> {
         widget.game,
         status: status,
         platform: details.platform,
+        rating: details.rating,
+        review: details.review,
         startedAt: details.startedAt,
         completedAt: details.completedAt,
         droppedAt: details.droppedAt,
@@ -195,6 +199,8 @@ class _GameDetailPageState extends State<GameDetailPage> {
     if (status == GameStatus.wantToPlay) {
       return const (
         platform: null,
+        rating: null,
+        review: null,
         startedAt: null,
         completedAt: null,
         droppedAt: null,
@@ -205,6 +211,8 @@ class _GameDetailPageState extends State<GameDetailPage> {
     final platformOptions = [...widget.game.platforms, platformNotSpecified];
 
     var platform = platformOptions.first;
+    var rating = 0;
+    final reviewController = TextEditingController();
     var startedAt = DateTime.now();
     var completedAt = DateTime.now();
     var droppedAt = DateTime.now();
@@ -252,6 +260,28 @@ class _GameDetailPageState extends State<GameDetailPage> {
                         onChanged: (d) =>
                             setDialogState(() => completedAt = d),
                       ),
+
+                      const SizedBox(height: 16),
+                      Center(
+                        child: RatingStars(
+                          rating: rating,
+                          size: 28,
+                          onRatingChanged: (r) =>
+                              setDialogState(() => rating = r),
+                        ),
+                      ),
+
+                      const SizedBox(height: 12),
+                      TextField(
+                        controller: reviewController,
+                        minLines: 3,
+                        maxLines: 6,
+                        decoration: const InputDecoration(
+                          border: OutlineInputBorder(),
+                          hintText: GameStrings.reviewHint,
+                          alignLabelWithHint: true,
+                        ),
+                      ),
                     ],
 
                     if (status == GameStatus.dropped) ...[
@@ -290,15 +320,120 @@ class _GameDetailPageState extends State<GameDetailPage> {
       },
     );
 
+    final review = reviewController.text.trim();
+    reviewController.dispose();
+
     if (confirmed != true) return null;
 
     return (
       platform: platform == platformNotSpecified ? null : platform,
+      rating: status == GameStatus.completed && rating > 0 ? rating : null,
+      review: status == GameStatus.completed && review.isNotEmpty
+          ? review
+          : null,
       startedAt: startedAt,
       completedAt: status == GameStatus.completed ? completedAt : null,
       droppedAt: status == GameStatus.dropped ? droppedAt : null,
       pausedAt: status == GameStatus.paused ? pausedAt : null,
     );
+  }
+
+  // ─────────────────────────────────────────────
+  // PUNTUAR RÀPIDAMENT (estrelles clicables)
+  // ─────────────────────────────────────────────
+
+  bool get canReview {
+    final status = userGame?.status;
+    return status == GameStatus.completed || status == GameStatus.dropped;
+  }
+
+  Future<void> _rateGame(int initialRating) async {
+    final current = userGame!;
+
+    var rating = initialRating;
+    final reviewController = TextEditingController(text: current.review ?? '');
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: const Text(GameStrings.rateDialogTitle),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    RatingStars(
+                      rating: rating,
+                      size: 32,
+                      onRatingChanged: (r) => setDialogState(() => rating = r),
+                    ),
+                    const SizedBox(height: 16),
+                    TextField(
+                      controller: reviewController,
+                      minLines: 3,
+                      maxLines: 6,
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        hintText: GameStrings.reviewHint,
+                        alignLabelWithHint: true,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context, false),
+                  child: const Text(AppStrings.actionCancel),
+                ),
+                FilledButton(
+                  onPressed: () => Navigator.pop(context, true),
+                  child: const Text(GameStrings.saveAction),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+
+    final review = reviewController.text.trim();
+    reviewController.dispose();
+
+    if (confirmed != true || !mounted) return;
+
+    try {
+      await repository.updateUserGame(
+        UserGame(
+          igdbId: current.igdbId,
+          status: current.status,
+          rating: rating,
+          hoursPlayed: current.hoursPlayed,
+          favorite: current.favorite,
+          review: review.isEmpty ? null : review,
+          platform: current.platform,
+          startedAt: current.startedAt,
+          completedAt: current.completedAt,
+          droppedAt: current.droppedAt,
+          pausedAt: current.pausedAt,
+          resumedAt: current.resumedAt,
+        ),
+      );
+
+      hasChanges = true;
+
+      await loadUserGame();
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('${GameStrings.rateFailedPrefix}${friendlyError(e)}'),
+        ),
+      );
+    }
   }
 
   Widget buildGenreChips(BuildContext context) {
@@ -517,7 +652,11 @@ class _GameDetailPageState extends State<GameDetailPage> {
                         ),
                       ),
 
-                      RatingStars(rating: userGame!.rating ?? 0, size: 22),
+                      RatingStars(
+                        rating: userGame!.rating ?? 0,
+                        size: 22,
+                        onRatingChanged: canReview ? _rateGame : null,
+                      ),
                     ],
                   ),
 

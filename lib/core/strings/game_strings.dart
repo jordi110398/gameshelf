@@ -27,6 +27,9 @@ class GameStrings {
   static const datePausedLabel = 'Data de pausa';
   static const dateResumedLabel = 'Data de represa';
 
+  static const rateDialogTitle = 'Puntua aquest joc';
+  static const rateFailedPrefix = 'No s\'ha pogut desar la puntuació: ';
+
   // ─────────────────────────────────────────────
   // EDITAR JOC
   // ─────────────────────────────────────────────
