@@ -76,12 +76,4 @@ class LlampStrings {
   static const publishFailedPrefix = 'No s\'ha pogut publicar l\'estanteria: ';
   static const addGameFailedPrefix = 'No s\'ha pogut afegir el joc: ';
   static const removeGameFailedPrefix = 'No s\'ha pogut treure el joc: ';
-
-  // ─────────────────────────────────────────────
-  // ESTANTERIA FIXADA AL PERFIL
-  // ─────────────────────────────────────────────
-
-  static const pinnedShelfTitleOwn = 'La teva estanteria';
-  static String pinnedShelfTitleOf(String nickname) =>
-      'Estanteria de @$nickname';
 }

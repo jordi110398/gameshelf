@@ -5,6 +5,7 @@ enum ActivityType {
   review,
   addedToLibrary,
   friendshipFormed,
+  shelfPublished,
 }
 
 extension ActivityTypeX on ActivityType {
@@ -22,6 +23,8 @@ extension ActivityTypeX on ActivityType {
         return ActivityType.addedToLibrary;
       case 'friendship_formed':
         return ActivityType.friendshipFormed;
+      case 'shelf_published':
+        return ActivityType.shelfPublished;
       default:
         throw ArgumentError('Tipus d\'activitat desconegut: $value');
     }
@@ -48,6 +51,11 @@ class ActivityItem {
   final String? friendNickname;
   final String? friendAvatarUrl;
 
+  // Només per a `shelfPublished`.
+  final String? shelfId;
+  final String? shelfTitle;
+  final List<String> shelfCoverUrls;
+
   const ActivityItem({
     required this.id,
     required this.userId,
@@ -65,6 +73,9 @@ class ActivityItem {
     this.friendId,
     this.friendNickname,
     this.friendAvatarUrl,
+    this.shelfId,
+    this.shelfTitle,
+    this.shelfCoverUrls = const [],
   });
 
   factory ActivityItem.fromMap(Map<String, dynamic> map) {
@@ -88,6 +99,11 @@ class ActivityItem {
       friendId: map['friend_id'] as String?,
       friendNickname: friendProfile?['nickname'] as String?,
       friendAvatarUrl: friendProfile?['avatar_url'] as String?,
+      shelfId: map['shelf_id'] as String?,
+      shelfTitle: map['shelf_title'] as String?,
+      shelfCoverUrls: map['shelf_cover_urls'] != null
+          ? List<String>.from(map['shelf_cover_urls'] as List)
+          : const [],
     );
   }
 }

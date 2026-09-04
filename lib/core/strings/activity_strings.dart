@@ -14,6 +14,7 @@ class ActivityStrings {
   static const actionReviewPrefix = 'ha publicat una review de ';
   static const actionAddedToLibrarySuffix = ' a la seva biblioteca';
   static const actionAddedToLibraryVerb = 'ha afegit ';
+  static const actionShelfPublishedPrefix = 'ha publicat l\'estanteria ';
 
   static const friendshipFormedConnector = 'i ';
   static const friendshipFormedSuffix = 'ara són amics! 🎉';

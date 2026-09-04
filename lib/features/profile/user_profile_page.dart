@@ -954,7 +954,30 @@ class _UserProfilePageState extends State<UserProfilePage> {
                 // ESTANTERIA FIXADA
                 // ─────────────────────────────────────
                 if (pinnedShelf != null) ...[
-                  const SizedBox(height: 28),
+                  const SizedBox(height: 36),
+
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          pinnedShelf!.title,
+                          style: const TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      if (isMyProfile)
+                        IconButton(
+                          visualDensity: VisualDensity.compact,
+                          icon: const Icon(Icons.edit_outlined),
+                          onPressed: _openMyShelves,
+                        ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 14),
+
                   _buildPinnedShelf(),
                 ] else if (isMyProfile) ...[
                   const SizedBox(height: 20),
@@ -1226,44 +1249,6 @@ class _UserProfilePageState extends State<UserProfilePage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    const Icon(Icons.bolt, size: 16, color: Colors.amber),
-                    const SizedBox(width: 6),
-                    Expanded(
-                      child: Text(
-                        isMyProfile
-                            ? LlampStrings.pinnedShelfTitleOwn
-                            : LlampStrings.pinnedShelfTitleOf(
-                                currentProfile.nickname,
-                              ),
-                        style: const TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    if (isMyProfile)
-                      IconButton(
-                        visualDensity: VisualDensity.compact,
-                        icon: const Icon(Icons.edit_outlined, size: 18),
-                        onPressed: _openMyShelves,
-                      ),
-                  ],
-                ),
-
-                const SizedBox(height: 8),
-
-                Text(
-                  shelf.title,
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: Colors.grey.shade400,
-                  ),
-                ),
-
-                const SizedBox(height: 8),
-
                 LayoutBuilder(
                   builder: (context, constraints) {
                     return ShelfLedStrip(width: constraints.maxWidth);
