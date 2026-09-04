@@ -5,6 +5,7 @@ import 'package:gameshelf/core/strings/llamp_strings.dart';
 import 'package:gameshelf/core/utils/error_messages.dart';
 import 'package:gameshelf/core/widgets/wood_drawer_container.dart';
 import 'package:gameshelf/features/llamp/edit_shelf_page.dart';
+import 'package:gameshelf/features/llamp/shelf_emojis.dart';
 import 'package:gameshelf/models/game.dart';
 import 'package:gameshelf/models/shelf.dart';
 import 'package:gameshelf/repositories/shelf_repository.dart';
@@ -67,38 +68,78 @@ class _MyShelvesPageState extends State<MyShelvesPage> {
 
   Future<void> _createShelf() async {
     final controller = TextEditingController();
+    var selectedEmoji = shelfEmojiOptions.first;
 
-    final title = await showDialog<String>(
+    final result = await showDialog<({String title, String emoji})>(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          title: const Text(LlampStrings.newShelfDialogTitle),
-          content: TextField(
-            controller: controller,
-            autofocus: true,
-            decoration: const InputDecoration(
-              hintText: LlampStrings.shelfTitleHint,
-            ),
-            onSubmitted: (value) => Navigator.pop(context, value),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text(AppStrings.actionCancel),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.pop(context, controller.text),
-              child: const Text(AppStrings.actionSave),
-            ),
-          ],
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: const Text(LlampStrings.newShelfDialogTitle),
+              content: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  DropdownButton<String>(
+                    value: selectedEmoji,
+                    items: shelfEmojiOptions
+                        .map(
+                          (emoji) => DropdownMenuItem(
+                            value: emoji,
+                            child: Text(
+                              emoji,
+                              style: const TextStyle(fontSize: 22),
+                            ),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (value) {
+                      if (value == null) return;
+                      setDialogState(() => selectedEmoji = value);
+                    },
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: TextField(
+                      controller: controller,
+                      autofocus: true,
+                      decoration: const InputDecoration(
+                        hintText: LlampStrings.shelfTitleHint,
+                      ),
+                      onSubmitted: (value) => Navigator.pop(
+                        context,
+                        (title: value, emoji: selectedEmoji),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text(AppStrings.actionCancel),
+                ),
+                FilledButton(
+                  onPressed: () => Navigator.pop(
+                    context,
+                    (title: controller.text, emoji: selectedEmoji),
+                  ),
+                  child: const Text(AppStrings.actionSave),
+                ),
+              ],
+            );
+          },
         );
       },
     );
 
-    if (title == null || title.trim().isEmpty) return;
+    if (result == null || result.title.trim().isEmpty) return;
 
     try {
-      final shelf = await repository.createShelf(title.trim());
+      final shelf = await repository.createShelf(
+        result.title.trim(),
+        emoji: result.emoji,
+      );
 
       if (!mounted) return;
 
@@ -206,7 +247,7 @@ class _ShelfTile extends StatelessWidget {
               children: [
                 Expanded(
                   child: Text(
-                    shelf.title,
+                    shelf.displayTitle,
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,

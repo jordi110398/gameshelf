@@ -59,10 +59,10 @@ class ShelfRepository {
   // CRUD D'ESTANTERIES
   // ─────────────────────────────────────────────
 
-  Future<Shelf> createShelf(String title) async {
+  Future<Shelf> createShelf(String title, {String? emoji}) async {
     final response = await client
         .from('shelves')
-        .insert({'user_id': _userId, 'title': title})
+        .insert({'user_id': _userId, 'title': title, 'emoji': emoji})
         .select(_shelfSelect)
         .single();
 
@@ -199,6 +199,7 @@ class ShelfRepository {
         id: row['shelf_id'] as String,
         userId: row['user_id'] as String,
         title: row['title'] as String,
+        emoji: row['emoji'] as String?,
         isPinned: false,
         isPublished: true,
         updatedAt: DateTime.parse(row['updated_at'] as String),

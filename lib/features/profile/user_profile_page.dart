@@ -960,7 +960,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                     children: [
                       Expanded(
                         child: Text(
-                          pinnedShelf!.title,
+                          pinnedShelf!.displayTitle,
                           style: const TextStyle(
                             fontSize: 22,
                             fontWeight: FontWeight.bold,
@@ -1249,6 +1249,16 @@ class _UserProfilePageState extends State<UserProfilePage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Text(
+                  shelf.displayTitle,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+
+                const SizedBox(height: 10),
+
                 LayoutBuilder(
                   builder: (context, constraints) {
                     return ShelfLedStrip(width: constraints.maxWidth);

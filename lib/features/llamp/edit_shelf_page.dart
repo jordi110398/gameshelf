@@ -108,6 +108,7 @@ class _EditShelfPageState extends State<EditShelfPage> {
           id: shelf.id,
           userId: shelf.userId,
           title: title.trim(),
+          emoji: shelf.emoji,
           isPinned: shelf.isPinned,
           isPublished: shelf.isPublished,
           updatedAt: shelf.updatedAt,
@@ -173,6 +174,7 @@ class _EditShelfPageState extends State<EditShelfPage> {
       id: shelf.id,
       userId: shelf.userId,
       title: shelf.title,
+      emoji: shelf.emoji,
       isPinned: isPinned ?? shelf.isPinned,
       isPublished: isPublished ?? shelf.isPublished,
       updatedAt: shelf.updatedAt,
@@ -285,6 +287,7 @@ class _EditShelfPageState extends State<EditShelfPage> {
           id: shelf.id,
           userId: shelf.userId,
           title: shelf.title,
+          emoji: shelf.emoji,
           isPinned: shelf.isPinned,
           isPublished: shelf.isPublished,
           updatedAt: shelf.updatedAt,
@@ -308,6 +311,7 @@ class _EditShelfPageState extends State<EditShelfPage> {
           id: shelf.id,
           userId: shelf.userId,
           title: shelf.title,
+          emoji: shelf.emoji,
           isPinned: shelf.isPinned,
           isPublished: shelf.isPublished,
           updatedAt: shelf.updatedAt,
@@ -365,7 +369,7 @@ class _EditShelfPageState extends State<EditShelfPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(shelf.title),
+        title: Text(shelf.displayTitle),
         actions: [
           IconButton(
             tooltip: AppStrings.actionEdit,
