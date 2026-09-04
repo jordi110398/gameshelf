@@ -3,6 +3,8 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:gameshelf/core/navigation/page_transitions.dart';
+import 'package:gameshelf/features/profile/crop_avatar_page.dart';
 import 'package:gameshelf/models/profile.dart';
 import 'package:gameshelf/repositories/profile_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -70,9 +72,18 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
     final bytes = await image.readAsBytes();
 
+    if (!mounted) return;
+
+    final croppedBytes = await pushFade<Uint8List>(
+      context,
+      (_) => CropAvatarPage(imageBytes: bytes),
+    );
+
+    if (croppedBytes == null || !mounted) return;
+
     setState(() {
       selectedImage = image;
-      selectedImageBytes = bytes;
+      selectedImageBytes = croppedBytes;
     });
   }
 

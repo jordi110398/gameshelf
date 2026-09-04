@@ -55,6 +55,8 @@ class ProfileStrings {
 
   static const editAppBarTitle = 'Editar perfil';
   static const changePhoto = 'Canviar foto';
+  static const cropAvatarTitle = 'Ajusta la foto';
+  static const cropFailedMessage = 'No s\'ha pogut retallar la imatge.';
 
   static const nicknameLabel = 'Nickname';
   static const bioLabel = 'Bio';
