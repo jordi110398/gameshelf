@@ -5,6 +5,7 @@ import 'package:gameshelf/core/widgets/floating_pill.dart';
 import 'package:gameshelf/core/widgets/pressable_scale.dart';
 import 'package:gameshelf/core/widgets/shimmer_box.dart';
 import 'package:gameshelf/features/home/home_page.dart';
+import 'package:gameshelf/features/llamp/llamp_page.dart';
 import 'package:gameshelf/features/search/search_page.dart';
 import 'package:gameshelf/features/social/social_page.dart';
 import 'package:gameshelf/models/profile.dart';
@@ -38,6 +39,11 @@ const _navItems = [
     label: AppStrings.navHome,
   ),
   _NavItemData(
+    icon: Icons.bolt_outlined,
+    selectedIcon: Icons.bolt,
+    label: AppStrings.navLlamp,
+  ),
+  _NavItemData(
     icon: Icons.people_outline,
     selectedIcon: Icons.people,
     label: AppStrings.navSocial,
@@ -53,6 +59,7 @@ class _MainShellPageState extends State<MainShellPage> {
   int _currentIndex = 0;
 
   final _homeKey = GlobalKey<HomePageState>();
+  final _llampKey = GlobalKey<LlampPageState>();
   final _socialKey = GlobalKey<SocialPageState>();
   final _profileKey = GlobalKey<ProfileTabState>();
 
@@ -68,8 +75,10 @@ class _MainShellPageState extends State<MainShellPage> {
     // del perfil, marcar un preferit, etc.) la pestanya no es refaria sola
     // en tornar-hi. Ho refresquem explícitament en seleccionar-la.
     if (index == 1) {
-      _socialKey.currentState?.loadSocialData();
+      _llampKey.currentState?.refresh();
     } else if (index == 2) {
+      _socialKey.currentState?.loadSocialData();
+    } else if (index == 3) {
       _profileKey.currentState?.refresh();
     }
   }
@@ -90,6 +99,7 @@ class _MainShellPageState extends State<MainShellPage> {
             index: _currentIndex,
             children: [
               HomePage(key: _homeKey),
+              LlampPage(key: _llampKey),
               SocialPage(key: _socialKey),
               ProfileTab(key: _profileKey),
             ],
@@ -135,32 +145,18 @@ class _FloatingNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 5 caselles simètriques: [Inici] [Llamp (inactiu, de moment)] [+]
-    // [Social] [Perfil]. Amb el mateix nombre de caselles a cada costat,
-    // el botó '+' ja queda centrat sense necessitat de cap truc de `Stack`.
-    //
-    // La pestanya de recomanacions (llamp) encara no fa res: és un avançament
-    // visual de la futura funcionalitat, entre Inici i el botó '+'.
+    // 5 caselles simètriques: [Inici] [Descobreix] [+] [Social] [Perfil].
+    // Amb el mateix nombre de caselles a cada costat, el botó '+' ja queda
+    // centrat sense necessitat de cap truc de `Stack`.
     return FloatingPill(
       child: Row(
         children: [
           Expanded(child: _navTab(context, 0)),
-          Expanded(child: _buildInertTab(context)),
-          Expanded(child: _AddGameButton(onTap: onAddGame)),
           Expanded(child: _navTab(context, 1)),
+          Expanded(child: _AddGameButton(onTap: onAddGame)),
           Expanded(child: _navTab(context, 2)),
+          Expanded(child: _navTab(context, 3)),
         ],
-      ),
-    );
-  }
-
-  Widget _buildInertTab(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return Center(
-      child: Icon(
-        Icons.bolt,
-        color: colorScheme.onSurfaceVariant.withValues(alpha: 0.35),
       ),
     );
   }

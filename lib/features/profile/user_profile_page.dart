@@ -23,6 +23,11 @@ import 'package:gameshelf/core/utils/error_messages.dart';
 import 'package:gameshelf/features/profile/widgets/user_tags_row.dart';
 import 'package:gameshelf/features/game/pages/game_detail_page.dart';
 import 'package:gameshelf/repositories/activity_repository.dart';
+import 'package:gameshelf/core/strings/llamp_strings.dart';
+import 'package:gameshelf/features/llamp/my_shelves_page.dart';
+import 'package:gameshelf/models/game.dart';
+import 'package:gameshelf/models/shelf.dart';
+import 'package:gameshelf/repositories/shelf_repository.dart';
 
 const _monthNames = [
   'Gener',
@@ -52,9 +57,13 @@ class _UserProfilePageState extends State<UserProfilePage> {
   late final ProfileRepository profileRepository;
   late final SupabaseLibraryRepository libraryRepository;
   late final ActivityRepository activityRepository;
+  late final ShelfRepository shelfRepository;
   final UserTagsService tagsService = const UserTagsService();
   late Profile currentProfile;
   late final FriendshipRepository friendshipRepository;
+
+  Shelf? pinnedShelf;
+  Map<int, Game> pinnedShelfGames = {};
 
   Map<String, dynamic>? friendship;
   bool isFriendshipLoading = true;
@@ -83,9 +92,11 @@ class _UserProfilePageState extends State<UserProfilePage> {
     libraryRepository = SupabaseLibraryRepository(client);
     friendshipRepository = FriendshipRepository(client);
     activityRepository = ActivityRepository(client);
+    shelfRepository = ShelfRepository(client);
 
     loadProfile();
     loadFriendship();
+    loadPinnedShelf();
   }
 
   // ─────────────────────────────────────────────
@@ -196,6 +207,42 @@ class _UserProfilePageState extends State<UserProfilePage> {
         isFriendshipLoading = false;
       });
     }
+  }
+
+  // ─────────────────────────────────────────────
+  // ESTANTERIA FIXADA
+  // ─────────────────────────────────────────────
+
+  Future<void> loadPinnedShelf() async {
+    try {
+      final shelf = await shelfRepository.getPinnedShelf(currentProfile.id);
+
+      if (!mounted) return;
+
+      if (shelf == null) {
+        setState(() {
+          pinnedShelf = null;
+          pinnedShelfGames = {};
+        });
+        return;
+      }
+
+      final games = await shelfRepository.getGamesByIds(shelf.gameIds);
+
+      if (!mounted) return;
+
+      setState(() {
+        pinnedShelf = shelf;
+        pinnedShelfGames = {for (final g in games) g.igdbId: g};
+      });
+    } catch (e) {
+      debugPrint('Error carregant l\'estanteria fixada: $e');
+    }
+  }
+
+  Future<void> _openMyShelves() async {
+    await pushFade(context, (_) => const MyShelvesPage());
+    await loadPinnedShelf();
   }
 
   // --------------------------------------------
@@ -904,6 +951,21 @@ class _UserProfilePageState extends State<UserProfilePage> {
                 ],
 
                 // ─────────────────────────────────────
+                // ESTANTERIA FIXADA
+                // ─────────────────────────────────────
+                if (pinnedShelf != null) ...[
+                  const SizedBox(height: 28),
+                  _buildPinnedShelf(),
+                ] else if (isMyProfile) ...[
+                  const SizedBox(height: 20),
+                  TextButton.icon(
+                    onPressed: _openMyShelves,
+                    icon: const Icon(Icons.grid_view_outlined),
+                    label: const Text(LlampStrings.myShelvesAction),
+                  ),
+                ],
+
+                // ─────────────────────────────────────
                 // RESUM DE REVIEWS
                 // NOMÉS EL MEU PERFIL
                 // ─────────────────────────────────────
@@ -1127,6 +1189,131 @@ class _UserProfilePageState extends State<UserProfilePage> {
                         libraryGame: favorites[index],
                         width: 88,
                         onOpened: loadProfile,
+                      );
+                    },
+                  ),
+                ),
+
+                const SizedBox(height: 10),
+                const ShelfLedge(),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ─────────────────────────────────────────────
+  // ESTANTERIA FIXADA
+  // ─────────────────────────────────────────────
+
+  Widget _buildPinnedShelf() {
+    final shelf = pinnedShelf!;
+    final games = shelf.gameIds
+        .map((id) => pinnedShelfGames[id])
+        .whereType<Game>()
+        .toList();
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(18),
+      child: Stack(
+        children: [
+          const Positioned.fill(child: BookshelfBackground()),
+
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    const Icon(Icons.bolt, size: 16, color: Colors.amber),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        isMyProfile
+                            ? LlampStrings.pinnedShelfTitleOwn
+                            : LlampStrings.pinnedShelfTitleOf(
+                                currentProfile.nickname,
+                              ),
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    if (isMyProfile)
+                      IconButton(
+                        visualDensity: VisualDensity.compact,
+                        icon: const Icon(Icons.edit_outlined, size: 18),
+                        onPressed: _openMyShelves,
+                      ),
+                  ],
+                ),
+
+                const SizedBox(height: 8),
+
+                Text(
+                  shelf.title,
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Colors.grey.shade400,
+                  ),
+                ),
+
+                const SizedBox(height: 8),
+
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    return ShelfLedStrip(width: constraints.maxWidth);
+                  },
+                ),
+
+                const SizedBox(height: 4),
+
+                SizedBox(
+                  height: 120,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: games.length,
+                    separatorBuilder: (_, _) => const SizedBox(width: 10),
+                    itemBuilder: (context, index) {
+                      final game = games[index];
+
+                      return SizedBox(
+                        width: 88,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(12),
+                          onTap: () async {
+                            await pushFade(
+                              context,
+                              (_) => GameDetailPage(game: game),
+                            );
+                          },
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: AspectRatio(
+                              aspectRatio: 3 / 4,
+                              child:
+                                  game.coverUrl != null &&
+                                      game.coverUrl!.isNotEmpty
+                                  ? Image.network(
+                                      game.coverUrl!,
+                                      fit: BoxFit.cover,
+                                      cacheWidth: 180,
+                                    )
+                                  : Container(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .surfaceContainerHighest,
+                                      child: const Icon(
+                                        Icons.videogame_asset,
+                                      ),
+                                    ),
+                            ),
+                          ),
+                        ),
                       );
                     },
                   ),
