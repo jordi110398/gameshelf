@@ -15,15 +15,15 @@ import 'package:gameshelf/models/profile.dart';
 
 enum LibraryFilter { library, dropped, wantToPlay }
 
-enum LibrarySort { dateAdded, releaseDate, hoursPlayed, status, title }
+enum LibrarySort { dateAdded, datePlayed, hoursPlayed, status, title }
 
 extension on LibrarySort {
   String get label {
     switch (this) {
       case LibrarySort.dateAdded:
         return HomeStrings.sortDateAdded;
-      case LibrarySort.releaseDate:
-        return HomeStrings.sortReleaseDate;
+      case LibrarySort.datePlayed:
+        return HomeStrings.sortDatePlayed;
       case LibrarySort.hoursPlayed:
         return HomeStrings.sortHoursPlayed;
       case LibrarySort.status:
@@ -37,8 +37,8 @@ extension on LibrarySort {
     switch (this) {
       case LibrarySort.dateAdded:
         return Icons.calendar_today_outlined;
-      case LibrarySort.releaseDate:
-        return Icons.event_outlined;
+      case LibrarySort.datePlayed:
+        return Icons.videogame_asset_outlined;
       case LibrarySort.hoursPlayed:
         return Icons.schedule;
       case LibrarySort.status:
@@ -168,9 +168,9 @@ class HomePageState extends State<HomePage> {
           }
           break;
 
-        case LibrarySort.releaseDate:
-          final aDate = a.game.releaseDate;
-          final bDate = b.game.releaseDate;
+        case LibrarySort.datePlayed:
+          final aDate = a.userGame.startedAt;
+          final bDate = b.userGame.startedAt;
 
           if (aDate == null && bDate == null) {
             cmp = 0;

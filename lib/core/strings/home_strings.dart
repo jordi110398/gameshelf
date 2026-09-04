@@ -9,7 +9,7 @@ class HomeStrings {
   // ─────────────────────────────────────────────
 
   static const sortDateAdded = "Data d'addició";
-  static const sortReleaseDate = 'Data de llançament';
+  static const sortDatePlayed = 'Data que hi vas jugar';
   static const sortHoursPlayed = 'Hores jugades';
   static const sortStatus = 'Estat';
   static const sortTitle = 'Títol (A-Z)';
