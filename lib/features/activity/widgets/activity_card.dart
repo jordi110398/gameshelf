@@ -52,6 +52,9 @@ class _ActivityCardState extends State<ActivityCard> {
         return (icon: Icons.people_alt, color: Colors.deepPurpleAccent);
       case ActivityType.shelfPublished:
         return (icon: Icons.bolt, color: Colors.pinkAccent);
+      case ActivityType.unknown:
+        // ActivityRepository ja el descarta abans que arribi aquí.
+        return (icon: Icons.help_outline, color: Colors.grey);
     }
   }
 
@@ -82,6 +85,9 @@ class _ActivityCardState extends State<ActivityCard> {
       case ActivityType.shelfPublished:
         return '${ActivityStrings.actionShelfPublishedPrefix}'
             '"${widget.item.shelfTitle}"';
+      case ActivityType.unknown:
+        // ActivityRepository ja el descarta abans que arribi aquí.
+        return '';
     }
   }
 

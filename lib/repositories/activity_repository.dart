@@ -67,6 +67,10 @@ class ActivityRepository {
     final seenFriendshipPairs = <String>{};
 
     return items.where((item) {
+      if (item.type == ActivityType.unknown) {
+        return false;
+      }
+
       if (item.type != ActivityType.friendshipFormed || item.friendId == null) {
         return true;
       }

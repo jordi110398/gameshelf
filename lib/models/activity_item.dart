@@ -6,9 +6,15 @@ enum ActivityType {
   addedToLibrary,
   friendshipFormed,
   shelfPublished,
+  unknown,
 }
 
 extension ActivityTypeX on ActivityType {
+  /// Un tipus no reconegut (p. ex. afegit per una versió més nova de l'app
+  /// que encara no s'ha desplegat) es tradueix a [ActivityType.unknown] en
+  /// lloc de llançar -- `ActivityRepository` el descarta abans de mostrar-lo,
+  /// així que una versió antiga en producció simplement l'ignora en lloc de
+  /// petar tot el feed d'activitat.
   static ActivityType fromDb(String value) {
     switch (value) {
       case 'started_playing':
@@ -26,7 +32,7 @@ extension ActivityTypeX on ActivityType {
       case 'shelf_published':
         return ActivityType.shelfPublished;
       default:
-        throw ArgumentError('Tipus d\'activitat desconegut: $value');
+        return ActivityType.unknown;
     }
   }
 }

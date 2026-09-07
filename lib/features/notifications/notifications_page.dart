@@ -133,6 +133,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
       case NotificationType.activityLike:
         return '${NotificationStrings.listActivityLikePrefix}'
             '${item.gameTitle ?? NotificationStrings.listActivityLikeUnknownGame}';
+      case NotificationType.unknown:
+        // NotificationRepository ja el descarta abans que arribi aquí.
+        return '';
     }
   }
 
@@ -144,6 +147,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
         return Icons.people_alt_outlined;
       case NotificationType.activityLike:
         return Icons.star;
+      case NotificationType.unknown:
+        return Icons.notifications_none;
     }
   }
 
