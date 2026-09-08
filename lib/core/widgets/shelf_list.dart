@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:gameshelf/core/widgets/shelf_ledge.dart';
-import 'package:gameshelf/core/widgets/shelf_led_strip.dart';
+import 'package:gameshelf/core/widgets/shelf_light_fixture.dart';
 import 'package:gameshelf/core/widgets/staggered_fade_in.dart';
+import 'package:gameshelf/models/shelf_style.dart';
 
 /// Llista genèrica organitzada en "prestatges": files d'elements amb un fil
 /// de llumets a sobre i una planxa de fusta a sota, reutilitzable a
@@ -28,6 +29,9 @@ class ShelfList<T> extends StatelessWidget {
   /// que ocupi només l'alçada del seu contingut.
   final bool scrollable;
 
+  /// Estil dels llumets de cada fila -- vegeu [ShelfLightFixture].
+  final ShelfLightStyle lightStyle;
+
   const ShelfList({
     super.key,
     required this.items,
@@ -39,6 +43,7 @@ class ShelfList<T> extends StatelessWidget {
     this.rowGap = 22,
     this.padding = EdgeInsets.zero,
     this.scrollable = true,
+    this.lightStyle = ShelfLightStyle.neon,
   });
 
   List<List<T>> _buildRows(int columns) {
@@ -64,7 +69,7 @@ class ShelfList<T> extends StatelessWidget {
         builder: (context, constraints) {
           return Column(
             children: [
-              ShelfLedStrip(width: constraints.maxWidth),
+              ShelfLightFixture(width: constraints.maxWidth, style: lightStyle),
               const SizedBox(height: 2),
 
               Row(

@@ -1,23 +1,43 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:gameshelf/models/shelf_style.dart';
 
 /// Paret de fusta de la prestatgeria. És un backdrop fix (no fa scroll amb
 /// la llista, es dibuixa un sol cop sobre tot l'espai visible): per això no
 /// cal cap imatge "seamless" que s'hagi de repetir infinitament cap avall,
 /// només queda estàtica darrere les fileres que sí que es desplacen.
+///
+/// El color és una preferència pública del perfil a qui pertany
+/// l'estanteria mostrada (com el banner generat pels tags): passa'l quan
+/// es mostra la col·lecció d'un usuari concret; deixa el valor per
+/// defecte (walnut) per a decoració genèrica no lligada a ningú.
 class BookshelfBackground extends StatelessWidget {
-  const BookshelfBackground({super.key});
+  final ShelfWoodColor color;
+
+  const BookshelfBackground({super.key, this.color = ShelfWoodColor.walnut});
 
   @override
   Widget build(BuildContext context) {
-    return const SizedBox.expand(
-      child: RepaintBoundary(child: CustomPaint(painter: _WoodGrainPainter())),
+    return SizedBox.expand(
+      child: RepaintBoundary(
+        child: CustomPaint(painter: _WoodGrainPainter(color)),
+      ),
     );
   }
 }
 
+const _woodGradients = {
+  ShelfWoodColor.walnut: [Color(0xFF1B1714), Color(0xFF0A0807)],
+  ShelfWoodColor.oak: [Color(0xFF2E2013), Color(0xFF150E08)],
+  ShelfWoodColor.ebony: [Color(0xFF17181A), Color(0xFF030304)],
+  ShelfWoodColor.cherry: [Color(0xFF2B1512), Color(0xFF120705)],
+  ShelfWoodColor.birch: [Color(0xFF2A2620), Color(0xFF120F0C)],
+};
+
 class _WoodGrainPainter extends CustomPainter {
-  const _WoodGrainPainter();
+  final ShelfWoodColor color;
+
+  const _WoodGrainPainter(this.color);
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -26,10 +46,10 @@ class _WoodGrainPainter extends CustomPainter {
     canvas.drawRect(
       rect,
       Paint()
-        ..shader = const LinearGradient(
+        ..shader = LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [Color(0xFF1B1714), Color(0xFF0A0807)],
+          colors: _woodGradients[color]!,
         ).createShader(rect),
     );
 
@@ -59,5 +79,7 @@ class _WoodGrainPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant _WoodGrainPainter oldDelegate) => false;
+  bool shouldRepaint(covariant _WoodGrainPainter oldDelegate) {
+    return oldDelegate.color != color;
+  }
 }

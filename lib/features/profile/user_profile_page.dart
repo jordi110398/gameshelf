@@ -7,11 +7,12 @@ import 'package:gameshelf/core/widgets/app_logo.dart';
 import 'package:gameshelf/core/widgets/bookshelf_background.dart';
 import 'package:gameshelf/core/widgets/dither_banner.dart';
 import 'package:gameshelf/core/widgets/shelf_ledge.dart';
-import 'package:gameshelf/core/widgets/shelf_led_strip.dart';
+import 'package:gameshelf/core/widgets/shelf_light_fixture.dart';
 import 'package:gameshelf/core/widgets/shelf_list.dart';
 import 'package:gameshelf/core/widgets/wood_drawer_container.dart';
 import 'package:gameshelf/features/home/widgets/game_card.dart';
 import 'package:gameshelf/features/llamp/my_shelves_page.dart';
+import 'package:gameshelf/features/profile/settings_page.dart';
 import 'package:gameshelf/features/profile/share_profile_page.dart';
 import 'package:gameshelf/models/game.dart';
 import 'package:gameshelf/models/game_status.dart';
@@ -23,9 +24,7 @@ import 'package:gameshelf/repositories/shelf_repository.dart';
 import 'package:gameshelf/repositories/supabase_library_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:gameshelf/core/services/user_tags_service.dart';
-import 'package:gameshelf/features/profile/edit_profile_page.dart';
 import 'package:gameshelf/repositories/friendship_repository.dart';
-import 'package:gameshelf/core/services/auth_service.dart';
 import 'package:gameshelf/core/utils/error_messages.dart';
 import 'package:gameshelf/features/profile/widgets/user_tags_row.dart';
 import 'package:gameshelf/features/game/pages/game_detail_page.dart';
@@ -805,11 +804,9 @@ class _UserProfilePageState extends State<UserProfilePage> {
             ),
           if (isMyProfile)
             IconButton(
-              tooltip: ProfileStrings.logoutTooltip,
-              icon: const Icon(Icons.logout),
-              onPressed: () async {
-                await AuthService().signOut();
-              },
+              tooltip: ProfileStrings.settingsTooltip,
+              icon: const Icon(Icons.settings_outlined),
+              onPressed: _openSettings,
             ),
         ],
       ),
@@ -818,44 +815,21 @@ class _UserProfilePageState extends State<UserProfilePage> {
           : Stack(
               children: [
                 _buildContent(),
-                if (isMyProfile)
-                  Positioned(
-                    top: 12,
-                    right: 12,
-                    child: IconButton.filled(
-                      icon: const Icon(Icons.edit),
-                      tooltip: ProfileStrings.editProfileTooltip,
-                      onPressed: _openEditProfile,
-                    ),
-                  )
-                else if (_buildFriendshipCornerAction() case final action?)
-                  Positioned(top: 12, right: 12, child: action),
+                if (!isMyProfile)
+                  if (_buildFriendshipCornerAction() case final action?)
+                    Positioned(top: 12, right: 12, child: action),
               ],
             ),
     );
   }
 
   // ----------------------------------------------
-  // EDICIÓ PERFIL
+  // CONFIGURACIÓ
   // ----------------------------------------------
-  Future<void> _openEditProfile() async {
-    // currentProfile pot venir de profiles_public (sense email) si hem
-    // arribat aquí per cerca; per editar cal el perfil complet.
-    final profileToEdit =
-        await profileRepository.getMyProfile() ?? currentProfile;
+  Future<void> _openSettings() async {
+    await pushFade(context, (_) => SettingsPage(profile: currentProfile));
 
-    if (!mounted) return;
-
-    final updatedProfile = await pushFade<Profile>(
-      context,
-      (_) => EditProfilePage(profile: profileToEdit),
-    );
-
-    if (updatedProfile != null && mounted) {
-      setState(() {
-        currentProfile = updatedProfile;
-      });
-    }
+    await reloadProfile();
   }
 
   // ─────────────────────────────────────────────
@@ -999,27 +973,28 @@ class _UserProfilePageState extends State<UserProfilePage> {
                   if (pinnedShelf != null) ...[
                     const SizedBox(height: 36),
 
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            pinnedShelf!.displayTitle,
-                            style: const TextStyle(
-                              fontSize: 22,
-                              fontWeight: FontWeight.bold,
+                    if (isMyProfile) ...[
+                      Row(
+                        children: [
+                          const Expanded(
+                            child: Text(
+                              LlampStrings.myShelvesTitle,
+                              style: TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
-                        ),
-                        if (isMyProfile)
                           IconButton(
                             visualDensity: VisualDensity.compact,
                             icon: const Icon(Icons.edit_outlined),
                             onPressed: _openMyShelves,
                           ),
-                      ],
-                    ),
+                        ],
+                      ),
 
-                    const SizedBox(height: 14),
+                      const SizedBox(height: 14),
+                    ],
 
                     _buildPinnedShelf(),
                   ] else if (isMyProfile) ...[
@@ -1221,7 +1196,9 @@ class _UserProfilePageState extends State<UserProfilePage> {
       borderRadius: BorderRadius.circular(18),
       child: Stack(
         children: [
-          const Positioned.fill(child: BookshelfBackground()),
+          Positioned.fill(
+            child: BookshelfBackground(color: currentProfile.shelfWoodColor),
+          ),
 
           Padding(
             padding: const EdgeInsets.all(16),
@@ -1246,7 +1223,10 @@ class _UserProfilePageState extends State<UserProfilePage> {
 
                 LayoutBuilder(
                   builder: (context, constraints) {
-                    return ShelfLedStrip(width: constraints.maxWidth);
+                    return ShelfLightFixture(
+                      width: constraints.maxWidth,
+                      style: currentProfile.shelfLightStyle,
+                    );
                   },
                 ),
 
@@ -1293,7 +1273,9 @@ class _UserProfilePageState extends State<UserProfilePage> {
       borderRadius: BorderRadius.circular(18),
       child: Stack(
         children: [
-          const Positioned.fill(child: BookshelfBackground()),
+          Positioned.fill(
+            child: BookshelfBackground(color: currentProfile.shelfWoodColor),
+          ),
 
           Padding(
             padding: const EdgeInsets.all(16),
@@ -1312,7 +1294,10 @@ class _UserProfilePageState extends State<UserProfilePage> {
 
                 LayoutBuilder(
                   builder: (context, constraints) {
-                    return ShelfLedStrip(width: constraints.maxWidth);
+                    return ShelfLightFixture(
+                      width: constraints.maxWidth,
+                      style: currentProfile.shelfLightStyle,
+                    );
                   },
                 ),
 
@@ -1412,7 +1397,11 @@ class _UserProfilePageState extends State<UserProfilePage> {
             borderRadius: BorderRadius.circular(16),
             child: Stack(
               children: [
-                const Positioned.fill(child: BookshelfBackground()),
+                Positioned.fill(
+                  child: BookshelfBackground(
+                    color: currentProfile.shelfWoodColor,
+                  ),
+                ),
                 ShelfList<LibraryGame>(
                   items: entry.value,
                   scrollable: false,
@@ -1420,6 +1409,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                   minColumns: 4,
                   itemAspectRatio: 3 / 4,
                   padding: const EdgeInsets.all(14),
+                  lightStyle: currentProfile.shelfLightStyle,
                   itemBuilder: (context, libraryGame) => _GameCoverTile(
                     libraryGame: libraryGame,
                     onOpened: loadProfile,
@@ -1535,7 +1525,9 @@ class _UserProfilePageState extends State<UserProfilePage> {
       borderRadius: BorderRadius.circular(16),
       child: Stack(
         children: [
-          const Positioned.fill(child: BookshelfBackground()),
+          Positioned.fill(
+            child: BookshelfBackground(color: currentProfile.shelfWoodColor),
+          ),
           ShelfList<LibraryGame>(
             items: filteredGames,
             scrollable: false,
@@ -1543,6 +1535,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
             minColumns: 3,
             itemAspectRatio: 2 / 3,
             padding: const EdgeInsets.all(14),
+            lightStyle: currentProfile.shelfLightStyle,
             itemBuilder: (context, libraryGame) {
               final gameId = libraryGame.game.igdbId;
 

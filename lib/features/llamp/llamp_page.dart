@@ -5,8 +5,8 @@ import 'package:gameshelf/core/utils/error_messages.dart';
 import 'package:gameshelf/core/widgets/app_logo.dart';
 import 'package:gameshelf/core/widgets/bookshelf_background.dart';
 import 'package:gameshelf/core/widgets/responsive_center.dart';
-import 'package:gameshelf/core/widgets/shelf_led_strip.dart';
 import 'package:gameshelf/core/widgets/shelf_ledge.dart';
+import 'package:gameshelf/core/widgets/shelf_light_fixture.dart';
 import 'package:gameshelf/core/widgets/shimmer_box.dart';
 import 'package:gameshelf/core/widgets/wood_drawer_container.dart';
 import 'package:gameshelf/features/game/pages/game_detail_page.dart';
@@ -214,7 +214,9 @@ class _FriendShelfCard extends StatelessWidget {
       borderRadius: BorderRadius.circular(18),
       child: Stack(
         children: [
-          const Positioned.fill(child: BookshelfBackground()),
+          Positioned.fill(
+            child: BookshelfBackground(color: profile.shelfWoodColor),
+          ),
           Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -254,7 +256,10 @@ class _FriendShelfCard extends StatelessWidget {
 
                 LayoutBuilder(
                   builder: (context, constraints) {
-                    return ShelfLedStrip(width: constraints.maxWidth);
+                    return ShelfLightFixture(
+                      width: constraints.maxWidth,
+                      style: profile.shelfLightStyle,
+                    );
                   },
                 ),
 

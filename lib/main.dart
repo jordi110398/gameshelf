@@ -1,6 +1,7 @@
 import 'dart:js_interop';
 
 import 'package:flutter/material.dart';
+import 'package:gameshelf/core/services/theme_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
@@ -62,6 +63,8 @@ Future<void> main() async {
       detectSessionInUri: false,
     ),
   );
+
+  ThemeService.instance.init();
 
   runApp(const GameShelfApp());
 }

@@ -1,4 +1,5 @@
 import 'package:gameshelf/models/profile.dart';
+import 'package:gameshelf/models/shelf_style.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ProfileRepository {
@@ -95,6 +96,48 @@ class ProfileRepository {
           'avatar_url': profile.avatarUrl,
         })
         .eq('id', user.id);
+  }
+
+  // ─────────────────────────────────────────────
+  // CONFIGURACIÓ: TEMA I ESTÈTICA DE L'ESTANTERIA
+  // ─────────────────────────────────────────────
+
+  Future<void> updateThemePreference(AppThemeOption value) async {
+    final user = client.auth.currentUser;
+
+    if (user == null) {
+      throw Exception('Usuari no autenticat');
+    }
+
+    await client
+        .from('profiles')
+        .update({'theme_preference': value.databaseValue})
+        .eq('id', user.id);
+  }
+
+  Future<void> updateShelfSkin({
+    ShelfLightStyle? lightStyle,
+    ShelfWoodColor? woodColor,
+  }) async {
+    final user = client.auth.currentUser;
+
+    if (user == null) {
+      throw Exception('Usuari no autenticat');
+    }
+
+    final update = <String, dynamic>{};
+
+    if (lightStyle != null) {
+      update['shelf_light_style'] = lightStyle.databaseValue;
+    }
+
+    if (woodColor != null) {
+      update['shelf_wood_color'] = woodColor.databaseValue;
+    }
+
+    if (update.isEmpty) return;
+
+    await client.from('profiles').update(update).eq('id', user.id);
   }
 
   Future<ProfileStats> getMyStats() async {

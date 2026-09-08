@@ -118,6 +118,36 @@ class ProfileStrings {
       'No s\'ha pogut generar la imatge: ';
 
   // ─────────────────────────────────────────────
+  // CONFIGURACIÓ
+  // ─────────────────────────────────────────────
+
+  static const settingsTooltip = 'Configuració';
+  static const settingsAppBarTitle = 'Configuració';
+
+  static const settingsEditProfileSubtitle =
+      'Nickname, bio, foto, contrasenya i compte';
+
+  static const themeSectionTitle = 'Tema de l\'app';
+  static const themeLight = 'Clar';
+  static const themeDark = 'Fosc';
+  static const themeGba = 'Game Boy Advance';
+  static const themeChangeFailedPrefix =
+      'No s\'ha pogut canviar el tema: ';
+
+  static const shelfStyleSectionTitle = 'Estètica de l\'estanteria';
+  static const shelfLightsLabel = 'Llums';
+  static const shelfLightsNeon = 'Neó';
+  static const shelfLightsBulbs = 'Bombetes';
+  static const shelfWoodLabel = 'Color de la fusta';
+  static const shelfWoodWalnut = 'Noguera';
+  static const shelfWoodOak = 'Roure';
+  static const shelfWoodEbony = 'Banús';
+  static const shelfWoodCherry = 'Cirerer';
+  static const shelfWoodBirch = 'Bedoll';
+  static const shelfStyleChangeFailedPrefix =
+      'No s\'ha pogut canviar l\'estètica: ';
+
+  // ─────────────────────────────────────────────
   // PÀGINA CANVIAR CONTRASENYA (standalone)
   // ─────────────────────────────────────────────
 
