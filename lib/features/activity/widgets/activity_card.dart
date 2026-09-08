@@ -37,6 +37,11 @@ class _ActivityCardState extends State<ActivityCard> {
         return (icon: Icons.add_circle_outline, color: Colors.green);
       case ActivityType.friendshipFormed:
         return (icon: Icons.people_alt, color: Colors.deepPurpleAccent);
+      case ActivityType.shelfPublished:
+        return (icon: Icons.bolt, color: Colors.pinkAccent);
+      case ActivityType.unknown:
+        // ActivityRepository ja el descarta abans que arribi aquí.
+        return (icon: Icons.help_outline, color: Colors.grey);
     }
   }
 
@@ -64,6 +69,12 @@ class _ActivityCardState extends State<ActivityCard> {
         return '${ActivityStrings.friendshipFormedConnector}'
             '@${widget.item.friendNickname ?? ActivityStrings.friendshipFormedUnknownFriend} '
             '${ActivityStrings.friendshipFormedSuffix}';
+      case ActivityType.shelfPublished:
+        return '${ActivityStrings.actionShelfPublishedPrefix}'
+            '"${widget.item.shelfTitle}"';
+      case ActivityType.unknown:
+        // ActivityRepository ja el descarta abans que arribi aquí.
+        return '';
     }
   }
 
@@ -448,6 +459,32 @@ class _ActivityCardState extends State<ActivityCard> {
                     onPressed: () => _showReview(context),
                     style: TextButton.styleFrom(padding: EdgeInsets.zero),
                     child: const Text(ActivityStrings.seeReview),
+                  ),
+                ],
+
+                if (widget.item.type == ActivityType.shelfPublished &&
+                    widget.item.shelfCoverUrls.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    height: 64,
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: widget.item.shelfCoverUrls.length,
+                      separatorBuilder: (_, _) => const SizedBox(width: 6),
+                      itemBuilder: (context, index) {
+                        return ClipRRect(
+                          borderRadius: BorderRadius.circular(6),
+                          child: AspectRatio(
+                            aspectRatio: 3 / 4,
+                            child: Image.network(
+                              widget.item.shelfCoverUrls[index],
+                              fit: BoxFit.cover,
+                              cacheWidth: 100,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
                   ),
                 ],
               ],

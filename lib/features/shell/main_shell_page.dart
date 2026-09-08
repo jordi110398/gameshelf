@@ -5,6 +5,7 @@ import 'package:gameshelf/core/widgets/floating_pill.dart';
 import 'package:gameshelf/core/widgets/pressable_scale.dart';
 import 'package:gameshelf/core/widgets/shimmer_box.dart';
 import 'package:gameshelf/features/home/home_page.dart';
+import 'package:gameshelf/features/llamp/llamp_page.dart';
 import 'package:gameshelf/features/search/search_page.dart';
 import 'package:gameshelf/features/social/social_page.dart';
 import 'package:gameshelf/models/profile.dart';
@@ -13,7 +14,11 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:gameshelf/features/profile/user_profile_page.dart';
 
 class MainShellPage extends StatefulWidget {
-  const MainShellPage({super.key});
+  /// Nickname a cercar en obrir (p. ex. vinent d'un enllaç de "Compartir
+  /// perfil", `/home?u=nickname`). Vegeu `app_router.dart`.
+  final String? initialSearchNickname;
+
+  const MainShellPage({super.key, this.initialSearchNickname});
 
   @override
   State<MainShellPage> createState() => _MainShellPageState();
@@ -38,6 +43,11 @@ const _navItems = [
     label: AppStrings.navHome,
   ),
   _NavItemData(
+    icon: Icons.bolt_outlined,
+    selectedIcon: Icons.bolt,
+    label: AppStrings.navLlamp,
+  ),
+  _NavItemData(
     icon: Icons.people_outline,
     selectedIcon: Icons.people,
     label: AppStrings.navSocial,
@@ -53,8 +63,26 @@ class _MainShellPageState extends State<MainShellPage> {
   int _currentIndex = 0;
 
   final _homeKey = GlobalKey<HomePageState>();
+  final _llampKey = GlobalKey<LlampPageState>();
   final _socialKey = GlobalKey<SocialPageState>();
   final _profileKey = GlobalKey<ProfileTabState>();
+
+  @override
+  void initState() {
+    super.initState();
+
+    final nickname = widget.initialSearchNickname;
+    if (nickname == null || nickname.trim().isEmpty) return;
+
+    // L'`IndexedStack` ja munta totes les pestanyes des del primer frame,
+    // però cal esperar-lo per poder fer servir el `GlobalKey` de Social.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+
+      setState(() => _currentIndex = 2);
+      _socialKey.currentState?.searchForNickname(nickname.trim());
+    });
+  }
 
   void _selectTab(int index) {
     if (index == _currentIndex) return;
@@ -68,8 +96,10 @@ class _MainShellPageState extends State<MainShellPage> {
     // del perfil, marcar un preferit, etc.) la pestanya no es refaria sola
     // en tornar-hi. Ho refresquem explícitament en seleccionar-la.
     if (index == 1) {
-      _socialKey.currentState?.loadSocialData();
+      _llampKey.currentState?.refresh();
     } else if (index == 2) {
+      _socialKey.currentState?.loadSocialData();
+    } else if (index == 3) {
       _profileKey.currentState?.refresh();
     }
   }
@@ -90,6 +120,7 @@ class _MainShellPageState extends State<MainShellPage> {
             index: _currentIndex,
             children: [
               HomePage(key: _homeKey, onLogoTap: () => _selectTab(0)),
+              LlampPage(key: _llampKey, onLogoTap: () => _selectTab(0)),
               SocialPage(key: _socialKey, onLogoTap: () => _selectTab(0)),
               ProfileTab(key: _profileKey, onLogoTap: () => _selectTab(0)),
             ],
@@ -135,32 +166,18 @@ class _FloatingNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 5 caselles simètriques: [Inici] [Llamp (inactiu, de moment)] [+]
-    // [Social] [Perfil]. Amb el mateix nombre de caselles a cada costat,
-    // el botó '+' ja queda centrat sense necessitat de cap truc de `Stack`.
-    //
-    // La pestanya de recomanacions (llamp) encara no fa res: és un avançament
-    // visual de la futura funcionalitat, entre Inici i el botó '+'.
+    // 5 caselles simètriques: [Inici] [Descobreix] [+] [Social] [Perfil].
+    // Amb el mateix nombre de caselles a cada costat, el botó '+' ja queda
+    // centrat sense necessitat de cap truc de `Stack`.
     return FloatingPill(
       child: Row(
         children: [
           Expanded(child: _navTab(context, 0)),
-          Expanded(child: _buildInertTab(context)),
-          Expanded(child: _AddGameButton(onTap: onAddGame)),
           Expanded(child: _navTab(context, 1)),
+          Expanded(child: _AddGameButton(onTap: onAddGame)),
           Expanded(child: _navTab(context, 2)),
+          Expanded(child: _navTab(context, 3)),
         ],
-      ),
-    );
-  }
-
-  Widget _buildInertTab(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return Center(
-      child: Icon(
-        Icons.bolt,
-        color: colorScheme.onSurfaceVariant.withValues(alpha: 0.35),
       ),
     );
   }

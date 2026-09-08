@@ -28,19 +28,19 @@
 - [x] About
 
 ## v1.0.1 Social Update
-- [ ] Compartir perfil
+- [x] Compartir perfil
 - [x] Sistema de likes
 - [x] Notificacions
 - [ ] Themes app (light/dark?, colors interfície, etc.)
-- [ ] Recomanació de jocs/llistes/jugadors (al llamp)
-- [ ] Playlists de jocs (que es publiquen al llamp)
+- [x] Recomanació de jocs/llistes/jugadors (al llamp)
+- [x] Playlists de jocs (que es publiquen al llamp)
 - [x] Escollir plataforma de joc i mostrar-la
 - [ ] Personalització estanteria: colors, elements decoratius, etc.
 - [ ] Desplegable escollir idioma
 - [ ] Apartat configuració
 - [ ] Animated handlers
 - [ ] More tags and more colors
-- [ ] Creació de shelves/estanteries/col·leccions (de 8 jocs maxim) des del perfil de cada usuari, per mostrar i fixar o per publicar (al llamp) si es vol.
+- [x] Creació de shelves/estanteries/col·leccions (de 8 jocs maxim) des del perfil de cada usuari, per mostrar i fixar o per publicar (al llamp) si es vol.
 - [ ] Wrapped a final d'any
 
 

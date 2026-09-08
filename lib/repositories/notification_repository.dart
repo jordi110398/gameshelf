@@ -41,11 +41,14 @@ class NotificationRepository {
 
     final profileById = {for (final p in profiles) p['id'] as String: p};
 
-    return rows.map((row) {
-      final map = Map<String, dynamic>.from(row as Map);
-      map['profiles'] = profileById[map['actor_id']];
-      return NotificationItem.fromMap(map);
-    }).toList();
+    return rows
+        .map((row) {
+          final map = Map<String, dynamic>.from(row as Map);
+          map['profiles'] = profileById[map['actor_id']];
+          return NotificationItem.fromMap(map);
+        })
+        .where((item) => item.type != NotificationType.unknown)
+        .toList();
   }
 
   Future<int> getUnreadCount() async {

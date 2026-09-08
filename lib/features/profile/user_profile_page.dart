@@ -1,18 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:gameshelf/core/navigation/page_transitions.dart';
 import 'package:gameshelf/core/strings/app_strings.dart';
+import 'package:gameshelf/core/strings/llamp_strings.dart';
 import 'package:gameshelf/core/strings/profile_strings.dart';
 import 'package:gameshelf/core/widgets/app_logo.dart';
 import 'package:gameshelf/core/widgets/bookshelf_background.dart';
+import 'package:gameshelf/core/widgets/dither_banner.dart';
 import 'package:gameshelf/core/widgets/shelf_ledge.dart';
 import 'package:gameshelf/core/widgets/shelf_led_strip.dart';
 import 'package:gameshelf/core/widgets/shelf_list.dart';
 import 'package:gameshelf/core/widgets/wood_drawer_container.dart';
 import 'package:gameshelf/features/home/widgets/game_card.dart';
+import 'package:gameshelf/features/llamp/my_shelves_page.dart';
+import 'package:gameshelf/features/profile/share_profile_page.dart';
+import 'package:gameshelf/models/game.dart';
 import 'package:gameshelf/models/game_status.dart';
 import 'package:gameshelf/models/library_game.dart';
 import 'package:gameshelf/models/profile.dart';
+import 'package:gameshelf/models/shelf.dart';
 import 'package:gameshelf/repositories/profile_repository.dart';
+import 'package:gameshelf/repositories/shelf_repository.dart';
 import 'package:gameshelf/repositories/supabase_library_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:gameshelf/core/services/user_tags_service.dart';
@@ -53,9 +60,13 @@ class _UserProfilePageState extends State<UserProfilePage> {
   late final ProfileRepository profileRepository;
   late final SupabaseLibraryRepository libraryRepository;
   late final ActivityRepository activityRepository;
+  late final ShelfRepository shelfRepository;
   final UserTagsService tagsService = const UserTagsService();
   late Profile currentProfile;
   late final FriendshipRepository friendshipRepository;
+
+  Shelf? pinnedShelf;
+  Map<int, Game> pinnedShelfGames = {};
 
   Map<String, dynamic>? friendship;
   bool isFriendshipLoading = true;
@@ -84,9 +95,11 @@ class _UserProfilePageState extends State<UserProfilePage> {
     libraryRepository = SupabaseLibraryRepository(client);
     friendshipRepository = FriendshipRepository(client);
     activityRepository = ActivityRepository(client);
+    shelfRepository = ShelfRepository(client);
 
     loadProfile();
     loadFriendship();
+    loadPinnedShelf();
   }
 
   // ─────────────────────────────────────────────
@@ -197,6 +210,42 @@ class _UserProfilePageState extends State<UserProfilePage> {
         isFriendshipLoading = false;
       });
     }
+  }
+
+  // ─────────────────────────────────────────────
+  // ESTANTERIA FIXADA
+  // ─────────────────────────────────────────────
+
+  Future<void> loadPinnedShelf() async {
+    try {
+      final shelf = await shelfRepository.getPinnedShelf(currentProfile.id);
+
+      if (!mounted) return;
+
+      if (shelf == null) {
+        setState(() {
+          pinnedShelf = null;
+          pinnedShelfGames = {};
+        });
+        return;
+      }
+
+      final games = await shelfRepository.getGamesByIds(shelf.gameIds);
+
+      if (!mounted) return;
+
+      setState(() {
+        pinnedShelf = shelf;
+        pinnedShelfGames = {for (final g in games) g.igdbId: g};
+      });
+    } catch (e) {
+      debugPrint('Error carregant l\'estanteria fixada: $e');
+    }
+  }
+
+  Future<void> _openMyShelves() async {
+    await pushFade(context, (_) => const MyShelvesPage());
+    await loadPinnedShelf();
   }
 
   // --------------------------------------------
@@ -750,6 +799,12 @@ class _UserProfilePageState extends State<UserProfilePage> {
         actions: [
           if (isMyProfile)
             IconButton(
+              tooltip: ProfileStrings.shareProfileTooltip,
+              icon: const Icon(Icons.ios_share),
+              onPressed: _openShareProfile,
+            ),
+          if (isMyProfile)
+            IconButton(
               tooltip: ProfileStrings.logoutTooltip,
               icon: const Icon(Icons.logout),
               onPressed: () async {
@@ -801,6 +856,24 @@ class _UserProfilePageState extends State<UserProfilePage> {
         currentProfile = updatedProfile;
       });
     }
+  }
+
+  // ─────────────────────────────────────────────
+  // COMPARTIR PERFIL
+  // ─────────────────────────────────────────────
+
+  Future<void> _openShareProfile() async {
+    final currentStats = stats;
+    if (currentStats == null) return;
+
+    await pushFade(
+      context,
+      (_) => ShareProfilePage(
+        profile: currentProfile,
+        stats: currentStats,
+        bannerColors: _bannerColors(context),
+      ),
+    );
   }
 
   // ─────────────────────────────────────────────
@@ -921,6 +994,44 @@ class _UserProfilePageState extends State<UserProfilePage> {
                   ],
 
                   // ─────────────────────────────────────
+                  // ESTANTERIA FIXADA
+                  // ─────────────────────────────────────
+                  if (pinnedShelf != null) ...[
+                    const SizedBox(height: 36),
+
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            pinnedShelf!.displayTitle,
+                            style: const TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        if (isMyProfile)
+                          IconButton(
+                            visualDensity: VisualDensity.compact,
+                            icon: const Icon(Icons.edit_outlined),
+                            onPressed: _openMyShelves,
+                          ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 14),
+
+                    _buildPinnedShelf(),
+                  ] else if (isMyProfile) ...[
+                    const SizedBox(height: 20),
+                    TextButton.icon(
+                      onPressed: _openMyShelves,
+                      icon: const Icon(Icons.grid_view_outlined),
+                      label: const Text(LlampStrings.myShelvesAction),
+                    ),
+                  ],
+
+                  // ─────────────────────────────────────
                   // RESUM DE REVIEWS
                   // NOMÉS EL MEU PERFIL
                   // ─────────────────────────────────────
@@ -1031,12 +1142,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
   }
 
   Widget _buildBanner(BuildContext context) {
-    final colors = _bannerColors(context);
-
-    return CustomPaint(
-      size: Size.infinite,
-      painter: _DitherBannerPainter(colors),
-    );
+    return DitherBanner(colors: _bannerColors(context));
   }
 
   // ─────────────────────────────────────────────
@@ -1157,6 +1263,103 @@ class _UserProfilePageState extends State<UserProfilePage> {
                         libraryGame: favorites[index],
                         width: 88,
                         onOpened: loadProfile,
+                      );
+                    },
+                  ),
+                ),
+
+                const SizedBox(height: 10),
+                const ShelfLedge(),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ─────────────────────────────────────────────
+  // ESTANTERIA FIXADA
+  // ─────────────────────────────────────────────
+
+  Widget _buildPinnedShelf() {
+    final shelf = pinnedShelf!;
+    final games = shelf.gameIds
+        .map((id) => pinnedShelfGames[id])
+        .whereType<Game>()
+        .toList();
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(18),
+      child: Stack(
+        children: [
+          const Positioned.fill(child: BookshelfBackground()),
+
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  shelf.displayTitle,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+
+                const SizedBox(height: 10),
+
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    return ShelfLedStrip(width: constraints.maxWidth);
+                  },
+                ),
+
+                const SizedBox(height: 4),
+
+                SizedBox(
+                  height: 120,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: games.length,
+                    separatorBuilder: (_, _) => const SizedBox(width: 10),
+                    itemBuilder: (context, index) {
+                      final game = games[index];
+
+                      return SizedBox(
+                        width: 88,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(12),
+                          onTap: () async {
+                            await pushFade(
+                              context,
+                              (_) => GameDetailPage(game: game),
+                            );
+                          },
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: AspectRatio(
+                              aspectRatio: 3 / 4,
+                              child:
+                                  game.coverUrl != null &&
+                                      game.coverUrl!.isNotEmpty
+                                  ? Image.network(
+                                      game.coverUrl!,
+                                      fit: BoxFit.cover,
+                                      cacheWidth: 180,
+                                    )
+                                  : Container(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .surfaceContainerHighest,
+                                      child: const Icon(
+                                        Icons.videogame_asset,
+                                      ),
+                                    ),
+                            ),
+                          ),
+                        ),
                       );
                     },
                   ),
@@ -1453,82 +1656,5 @@ class _GameCoverTile extends StatelessWidget {
     );
 
     return width != null ? SizedBox(width: width, child: tile) : tile;
-  }
-}
-
-// ─────────────────────────────────────────────
-// BANNER AMB DITHERING (ESTIL GBA)
-// ─────────────────────────────────────────────
-
-/// Matriu Bayer 4x4 estàndard, per decidir píxel a píxel quin dels dos
-/// colors "reals" toca dibuixar en una transició -- la tècnica autèntica
-/// de dithering ordenat que feien servir les pantalles de GBA en lloc
-/// d'un degradat suau (que necessitaria més colors dels que la pantalla
-/// podia mostrar).
-const _bayer4x4 = [
-  [0, 8, 2, 10],
-  [12, 4, 14, 6],
-  [3, 11, 1, 9],
-  [15, 7, 13, 5],
-];
-
-class _DitherBannerPainter extends CustomPainter {
-  final List<Color> colors;
-
-  static const double _pixelSize = 6;
-  static const Color _shadowColor = Color(0xFF14101C);
-
-  const _DitherBannerPainter(this.colors);
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final palette = colors.isEmpty
-        ? const [Color(0xFF8B5CF6), Color(0xFF6D28D9)]
-        : colors;
-
-    final cols = (size.width / _pixelSize).ceil();
-    final rows = (size.height / _pixelSize).ceil();
-
-    final paint = Paint()..style = PaintingStyle.fill;
-
-    for (var row = 0; row < rows; row++) {
-      for (var col = 0; col < cols; col++) {
-        final threshold = _bayer4x4[row % 4][col % 4] / 16.0;
-
-        // Transició horitzontal entre els colors de la paleta.
-        final hProgress = palette.length == 1
-            ? 0.0
-            : (col / cols) * (palette.length - 1);
-        final colorA = palette[hProgress.floor().clamp(0, palette.length - 1)];
-        final colorB =
-            palette[(hProgress.floor() + 1).clamp(0, palette.length - 1)];
-        final hLocal = hProgress - hProgress.floor();
-
-        var pixelColor = hLocal > threshold ? colorB : colorA;
-
-        // Ombreig vertical cap avall (dithered, no degradat suau).
-        final vProgress = ((row / rows) - 0.3) / 0.7;
-        if (vProgress > 0 && vProgress.clamp(0.0, 1.0) > threshold) {
-          pixelColor = _shadowColor;
-        }
-
-        paint.color = pixelColor;
-
-        canvas.drawRect(
-          Rect.fromLTWH(
-            col * _pixelSize,
-            row * _pixelSize,
-            _pixelSize,
-            _pixelSize,
-          ),
-          paint,
-        );
-      }
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant _DitherBannerPainter oldDelegate) {
-    return oldDelegate.colors != colors;
   }
 }

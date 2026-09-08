@@ -19,6 +19,7 @@ class AppStrings {
   // ─────────────────────────────────────────────
 
   static const navHome = 'Inici';
+  static const navLlamp = 'Descobreix';
   static const navSocial = 'Social';
   static const navProfile = 'Perfil';
 

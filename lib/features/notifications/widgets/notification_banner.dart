@@ -92,6 +92,9 @@ class _NotificationBannerState extends State<_NotificationBanner>
         final game = n.gameTitle;
         return '@${n.actorNickname} ${NotificationStrings.bannerActivityLikeSuffix}'
             '${game != null ? '${NotificationStrings.bannerActivityLikeGamePrefix}$game' : ''}';
+      case NotificationType.unknown:
+        // NotificationRepository ja el descarta abans que arribi aquí.
+        return '';
     }
   }
 
@@ -103,6 +106,8 @@ class _NotificationBannerState extends State<_NotificationBanner>
         return Icons.people_alt;
       case NotificationType.activityLike:
         return Icons.star;
+      case NotificationType.unknown:
+        return Icons.notifications_none;
     }
   }
 

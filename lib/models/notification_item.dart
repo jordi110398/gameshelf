@@ -1,6 +1,11 @@
-enum NotificationType { friendRequest, friendAccepted, activityLike }
+enum NotificationType { friendRequest, friendAccepted, activityLike, unknown }
 
 extension NotificationTypeX on NotificationType {
+  /// Un tipus no reconegut (p. ex. afegit per una versió més nova de l'app
+  /// que encara no s'ha desplegat) es tradueix a [NotificationType.unknown]
+  /// en lloc de llançar -- `NotificationRepository` el descarta abans de
+  /// mostrar-lo, així que una versió antiga en producció simplement
+  /// l'ignora en lloc de petar tota la llista de notificacions.
   static NotificationType fromDb(String value) {
     switch (value) {
       case 'friend_request':
@@ -10,7 +15,7 @@ extension NotificationTypeX on NotificationType {
       case 'activity_like':
         return NotificationType.activityLike;
       default:
-        throw ArgumentError('Tipus de notificació desconegut: $value');
+        return NotificationType.unknown;
     }
   }
 }
