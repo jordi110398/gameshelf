@@ -106,6 +106,7 @@ class ProfileRepository {
     ShelfLightStyle? lightStyle,
     ShelfWoodColor? woodColor,
     ShelfDecoration? decoration,
+    ShelfCoverStyle? coverStyle,
   }) async {
     final user = client.auth.currentUser;
 
@@ -125,6 +126,10 @@ class ProfileRepository {
 
     if (decoration != null) {
       update['shelf_decoration'] = decoration.databaseValue;
+    }
+
+    if (coverStyle != null) {
+      update['shelf_cover_style'] = coverStyle.databaseValue;
     }
 
     if (update.isEmpty) return;

@@ -1302,6 +1302,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                         libraryGame: favorite,
                         width: 88,
                         onOpened: loadProfile,
+                        coverStyle: currentProfile.shelfCoverStyle,
                       ),
                   ],
                 ),
@@ -1375,24 +1376,36 @@ class _UserProfilePageState extends State<UserProfilePage> {
                               (_) => GameDetailPage(game: game),
                             );
                           },
-                          child: CartridgeCover(
-                            cover: AspectRatio(
-                              aspectRatio: 3 / 4,
-                              child:
-                                  game.coverUrl != null &&
-                                      game.coverUrl!.isNotEmpty
-                                  ? Image.network(
-                                      game.coverUrl!,
-                                      fit: BoxFit.cover,
-                                      cacheWidth: 180,
+                          child: Builder(
+                            builder: (context) {
+                              final coverArt = AspectRatio(
+                                aspectRatio: 3 / 4,
+                                child:
+                                    game.coverUrl != null &&
+                                        game.coverUrl!.isNotEmpty
+                                    ? Image.network(
+                                        game.coverUrl!,
+                                        fit: BoxFit.cover,
+                                        cacheWidth: 180,
+                                      )
+                                    : Container(
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.surfaceContainerHighest,
+                                        child: const Icon(
+                                          Icons.videogame_asset,
+                                        ),
+                                      ),
+                              );
+
+                              return currentProfile.shelfCoverStyle ==
+                                      ShelfCoverStyle.plain
+                                  ? ClipRRect(
+                                      borderRadius: BorderRadius.circular(8),
+                                      child: coverArt,
                                     )
-                                  : Container(
-                                      color: Theme.of(
-                                        context,
-                                      ).colorScheme.surfaceContainerHighest,
-                                      child: const Icon(Icons.videogame_asset),
-                                    ),
-                            ),
+                                  : CartridgeCover(cover: coverArt);
+                            },
                           ),
                         ),
                       ),
@@ -1463,6 +1476,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                   itemBuilder: (context, libraryGame) => _GameCoverTile(
                     libraryGame: libraryGame,
                     onOpened: loadProfile,
+                    coverStyle: currentProfile.shelfCoverStyle,
                   ),
                 ),
               ],
@@ -1602,6 +1616,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                 },
 
                 socialNickname: currentProfile.nickname,
+                coverStyle: currentProfile.shelfCoverStyle,
               );
             },
           ),
@@ -1650,10 +1665,12 @@ class _GameCoverTile extends StatelessWidget {
   final LibraryGame libraryGame;
   final Future<void> Function() onOpened;
   final double? width;
+  final ShelfCoverStyle coverStyle;
 
   const _GameCoverTile({
     required this.libraryGame,
     required this.onOpened,
+    required this.coverStyle,
     this.width,
   });
 
@@ -1672,25 +1689,33 @@ class _GameCoverTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final game = libraryGame.game;
 
-    final cover = CartridgeCover(
-      cover: AspectRatio(
-        aspectRatio: 3 / 4,
-        child: game.coverUrl != null && game.coverUrl!.isNotEmpty
-            ? Image.network(
-                game.coverUrl!,
-                fit: BoxFit.cover,
-                cacheWidth: 220,
-                errorBuilder: (_, _, _) => Container(
-                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                  child: const Icon(Icons.videogame_asset),
-                ),
-              )
-            : Container(
+    final coverArt = AspectRatio(
+      aspectRatio: 3 / 4,
+      child: game.coverUrl != null && game.coverUrl!.isNotEmpty
+          ? Image.network(
+              game.coverUrl!,
+              fit: BoxFit.cover,
+              cacheWidth: 220,
+              errorBuilder: (_, _, _) => Container(
                 color: Theme.of(context).colorScheme.surfaceContainerHighest,
                 child: const Icon(Icons.videogame_asset),
               ),
-      ),
+            )
+          : Container(
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
+              child: const Icon(Icons.videogame_asset),
+            ),
     );
+
+    final cover = coverStyle == ShelfCoverStyle.plain
+        ? ClipRRect(borderRadius: BorderRadius.circular(8), child: coverArt)
+        : CartridgeCover(
+            cover: coverArt,
+            shellColor: cartridgeShellColorFor(
+              platform: libraryGame.userGame.platform,
+              favorite: libraryGame.userGame.favorite,
+            ),
+          );
 
     final tile = InkWell(
       borderRadius: BorderRadius.circular(10),

@@ -66,6 +66,32 @@ extension ShelfWoodColorX on ShelfWoodColor {
   bool get isLight => this == ShelfWoodColor.birch;
 }
 
+/// Estil de les cobertes de joc a les estanteries destacades. `cartridge`
+/// és la carcassa retro (`CartridgeCover`); `plain` és una coberta neta
+/// sense marc, per a qui no el vulgui. Enum obert a futures variants.
+enum ShelfCoverStyle { plain, cartridge }
+
+extension ShelfCoverStyleX on ShelfCoverStyle {
+  static ShelfCoverStyle fromDb(String? value) {
+    switch (value) {
+      case 'plain':
+        return ShelfCoverStyle.plain;
+      case 'cartridge':
+      default:
+        return ShelfCoverStyle.cartridge;
+    }
+  }
+
+  String get databaseValue {
+    switch (this) {
+      case ShelfCoverStyle.plain:
+        return 'plain';
+      case ShelfCoverStyle.cartridge:
+        return 'cartridge';
+    }
+  }
+}
+
 /// Element decoratiu opcional a l'extrem d'una estanteria destacada
 /// (preferits, estanteria fixada, targetes del llamp) -- no es mostra a
 /// les graelles denses (Inici, cerca...).

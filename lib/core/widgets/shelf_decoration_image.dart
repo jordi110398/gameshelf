@@ -34,6 +34,10 @@ class ShelfDecorationImage extends StatelessWidget {
       path,
       height: height,
       fit: BoxFit.contain,
+      // Alineat a baix: la imatge (quadrada) no omple tota l'alçada
+      // reservada, i sense això `Image` la centra, deixant el test que
+      // el vas (la part de baix del PNG) no toqui la lleixa.
+      alignment: Alignment.bottomCenter,
       // Els PNG originals són molt més grans (renders 1080x1080); limita
       // la memòria de descodificació al que realment es necessita.
       cacheHeight: (height * 2.5).round(),

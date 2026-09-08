@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:gameshelf/core/navigation/page_transitions.dart';
+import 'package:gameshelf/core/services/shelf_skin_service.dart';
 import 'package:gameshelf/core/strings/app_strings.dart';
 import 'package:gameshelf/core/strings/home_strings.dart';
 import 'package:gameshelf/core/utils/error_messages.dart';
 import 'package:gameshelf/core/utils/platform_visuals.dart';
+import 'package:gameshelf/core/widgets/cartridge_cover.dart';
 import 'package:gameshelf/core/widgets/star_burst.dart';
 import 'package:gameshelf/features/game/pages/game_detail_page.dart';
 import 'package:gameshelf/models/library_game.dart';
 import 'package:gameshelf/models/game_status.dart';
+import 'package:gameshelf/models/shelf_style.dart';
 import 'package:gameshelf/models/user_game.dart';
 import 'package:gameshelf/repositories/supabase_library_repository.dart';
 import 'package:gameshelf/features/social/social_game_detail_page.dart';
@@ -22,6 +25,12 @@ class GameCard extends StatefulWidget {
   final VoidCallback onActivate;
   final String? socialNickname;
 
+  /// `null` -- segueix la preferència de l'usuari actual
+  /// (`ShelfSkinService`); explícit quan la coberta pertany a
+  /// l'estanteria/perfil d'una altra persona (mateix patró que
+  /// `BookshelfBackground`).
+  final ShelfCoverStyle? coverStyle;
+
   const GameCard({
     super.key,
     required this.libraryGame,
@@ -29,6 +38,7 @@ class GameCard extends StatefulWidget {
     required this.isActive,
     required this.onActivate,
     this.socialNickname,
+    this.coverStyle,
   });
 
   @override
@@ -194,6 +204,17 @@ class _GameCardState extends State<GameCard> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.coverStyle != null) {
+      return _build(context, widget.coverStyle!);
+    }
+
+    return ValueListenableBuilder<ShelfCoverStyle>(
+      valueListenable: ShelfSkinService.instance.coverStyle,
+      builder: (context, ambientStyle, _) => _build(context, ambientStyle),
+    );
+  }
+
+  Widget _build(BuildContext context, ShelfCoverStyle coverStyle) {
     final game = widget.libraryGame.game;
     final status = widget.libraryGame.userGame.status;
     final statusColor = status.color;
@@ -276,22 +297,41 @@ class _GameCardState extends State<GameCard> {
                     fit: StackFit.expand,
 
                     children: [
-                      Hero(
-                        tag: game.igdbId,
+                      Builder(
+                        builder: (context) {
+                          final hero = Hero(
+                            tag: game.igdbId,
 
-                        child: game.coverUrl != null
-                            ? Image.network(
-                                game.coverUrl!,
-                                fit: BoxFit.cover,
-                                cacheWidth: 300,
-                              )
-                            : Container(
-                                color: Colors.grey.shade800,
-                                child: const Icon(
-                                  Icons.image_not_supported,
-                                  size: 48,
-                                ),
-                              ),
+                            child: game.coverUrl != null
+                                ? Image.network(
+                                    game.coverUrl!,
+                                    fit: BoxFit.cover,
+                                    cacheWidth: 300,
+                                  )
+                                : Container(
+                                    color: Colors.grey.shade800,
+                                    child: const Icon(
+                                      Icons.image_not_supported,
+                                      size: 48,
+                                    ),
+                                  ),
+                          );
+
+                          if (coverStyle == ShelfCoverStyle.plain) {
+                            return hero;
+                          }
+
+                          return CartridgeCover(
+                            cover: hero,
+                            shellColor: cartridgeShellColorFor(
+                              platform: widget.libraryGame.userGame.platform,
+                              favorite: _favorite,
+                            ),
+                            // Graella densa: la pestanya del cartutx es
+                            // tallaria contra la fila anterior.
+                            showNotch: false,
+                          );
+                        },
                       ),
 
                       GameOverlay(

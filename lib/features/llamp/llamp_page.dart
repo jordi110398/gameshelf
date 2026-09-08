@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gameshelf/core/navigation/page_transitions.dart';
+import 'package:gameshelf/core/services/shelf_skin_service.dart';
 import 'package:gameshelf/core/strings/llamp_strings.dart';
 import 'package:gameshelf/core/utils/error_messages.dart';
 import 'package:gameshelf/core/widgets/app_logo.dart';
@@ -307,6 +308,7 @@ class _FriendShelfCard extends StatelessWidget {
                 game: game,
                 width: 80,
                 onTap: () => onOpenGame(game),
+                coverStyle: profile.shelfCoverStyle,
               ),
             );
           }
@@ -331,32 +333,53 @@ class _GameCoverTile extends StatelessWidget {
   final double width;
   final VoidCallback onTap;
 
+  /// `null` -- segueix la preferència de l'usuari actual (recomanacions,
+  /// que són pròpies); explícit quan la coberta pertany a l'estanteria
+  /// d'un amic concret.
+  final ShelfCoverStyle? coverStyle;
+
   const _GameCoverTile({
     required this.game,
     required this.width,
     required this.onTap,
+    this.coverStyle,
   });
 
   @override
   Widget build(BuildContext context) {
+    if (coverStyle != null) {
+      return _build(context, coverStyle!);
+    }
+
+    return ValueListenableBuilder<ShelfCoverStyle>(
+      valueListenable: ShelfSkinService.instance.coverStyle,
+      builder: (context, ambientStyle, _) => _build(context, ambientStyle),
+    );
+  }
+
+  Widget _build(BuildContext context, ShelfCoverStyle resolvedStyle) {
+    final coverArt = AspectRatio(
+      aspectRatio: 3 / 4,
+      child: game.coverUrl != null && game.coverUrl!.isNotEmpty
+          ? Image.network(
+              game.coverUrl!,
+              fit: BoxFit.cover,
+              cacheWidth: 200,
+              errorBuilder: (_, _, _) => _placeholder(context),
+            )
+          : _placeholder(context),
+    );
+
+    final cover = resolvedStyle == ShelfCoverStyle.plain
+        ? ClipRRect(borderRadius: BorderRadius.circular(8), child: coverArt)
+        : CartridgeCover(cover: coverArt);
+
     return SizedBox(
       width: width,
       child: InkWell(
         borderRadius: BorderRadius.circular(10),
         onTap: onTap,
-        child: CartridgeCover(
-          cover: AspectRatio(
-            aspectRatio: 3 / 4,
-            child: game.coverUrl != null && game.coverUrl!.isNotEmpty
-                ? Image.network(
-                    game.coverUrl!,
-                    fit: BoxFit.cover,
-                    cacheWidth: 200,
-                    errorBuilder: (_, _, _) => _placeholder(context),
-                  )
-                : _placeholder(context),
-          ),
-        ),
+        child: cover,
       ),
     );
   }

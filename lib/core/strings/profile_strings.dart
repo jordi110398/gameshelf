@@ -144,6 +144,9 @@ class ProfileStrings {
   static const shelfDecorationPoppy = 'Rosella';
   static const shelfDecorationCactus = 'Cactus';
   static const shelfDecorationAzalea = 'Azalea';
+  static const shelfCoverStyleLabel = 'Cobertes de joc';
+  static const shelfCoverStylePlain = 'Planes';
+  static const shelfCoverStyleCartridge = 'Cartutx';
   static const shelfStyleChangeFailedPrefix =
       'No s\'ha pogut canviar l\'estètica: ';
 

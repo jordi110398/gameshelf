@@ -29,6 +29,9 @@ class ShelfSkinService {
   final ValueNotifier<ShelfDecoration> decoration = ValueNotifier(
     ShelfDecoration.none,
   );
+  final ValueNotifier<ShelfCoverStyle> coverStyle = ValueNotifier(
+    ShelfCoverStyle.cartridge,
+  );
 
   bool _listening = false;
 
@@ -55,6 +58,7 @@ class ShelfSkinService {
         lightStyle.value = profile.shelfLightStyle;
         woodColor.value = profile.shelfWoodColor;
         decoration.value = profile.shelfDecoration;
+        coverStyle.value = profile.shelfCoverStyle;
       }
     } catch (_) {
       // Es queda amb els valors per defecte si encara no hi ha sessió o
@@ -84,5 +88,13 @@ class ShelfSkinService {
     await ProfileRepository(
       Supabase.instance.client,
     ).updateShelfSkin(decoration: value);
+  }
+
+  Future<void> setCoverStyle(ShelfCoverStyle value) async {
+    coverStyle.value = value;
+
+    await ProfileRepository(
+      Supabase.instance.client,
+    ).updateShelfSkin(coverStyle: value);
   }
 }

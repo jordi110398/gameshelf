@@ -132,6 +132,26 @@ class _SettingsPageState extends State<SettingsPage> {
     }
   }
 
+  Future<void> _setCoverStyle(ShelfCoverStyle style) async {
+    setState(() => isSavingShelfStyle = true);
+
+    try {
+      await ShelfSkinService.instance.setCoverStyle(style);
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            '${ProfileStrings.shelfStyleChangeFailedPrefix}${friendlyError(e)}',
+          ),
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => isSavingShelfStyle = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -324,6 +344,41 @@ class _SettingsPageState extends State<SettingsPage> {
                           ),
                         );
                       }).toList(),
+                    );
+                  },
+                ),
+
+                const SizedBox(height: 20),
+
+                Text(
+                  ProfileStrings.shelfCoverStyleLabel,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey.shade400,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                ValueListenableBuilder<ShelfCoverStyle>(
+                  valueListenable: ShelfSkinService.instance.coverStyle,
+                  builder: (context, currentStyle, _) {
+                    return SegmentedButton<ShelfCoverStyle>(
+                      segments: const [
+                        ButtonSegment(
+                          value: ShelfCoverStyle.plain,
+                          label: Text(ProfileStrings.shelfCoverStylePlain),
+                          icon: Icon(Icons.crop_square),
+                        ),
+                        ButtonSegment(
+                          value: ShelfCoverStyle.cartridge,
+                          label: Text(ProfileStrings.shelfCoverStyleCartridge),
+                          icon: Icon(Icons.videogame_asset),
+                        ),
+                      ],
+                      selected: {currentStyle},
+                      onSelectionChanged: isSavingShelfStyle
+                          ? null
+                          : (selection) => _setCoverStyle(selection.first),
                     );
                   },
                 ),
