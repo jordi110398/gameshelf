@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gameshelf/app/theme.dart';
 import 'package:gameshelf/core/navigation/page_transitions.dart';
 import 'package:gameshelf/core/strings/app_strings.dart';
 import 'package:gameshelf/core/strings/llamp_strings.dart';
@@ -663,7 +664,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                 children: [
                   // PORTADA
                   ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: appRadius(context, 8),
                     child: game.coverUrl != null && game.coverUrl!.isNotEmpty
                         ? Image.network(
                             game.coverUrl!,
@@ -1145,7 +1146,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
               padding: const EdgeInsets.all(4),
               decoration: BoxDecoration(
                 color: Theme.of(context).scaffoldBackgroundColor,
-                borderRadius: BorderRadius.circular(22),
+                borderRadius: appRadius(context, 22),
                 border: Border.all(
                   color: Colors.black.withValues(alpha: 0.55),
                   width: 2,
@@ -1159,7 +1160,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                 ],
               ),
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(18),
+                borderRadius: appRadius(context, 18),
                 child:
                     currentProfile.avatarUrl != null &&
                         currentProfile.avatarUrl!.isNotEmpty
@@ -1193,7 +1194,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
     final favorites = favoriteGames;
 
     return ClipRRect(
-      borderRadius: BorderRadius.circular(18),
+      borderRadius: appRadius(context, 18),
       child: Stack(
         children: [
           Positioned.fill(
@@ -1270,7 +1271,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
         .toList();
 
     return ClipRRect(
-      borderRadius: BorderRadius.circular(18),
+      borderRadius: appRadius(context, 18),
       child: Stack(
         children: [
           Positioned.fill(
@@ -1315,7 +1316,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                       return SizedBox(
                         width: 88,
                         child: InkWell(
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: appRadius(context, 12),
                           onTap: () async {
                             await pushFade(
                               context,
@@ -1323,7 +1324,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                             );
                           },
                           child: ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: appRadius(context, 12),
                             child: AspectRatio(
                               aspectRatio: 3 / 4,
                               child:
@@ -1394,7 +1395,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
           const SizedBox(height: 10),
 
           ClipRRect(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: appRadius(context, 16),
             child: Stack(
               children: [
                 Positioned.fill(
@@ -1486,7 +1487,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
         color: Colors.deepPurple.withValues(alpha: selected ? 1 : 0.35),
       ),
 
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      shape: RoundedRectangleBorder(borderRadius: appRadius(context, 20)),
     );
   }
 
@@ -1522,7 +1523,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
 
   Widget _buildGameGrid() {
     return ClipRRect(
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: appRadius(context, 16),
       child: Stack(
         children: [
           Positioned.fill(
@@ -1622,7 +1623,7 @@ class _GameCoverTile extends StatelessWidget {
     final game = libraryGame.game;
 
     final cover = ClipRRect(
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: appRadius(context, 12),
       child: AspectRatio(
         aspectRatio: 3 / 4,
         child: game.coverUrl != null && game.coverUrl!.isNotEmpty
@@ -1643,7 +1644,7 @@ class _GameCoverTile extends StatelessWidget {
     );
 
     final tile = InkWell(
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: appRadius(context, 12),
       onTap: () => _open(context),
       child: cover,
     );

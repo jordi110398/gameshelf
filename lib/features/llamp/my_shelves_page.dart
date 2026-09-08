@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gameshelf/app/theme.dart';
 import 'package:gameshelf/core/navigation/page_transitions.dart';
 import 'package:gameshelf/core/strings/app_strings.dart';
 import 'package:gameshelf/core/strings/llamp_strings.dart';
@@ -239,7 +240,7 @@ class _ShelfTile extends StatelessWidget {
       padding: const EdgeInsets.all(14),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: appRadius(context, 12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -263,9 +264,10 @@ class _ShelfTile extends StatelessWidget {
               Wrap(
                 spacing: 6,
                 children: [
-                  if (shelf.isPinned) _buildBadge(LlampStrings.pinnedBadge),
+                  if (shelf.isPinned)
+                    _buildBadge(context, LlampStrings.pinnedBadge),
                   if (shelf.isPublished)
-                    _buildBadge(LlampStrings.publishedBadge),
+                    _buildBadge(context, LlampStrings.publishedBadge),
                 ],
               ),
             ],
@@ -287,7 +289,7 @@ class _ShelfTile extends StatelessWidget {
                         final game = games[index];
 
                         return ClipRRect(
-                          borderRadius: BorderRadius.circular(6),
+                          borderRadius: appRadius(context, 6),
                           child: AspectRatio(
                             aspectRatio: 3 / 4,
                             child:
@@ -314,12 +316,12 @@ class _ShelfTile extends StatelessWidget {
     );
   }
 
-  Widget _buildBadge(String label) {
+  Widget _buildBadge(BuildContext context, String label) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
         color: Colors.deepPurple.withValues(alpha: 0.25),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: appRadius(context, 20),
       ),
       child: Text(
         label,

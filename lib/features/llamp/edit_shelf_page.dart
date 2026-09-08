@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gameshelf/app/theme.dart';
 import 'package:gameshelf/core/strings/app_strings.dart';
 import 'package:gameshelf/core/strings/llamp_strings.dart';
 import 'package:gameshelf/core/utils/error_messages.dart';
@@ -245,7 +246,7 @@ class _EditShelfPageState extends State<EditShelfPage> {
                                   width: 40,
                                   height: 56,
                                   child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(6),
+                                    borderRadius: appRadius(context, 6),
                                     child:
                                         game.coverUrl != null &&
                                             game.coverUrl!.isNotEmpty
@@ -452,7 +453,7 @@ class _ShelfSlot extends StatelessWidget {
       children: [
         Positioned.fill(
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: appRadius(context, 10),
             child: game != null && game!.coverUrl != null && game!.coverUrl!.isNotEmpty
                 ? Image.network(
                     game!.coverUrl!,
@@ -494,7 +495,7 @@ class _EmptySlot extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      borderRadius: BorderRadius.circular(10),
+      borderRadius: appRadius(context, 10),
       onTap: onTap,
       child: DottedSlotBorder(
         child: Icon(Icons.add, color: Colors.grey.shade500),
@@ -514,7 +515,7 @@ class DottedSlotBorder extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: appRadius(context, 10),
         border: Border.all(color: Colors.grey.shade600),
       ),
       child: Center(child: child),

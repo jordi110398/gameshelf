@@ -1,6 +1,7 @@
 import 'dart:js_interop';
 
 import 'package:flutter/material.dart';
+import 'package:gameshelf/core/services/shelf_skin_service.dart';
 import 'package:gameshelf/core/services/theme_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:timeago/timeago.dart' as timeago;
@@ -65,6 +66,7 @@ Future<void> main() async {
   );
 
   ThemeService.instance.init();
+  ShelfSkinService.instance.init();
 
   runApp(const GameShelfApp());
 }

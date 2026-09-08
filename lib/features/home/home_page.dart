@@ -12,7 +12,6 @@ import 'package:gameshelf/features/home/widgets/home_app_bar.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:gameshelf/core/services/profile_service.dart';
 import 'package:gameshelf/models/profile.dart';
-import 'package:gameshelf/models/shelf_style.dart';
 
 enum LibraryFilter { library, dropped, wantToPlay }
 
@@ -669,11 +668,7 @@ class HomePageState extends State<HomePage> {
 
           return Stack(
             children: [
-              Positioned.fill(
-                child: BookshelfBackground(
-                  color: profile?.shelfWoodColor ?? ShelfWoodColor.walnut,
-                ),
-              ),
+              const Positioned.fill(child: BookshelfBackground()),
 
               Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,

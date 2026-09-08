@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gameshelf/app/theme.dart';
 import 'package:gameshelf/core/navigation/page_transitions.dart';
 import 'package:gameshelf/core/strings/app_strings.dart';
 import 'package:gameshelf/core/strings/home_strings.dart';
@@ -253,7 +254,7 @@ class _GameCardState extends State<GameCard> {
             duration: const Duration(milliseconds: 180),
 
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: appRadius(context, 16),
 
               boxShadow: isActive
                   ? [
@@ -267,7 +268,7 @@ class _GameCardState extends State<GameCard> {
             ),
 
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: appRadius(context, 16),
 
               child: AspectRatio(
                 aspectRatio: 2 / 3,

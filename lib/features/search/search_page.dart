@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:gameshelf/app/theme.dart';
 import 'package:gameshelf/core/navigation/page_transitions.dart';
 import 'package:gameshelf/models/game.dart';
 import 'package:gameshelf/repositories/igdb_repository.dart';
@@ -124,7 +125,7 @@ class _SearchPageState extends State<SearchPage> {
                   return ListTile(
                     leading: game.coverUrl != null
                         ? ClipRRect(
-                            borderRadius: BorderRadius.circular(6),
+                            borderRadius: appRadius(context, 6),
                             child: Image.network(
                               game.coverUrl!,
                               width: 50,

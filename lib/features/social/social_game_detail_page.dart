@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gameshelf/app/theme.dart';
 import 'package:gameshelf/core/strings/social_strings.dart';
 import 'package:gameshelf/core/widgets/rating_stars.dart';
 import 'package:gameshelf/models/game_status.dart';
@@ -31,7 +32,7 @@ class SocialGameDetailPage extends StatelessWidget {
             Hero(
               tag: 'social-${game.igdbId}',
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: appRadius(context, 20),
                 child: game.coverUrl != null
                     ? Image.network(
                         game.coverUrl!,

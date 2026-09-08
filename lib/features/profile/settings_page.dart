@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gameshelf/core/navigation/page_transitions.dart';
 import 'package:gameshelf/core/services/auth_service.dart';
+import 'package:gameshelf/core/services/shelf_skin_service.dart';
 import 'package:gameshelf/core/services/theme_service.dart';
 import 'package:gameshelf/core/strings/app_strings.dart';
 import 'package:gameshelf/core/strings/profile_strings.dart';
@@ -82,13 +83,10 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   Future<void> _setLightStyle(ShelfLightStyle style) async {
-    setState(() {
-      profile = profile.copyWith(shelfLightStyle: style);
-      isSavingShelfStyle = true;
-    });
+    setState(() => isSavingShelfStyle = true);
 
     try {
-      await repository.updateShelfSkin(lightStyle: style);
+      await ShelfSkinService.instance.setLightStyle(style);
     } catch (e) {
       if (!mounted) return;
 
@@ -105,13 +103,10 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   Future<void> _setWoodColor(ShelfWoodColor color) async {
-    setState(() {
-      profile = profile.copyWith(shelfWoodColor: color);
-      isSavingShelfStyle = true;
-    });
+    setState(() => isSavingShelfStyle = true);
 
     try {
-      await repository.updateShelfSkin(woodColor: color);
+      await ShelfSkinService.instance.setWoodColor(color);
     } catch (e) {
       if (!mounted) return;
 
@@ -211,23 +206,28 @@ class _SettingsPageState extends State<SettingsPage> {
                   ),
                 ),
                 const SizedBox(height: 10),
-                SegmentedButton<ShelfLightStyle>(
-                  segments: const [
-                    ButtonSegment(
-                      value: ShelfLightStyle.neon,
-                      label: Text(ProfileStrings.shelfLightsNeon),
-                      icon: Icon(Icons.bolt),
-                    ),
-                    ButtonSegment(
-                      value: ShelfLightStyle.bulbs,
-                      label: Text(ProfileStrings.shelfLightsBulbs),
-                      icon: Icon(Icons.lightbulb_outline),
-                    ),
-                  ],
-                  selected: {profile.shelfLightStyle},
-                  onSelectionChanged: isSavingShelfStyle
-                      ? null
-                      : (selection) => _setLightStyle(selection.first),
+                ValueListenableBuilder<ShelfLightStyle>(
+                  valueListenable: ShelfSkinService.instance.lightStyle,
+                  builder: (context, currentStyle, _) {
+                    return SegmentedButton<ShelfLightStyle>(
+                      segments: const [
+                        ButtonSegment(
+                          value: ShelfLightStyle.neon,
+                          label: Text(ProfileStrings.shelfLightsNeon),
+                          icon: Icon(Icons.bolt),
+                        ),
+                        ButtonSegment(
+                          value: ShelfLightStyle.bulbs,
+                          label: Text(ProfileStrings.shelfLightsBulbs),
+                          icon: Icon(Icons.lightbulb_outline),
+                        ),
+                      ],
+                      selected: {currentStyle},
+                      onSelectionChanged: isSavingShelfStyle
+                          ? null
+                          : (selection) => _setLightStyle(selection.first),
+                    );
+                  },
                 ),
 
                 const SizedBox(height: 20),
@@ -241,48 +241,53 @@ class _SettingsPageState extends State<SettingsPage> {
                   ),
                 ),
                 const SizedBox(height: 10),
-                Wrap(
-                  spacing: 14,
-                  runSpacing: 10,
-                  children: ShelfWoodColor.values.map((color) {
-                    final isSelected = profile.shelfWoodColor == color;
+                ValueListenableBuilder<ShelfWoodColor>(
+                  valueListenable: ShelfSkinService.instance.woodColor,
+                  builder: (context, currentColor, _) {
+                    return Wrap(
+                      spacing: 14,
+                      runSpacing: 10,
+                      children: ShelfWoodColor.values.map((color) {
+                        final isSelected = currentColor == color;
 
-                    return GestureDetector(
-                      onTap: isSavingShelfStyle
-                          ? null
-                          : () => _setWoodColor(color),
-                      child: Column(
-                        children: [
-                          Container(
-                            width: 40,
-                            height: 40,
-                            decoration: BoxDecoration(
-                              color: _woodSwatches[color],
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: isSelected
-                                    ? Theme.of(context).colorScheme.primary
-                                    : Colors.transparent,
-                                width: 3,
+                        return GestureDetector(
+                          onTap: isSavingShelfStyle
+                              ? null
+                              : () => _setWoodColor(color),
+                          child: Column(
+                            children: [
+                              Container(
+                                width: 40,
+                                height: 40,
+                                decoration: BoxDecoration(
+                                  color: _woodSwatches[color],
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: isSelected
+                                        ? Theme.of(context).colorScheme.primary
+                                        : Colors.transparent,
+                                    width: 3,
+                                  ),
+                                ),
+                                child: isSelected
+                                    ? const Icon(
+                                        Icons.check,
+                                        color: Colors.white,
+                                        size: 18,
+                                      )
+                                    : null,
                               ),
-                            ),
-                            child: isSelected
-                                ? const Icon(
-                                    Icons.check,
-                                    color: Colors.white,
-                                    size: 18,
-                                  )
-                                : null,
+                              const SizedBox(height: 4),
+                              Text(
+                                _woodLabels[color]!,
+                                style: const TextStyle(fontSize: 11),
+                              ),
+                            ],
                           ),
-                          const SizedBox(height: 4),
-                          Text(
-                            _woodLabels[color]!,
-                            style: const TextStyle(fontSize: 11),
-                          ),
-                        ],
-                      ),
+                        );
+                      }).toList(),
                     );
-                  }).toList(),
+                  },
                 ),
               ],
             ),

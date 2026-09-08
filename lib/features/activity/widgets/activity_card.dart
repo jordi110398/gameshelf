@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gameshelf/app/theme.dart';
 import 'package:gameshelf/core/navigation/page_transitions.dart';
 import 'package:gameshelf/core/strings/activity_strings.dart';
 import 'package:gameshelf/core/widgets/wood_drawer_container.dart';
@@ -127,7 +128,7 @@ class _ActivityCardState extends State<ActivityCard> {
                       children: [
                         // PORTADA
                         ClipRRect(
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: appRadius(context, 10),
                           child: SizedBox(
                             width: 70,
                             height: 100,
@@ -244,7 +245,7 @@ class _ActivityCardState extends State<ActivityCard> {
                       color: Theme.of(
                         context,
                       ).colorScheme.surfaceContainerHighest,
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: appRadius(context, 12),
                       clipBehavior: Clip.antiAlias,
                       child: InkWell(
                         onTap: () {
@@ -337,7 +338,7 @@ class _ActivityCardState extends State<ActivityCard> {
 
     return Container(
       padding: const EdgeInsets.all(14),
-      decoration: woodDrawerDecoration(borderRadius: BorderRadius.circular(14)),
+      decoration: woodDrawerDecoration(borderRadius: appRadius(context, 14)),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -473,7 +474,7 @@ class _ActivityCardState extends State<ActivityCard> {
                       separatorBuilder: (_, _) => const SizedBox(width: 6),
                       itemBuilder: (context, index) {
                         return ClipRRect(
-                          borderRadius: BorderRadius.circular(6),
+                          borderRadius: appRadius(context, 6),
                           child: AspectRatio(
                             aspectRatio: 3 / 4,
                             child: Image.network(

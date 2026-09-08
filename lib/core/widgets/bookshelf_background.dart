@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:gameshelf/core/services/shelf_skin_service.dart';
 import 'package:gameshelf/models/shelf_style.dart';
 
 /// Paret de fusta de la prestatgeria. És un backdrop fix (no fa scroll amb
@@ -8,30 +9,46 @@ import 'package:gameshelf/models/shelf_style.dart';
 /// només queda estàtica darrere les fileres que sí que es desplacen.
 ///
 /// El color és una preferència pública del perfil a qui pertany
-/// l'estanteria mostrada (com el banner generat pels tags): passa'l quan
-/// es mostra la col·lecció d'un usuari concret; deixa el valor per
-/// defecte (walnut) per a decoració genèrica no lligada a ningú.
+/// l'estanteria mostrada (com el banner generat pels tags): passa'l
+/// explícitament quan es mostra la col·lecció d'un usuari concret (el seu
+/// perfil, una targeta del llamp). Si es deixa `null` (decoració genèrica:
+/// Inici, Social, el propi perfil), es fa servir en temps real la
+/// preferència de l'usuari actual (`ShelfSkinService`).
 class BookshelfBackground extends StatelessWidget {
-  final ShelfWoodColor color;
+  final ShelfWoodColor? color;
 
-  const BookshelfBackground({super.key, this.color = ShelfWoodColor.walnut});
+  const BookshelfBackground({super.key, this.color});
 
   @override
   Widget build(BuildContext context) {
+    if (color != null) {
+      return _paint(color!);
+    }
+
+    return ValueListenableBuilder<ShelfWoodColor>(
+      valueListenable: ShelfSkinService.instance.woodColor,
+      builder: (context, ambientColor, _) => _paint(ambientColor),
+    );
+  }
+
+  Widget _paint(ShelfWoodColor resolvedColor) {
     return SizedBox.expand(
       child: RepaintBoundary(
-        child: CustomPaint(painter: _WoodGrainPainter(color)),
+        child: CustomPaint(painter: _WoodGrainPainter(resolvedColor)),
       ),
     );
   }
 }
 
+// Tons clarament diferenciables entre ells (no tots quasi negres com
+// abans), perquè el canvi es noti d'una ullada; l'ombreig cap avall del
+// painter ja fosqueja la part de sota igualment.
 const _woodGradients = {
-  ShelfWoodColor.walnut: [Color(0xFF1B1714), Color(0xFF0A0807)],
-  ShelfWoodColor.oak: [Color(0xFF2E2013), Color(0xFF150E08)],
-  ShelfWoodColor.ebony: [Color(0xFF17181A), Color(0xFF030304)],
-  ShelfWoodColor.cherry: [Color(0xFF2B1512), Color(0xFF120705)],
-  ShelfWoodColor.birch: [Color(0xFF2A2620), Color(0xFF120F0C)],
+  ShelfWoodColor.walnut: [Color(0xFF4A3320), Color(0xFF1A1109)],
+  ShelfWoodColor.oak: [Color(0xFF6B4A26), Color(0xFF2A1B0C)],
+  ShelfWoodColor.ebony: [Color(0xFF2B2B2E), Color(0xFF0B0B0C)],
+  ShelfWoodColor.cherry: [Color(0xFF6B2E24), Color(0xFF260F0B)],
+  ShelfWoodColor.birch: [Color(0xFFC7AD7C), Color(0xFF6E5B3B)],
 };
 
 class _WoodGrainPainter extends CustomPainter {
@@ -54,13 +71,15 @@ class _WoodGrainPainter extends CustomPainter {
     );
 
     // Vetes de fusta: línies horitzontals lleugerament ondulades. Llavor
-    // fixa perquè el patró no "parpellegi" en cada repintat. Sobre un fons
-    // gairebé negre, la veta es marca amb un lleuger reflex clar en lloc
-    // d'ombra fosca (que no es veuria).
+    // fixa perquè el patró no "parpellegi" en cada repintat.
     final random = Random(7);
     final grainPaint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.2;
+
+    // Sobre fusta clara (birch) la veta es marca amb una ombra fosca; sobre
+    // la resta (fosques), amb un lleuger reflex clar.
+    final isLight = color == ShelfWoodColor.birch;
 
     for (double y = 10; y < size.height; y += 24) {
       final path = Path()..moveTo(0, y);
@@ -70,9 +89,11 @@ class _WoodGrainPainter extends CustomPainter {
         path.lineTo(x, y + wobble);
       }
 
-      grainPaint.color = Colors.white.withValues(
-        alpha: 0.025 + random.nextDouble() * 0.035,
-      );
+      grainPaint.color = isLight
+          ? Colors.black.withValues(alpha: 0.05 + random.nextDouble() * 0.05)
+          : Colors.white.withValues(
+              alpha: 0.025 + random.nextDouble() * 0.035,
+            );
 
       canvas.drawPath(path, grainPaint);
     }

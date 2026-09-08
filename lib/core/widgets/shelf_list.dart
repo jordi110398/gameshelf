@@ -29,8 +29,9 @@ class ShelfList<T> extends StatelessWidget {
   /// que ocupi només l'alçada del seu contingut.
   final bool scrollable;
 
-  /// Estil dels llumets de cada fila -- vegeu [ShelfLightFixture].
-  final ShelfLightStyle lightStyle;
+  /// Estil dels llumets de cada fila -- vegeu [ShelfLightFixture]. `null`
+  /// segueix la preferència de l'usuari actual.
+  final ShelfLightStyle? lightStyle;
 
   const ShelfList({
     super.key,
@@ -43,7 +44,7 @@ class ShelfList<T> extends StatelessWidget {
     this.rowGap = 22,
     this.padding = EdgeInsets.zero,
     this.scrollable = true,
-    this.lightStyle = ShelfLightStyle.neon,
+    this.lightStyle,
   });
 
   List<List<T>> _buildRows(int columns) {

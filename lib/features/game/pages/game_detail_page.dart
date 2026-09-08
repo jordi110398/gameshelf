@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gameshelf/app/theme.dart';
 import 'package:gameshelf/core/navigation/page_transitions.dart';
 import 'package:gameshelf/core/widgets/rating_stars.dart';
 import 'package:gameshelf/features/game/pages/edit_game_page.dart';
@@ -570,7 +571,7 @@ class _GameDetailPageState extends State<GameDetailPage> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   ClipRRect(
-                    borderRadius: BorderRadius.circular(6),
+                    borderRadius: appRadius(context, 6),
                     child: widget.game.coverUrl != null
                         ? Image.network(
                             widget.game.coverUrl!,
