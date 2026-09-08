@@ -4,6 +4,7 @@ import 'package:gameshelf/core/strings/llamp_strings.dart';
 import 'package:gameshelf/core/utils/error_messages.dart';
 import 'package:gameshelf/core/widgets/app_logo.dart';
 import 'package:gameshelf/core/widgets/bookshelf_background.dart';
+import 'package:gameshelf/core/widgets/cartridge_cover.dart';
 import 'package:gameshelf/core/widgets/responsive_center.dart';
 import 'package:gameshelf/core/widgets/shelf_decoration_image.dart';
 import 'package:gameshelf/core/widgets/shelf_ledge.dart';
@@ -13,6 +14,8 @@ import 'package:gameshelf/core/widgets/wood_drawer_container.dart';
 import 'package:gameshelf/features/game/pages/game_detail_page.dart';
 import 'package:gameshelf/features/llamp/my_shelves_page.dart';
 import 'package:gameshelf/models/game.dart';
+import 'package:gameshelf/models/profile.dart';
+import 'package:gameshelf/models/shelf_style.dart';
 import 'package:gameshelf/repositories/shelf_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -266,42 +269,58 @@ class _FriendShelfCard extends StatelessWidget {
 
                 const SizedBox(height: 4),
 
-                SizedBox(
-                  height: 110,
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Expanded(
-                        child: ListView.separated(
-                          scrollDirection: Axis.horizontal,
-                          itemCount: item.games.length,
-                          separatorBuilder: (_, _) =>
-                              const SizedBox(width: 10),
-                          itemBuilder: (context, index) {
-                            final game = item.games[index];
+                _buildRow(profile),
 
-                            return _GameCoverTile(
-                              game: game,
-                              width: 80,
-                              onTap: () => onOpenGame(game),
-                            );
-                          },
-                        ),
-                      ),
-                      ShelfDecorationImage(
-                        height: 90,
-                        decoration: profile.shelfDecoration,
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 10),
+                const SizedBox(height: 2),
                 ShelfLedge(color: profile.shelfWoodColor),
               ],
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  /// Cobertes + decoracions que n'omplen els slots buits (com si fossin
+  /// un joc més), totes tocant la base de la lleixa.
+  Widget _buildRow(Profile profile) {
+    final decorations = decorationSlotsFor(
+      primary: profile.shelfDecoration,
+      gameCount: item.games.length,
+    );
+
+    final itemCount = item.games.length + decorations.length;
+
+    return SizedBox(
+      height: 118,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        itemCount: itemCount,
+        separatorBuilder: (_, _) => const SizedBox(width: 10),
+        itemBuilder: (context, index) {
+          if (index < item.games.length) {
+            final game = item.games[index];
+
+            return Align(
+              alignment: Alignment.bottomCenter,
+              child: _GameCoverTile(
+                game: game,
+                width: 80,
+                onTap: () => onOpenGame(game),
+              ),
+            );
+          }
+
+          final decoration = decorations[index - item.games.length];
+
+          return Align(
+            alignment: Alignment.bottomCenter,
+            child: SizedBox(
+              width: 80,
+              child: ShelfDecorationImage(height: 100, decoration: decoration),
+            ),
+          );
+        },
       ),
     );
   }
@@ -323,11 +342,10 @@ class _GameCoverTile extends StatelessWidget {
     return SizedBox(
       width: width,
       child: InkWell(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(10),
         onTap: onTap,
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(12),
-          child: AspectRatio(
+        child: CartridgeCover(
+          cover: AspectRatio(
             aspectRatio: 3 / 4,
             child: game.coverUrl != null && game.coverUrl!.isNotEmpty
                 ? Image.network(

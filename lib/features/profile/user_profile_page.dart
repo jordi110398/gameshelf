@@ -5,6 +5,7 @@ import 'package:gameshelf/core/strings/llamp_strings.dart';
 import 'package:gameshelf/core/strings/profile_strings.dart';
 import 'package:gameshelf/core/widgets/app_logo.dart';
 import 'package:gameshelf/core/widgets/bookshelf_background.dart';
+import 'package:gameshelf/core/widgets/cartridge_cover.dart';
 import 'package:gameshelf/core/widgets/dither_banner.dart';
 import 'package:gameshelf/core/widgets/shelf_decoration_image.dart';
 import 'package:gameshelf/core/widgets/shelf_ledge.dart';
@@ -1203,6 +1204,53 @@ class _UserProfilePageState extends State<UserProfilePage> {
   // PREFERITS
   // ─────────────────────────────────────────────
 
+  /// Fila d'una estanteria destacada: cobertes + decoracions que
+  /// n'ompentn els slots buits (com si fossin un joc més -- vegeu
+  /// `decorationSlotsFor`), totes tocant la base de la lleixa.
+  Widget _buildShelfRow({
+    required List<Widget> gameTiles,
+    required int gameCount,
+    double laneHeight = 130,
+    double decorationHeight = 112,
+  }) {
+    final decorations = decorationSlotsFor(
+      primary: currentProfile.shelfDecoration,
+      gameCount: gameCount,
+    );
+
+    final itemCount = gameTiles.length + decorations.length;
+
+    return SizedBox(
+      height: laneHeight,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        itemCount: itemCount,
+        separatorBuilder: (_, _) => const SizedBox(width: 10),
+        itemBuilder: (context, index) {
+          if (index < gameTiles.length) {
+            return Align(
+              alignment: Alignment.bottomCenter,
+              child: gameTiles[index],
+            );
+          }
+
+          final decoration = decorations[index - gameTiles.length];
+
+          return Align(
+            alignment: Alignment.bottomCenter,
+            child: SizedBox(
+              width: 88,
+              child: ShelfDecorationImage(
+                height: decorationHeight,
+                decoration: decoration,
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
   Widget _buildFavoritesShelf() {
     final favorites = favoriteGames;
 
@@ -1246,34 +1294,19 @@ class _UserProfilePageState extends State<UserProfilePage> {
 
                 const SizedBox(height: 4),
 
-                SizedBox(
-                  height: 120,
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Expanded(
-                        child: ListView.separated(
-                          scrollDirection: Axis.horizontal,
-                          itemCount: favorites.length,
-                          separatorBuilder: (_, _) =>
-                              const SizedBox(width: 10),
-                          itemBuilder: (context, index) {
-                            return _GameCoverTile(
-                              libraryGame: favorites[index],
-                              width: 88,
-                              onOpened: loadProfile,
-                            );
-                          },
-                        ),
+                _buildShelfRow(
+                  gameCount: favorites.length,
+                  gameTiles: [
+                    for (final favorite in favorites)
+                      _GameCoverTile(
+                        libraryGame: favorite,
+                        width: 88,
+                        onOpened: loadProfile,
                       ),
-                      ShelfDecorationImage(
-                        decoration: currentProfile.shelfDecoration,
-                      ),
-                    ],
-                  ),
+                  ],
                 ),
 
-                const SizedBox(height: 10),
+                const SizedBox(height: 2),
                 ShelfLedge(color: currentProfile.shelfWoodColor),
               ],
             ),
@@ -1328,65 +1361,45 @@ class _UserProfilePageState extends State<UserProfilePage> {
 
                 const SizedBox(height: 4),
 
-                SizedBox(
-                  height: 120,
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Expanded(
-                        child: ListView.separated(
-                          scrollDirection: Axis.horizontal,
-                          itemCount: games.length,
-                          separatorBuilder: (_, _) =>
-                              const SizedBox(width: 10),
-                          itemBuilder: (context, index) {
-                            final game = games[index];
-
-                            return SizedBox(
-                              width: 88,
-                              child: InkWell(
-                                borderRadius: BorderRadius.circular(12),
-                                onTap: () async {
-                                  await pushFade(
-                                    context,
-                                    (_) => GameDetailPage(game: game),
-                                  );
-                                },
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(12),
-                                  child: AspectRatio(
-                                    aspectRatio: 3 / 4,
-                                    child:
-                                        game.coverUrl != null &&
-                                            game.coverUrl!.isNotEmpty
-                                        ? Image.network(
-                                            game.coverUrl!,
-                                            fit: BoxFit.cover,
-                                            cacheWidth: 180,
-                                          )
-                                        : Container(
-                                            color: Theme.of(context)
-                                                .colorScheme
-                                                .surfaceContainerHighest,
-                                            child: const Icon(
-                                              Icons.videogame_asset,
-                                            ),
-                                          ),
-                                  ),
-                                ),
-                              ),
+                _buildShelfRow(
+                  gameCount: games.length,
+                  gameTiles: [
+                    for (final game in games)
+                      SizedBox(
+                        width: 88,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(10),
+                          onTap: () async {
+                            await pushFade(
+                              context,
+                              (_) => GameDetailPage(game: game),
                             );
                           },
+                          child: CartridgeCover(
+                            cover: AspectRatio(
+                              aspectRatio: 3 / 4,
+                              child:
+                                  game.coverUrl != null &&
+                                      game.coverUrl!.isNotEmpty
+                                  ? Image.network(
+                                      game.coverUrl!,
+                                      fit: BoxFit.cover,
+                                      cacheWidth: 180,
+                                    )
+                                  : Container(
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.surfaceContainerHighest,
+                                      child: const Icon(Icons.videogame_asset),
+                                    ),
+                            ),
+                          ),
                         ),
                       ),
-                      ShelfDecorationImage(
-                        decoration: currentProfile.shelfDecoration,
-                      ),
-                    ],
-                  ),
+                  ],
                 ),
 
-                const SizedBox(height: 10),
+                const SizedBox(height: 2),
                 ShelfLedge(color: currentProfile.shelfWoodColor),
               ],
             ),
@@ -1659,9 +1672,8 @@ class _GameCoverTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final game = libraryGame.game;
 
-    final cover = ClipRRect(
-      borderRadius: BorderRadius.circular(12),
-      child: AspectRatio(
+    final cover = CartridgeCover(
+      cover: AspectRatio(
         aspectRatio: 3 / 4,
         child: game.coverUrl != null && game.coverUrl!.isNotEmpty
             ? Image.network(
@@ -1681,7 +1693,7 @@ class _GameCoverTile extends StatelessWidget {
     );
 
     final tile = InkWell(
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(10),
       onTap: () => _open(context),
       child: cover,
     );

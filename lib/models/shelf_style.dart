@@ -113,3 +113,31 @@ extension ShelfDecorationX on ShelfDecoration {
     }
   }
 }
+
+/// Quantes decoracions mostrar i de quin tipus, per ocupar els slots
+/// buits d'una estanteria (com si cada planta fos un joc més) sense
+/// repetir sempre la mateixa: comença per [primary] (la triada a
+/// Configuració) i, si calen més d'una, hi intercala els altres tipus.
+/// Buida si [primary] és `none` o si l'estanteria ja està plena.
+List<ShelfDecoration> decorationSlotsFor({
+  required ShelfDecoration primary,
+  required int gameCount,
+  int capacity = 8,
+  int maxSlots = 3,
+}) {
+  if (primary == ShelfDecoration.none) return const [];
+
+  final emptySlots = capacity - gameCount;
+  if (emptySlots <= 0) return const [];
+
+  final slotCount = emptySlots < maxSlots ? emptySlots : maxSlots;
+
+  final otherTypes = ShelfDecoration.values
+      .where((d) => d != ShelfDecoration.none && d != primary)
+      .toList();
+
+  return List.generate(slotCount, (i) {
+    if (i == 0 || otherTypes.isEmpty) return primary;
+    return otherTypes[(i - 1) % otherTypes.length];
+  });
+}
