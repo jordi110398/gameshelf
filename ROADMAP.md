@@ -27,13 +27,12 @@
 - [x] Generació de banners
 - [x] About
 
-## v1.1 Social Update
-- [ ] Compartir perfil
-- [ ] Sistema de likes
+## v1.0.1 Social Update
+- [x] Compartir perfil
 - [ ] Notificacions
 - [ ] Themes
-- [ ] Recomanació de jocs/llistes/jugadors
-- [ ] Col·leccions de 4/5 jocs personalitzables per mostrar al perfil
+- [x] Recomanació de jocs/llistes/jugadors
+- [x] Col·leccions de 4/5 jocs personalitzables per mostrar al perfil
 
 
 ## To do before full release
