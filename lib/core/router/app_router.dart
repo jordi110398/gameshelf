@@ -18,6 +18,12 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 final supabase = Supabase.instance.client;
 
+// Destinació temptada mentre l'usuari no estava autenticat (p. ex. un
+// enllaç de "Compartir perfil" amb `?u=nickname`), perquè es pugui
+// recuperar just després d'iniciar sessió en lloc de perdre-la i anar
+// sempre a "/home" a seques.
+String? _pendingDeepLink;
+
 final appRouter = GoRouter(
   initialLocation: "/",
 
@@ -47,15 +53,20 @@ final appRouter = GoRouter(
         isLegal;
 
     // Si no està autenticat, només pot accedir
-    // a les rutes d'autenticació.
+    // a les rutes d'autenticació. Guardem on volia anar per recuperar-ho
+    // just després d'iniciar sessió.
     if (!loggedIn && !isAuthRoute) {
+      _pendingDeepLink = state.uri.toString();
       return "/";
     }
 
     // Si està autenticat i intenta anar al login o registre,
-    // el portem a home.
+    // el portem a home (o a la destinació que tenia pendent).
     if (loggedIn && (isLogin || isRegister)) {
-      return "/home";
+      final pending = _pendingDeepLink;
+      _pendingDeepLink = null;
+
+      return pending ?? "/home";
     }
 
     return null;
@@ -93,7 +104,14 @@ final appRouter = GoRouter(
       builder: (context, state) => const ResetPasswordPage(),
     ),
 
-    GoRoute(path: "/home", builder: (context, state) => const MainShellPage()),
+    GoRoute(
+      path: "/home",
+      builder: (context, state) {
+        final searchNickname = state.uri.queryParameters['u'];
+
+        return MainShellPage(initialSearchNickname: searchNickname);
+      },
+    ),
 
     GoRoute(path: "/search", builder: (context, state) => const SearchPage()),
 

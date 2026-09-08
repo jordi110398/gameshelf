@@ -111,6 +111,14 @@ class SocialPageState extends State<SocialPage> {
     }
   }
 
+  /// Emplena el cercador i llança la cerca, per obrir la pestanya Social
+  /// directament amb els resultats d'un nickname concret (p. ex. vinent
+  /// d'un enllaç de "Compartir perfil"). Vegeu `main_shell_page.dart`.
+  Future<void> searchForNickname(String nickname) async {
+    searchController.text = nickname;
+    await searchProfiles();
+  }
+
   Future<void> openProfile(Profile profile) async {
     await pushFade(context, (_) => UserProfilePage(profile: profile));
   }

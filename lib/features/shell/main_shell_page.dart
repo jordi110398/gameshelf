@@ -14,7 +14,11 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:gameshelf/features/profile/user_profile_page.dart';
 
 class MainShellPage extends StatefulWidget {
-  const MainShellPage({super.key});
+  /// Nickname a cercar en obrir (p. ex. vinent d'un enllaç de "Compartir
+  /// perfil", `/home?u=nickname`). Vegeu `app_router.dart`.
+  final String? initialSearchNickname;
+
+  const MainShellPage({super.key, this.initialSearchNickname});
 
   @override
   State<MainShellPage> createState() => _MainShellPageState();
@@ -62,6 +66,23 @@ class _MainShellPageState extends State<MainShellPage> {
   final _llampKey = GlobalKey<LlampPageState>();
   final _socialKey = GlobalKey<SocialPageState>();
   final _profileKey = GlobalKey<ProfileTabState>();
+
+  @override
+  void initState() {
+    super.initState();
+
+    final nickname = widget.initialSearchNickname;
+    if (nickname == null || nickname.trim().isEmpty) return;
+
+    // L'`IndexedStack` ja munta totes les pestanyes des del primer frame,
+    // però cal esperar-lo per poder fer servir el `GlobalKey` de Social.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+
+      setState(() => _currentIndex = 2);
+      _socialKey.currentState?.searchForNickname(nickname.trim());
+    });
+  }
 
   void _selectTab(int index) {
     if (index == _currentIndex) return;

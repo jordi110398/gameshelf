@@ -22,6 +22,7 @@ class ProfileStrings {
       'Vols eliminar @$nickname dels teus amics?';
 
   static const editProfileTooltip = 'Editar perfil';
+  static const shareProfileTooltip = 'Compartir perfil';
   static const logoutTooltip = 'Tancar sessió';
 
   static const noReviewsYet = 'Encara no has escrit cap review.';
@@ -100,6 +101,17 @@ class ProfileStrings {
   static const changePasswordFailedPrefix =
       'No s\'ha pogut canviar la contrasenya: ';
   static const changeAction = 'Canviar';
+
+  // ─────────────────────────────────────────────
+  // COMPARTIR PERFIL
+  // ─────────────────────────────────────────────
+
+  static const shareAppBarTitle = 'Compartir perfil';
+  static const shareQrCaption = 'Escaneja per trobar-me a GameShelf';
+  static const shareDownloadAction = 'Descarregar imatge';
+  static const shareDownloadedMessage = 'Imatge descarregada.';
+  static const shareGenerateFailedPrefix =
+      'No s\'ha pogut generar la imatge: ';
 
   // ─────────────────────────────────────────────
   // PÀGINA CANVIAR CONTRASENYA (standalone)
