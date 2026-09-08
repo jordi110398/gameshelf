@@ -5,27 +5,29 @@ import 'package:gameshelf/core/strings/llamp_strings.dart';
 import 'package:gameshelf/core/strings/profile_strings.dart';
 import 'package:gameshelf/core/widgets/app_logo.dart';
 import 'package:gameshelf/core/widgets/bookshelf_background.dart';
+import 'package:gameshelf/core/widgets/cartridge_cover.dart';
 import 'package:gameshelf/core/widgets/dither_banner.dart';
-import 'package:gameshelf/core/widgets/shelf_ledge.dart';
-import 'package:gameshelf/core/widgets/shelf_led_strip.dart';
+import 'package:gameshelf/core/widgets/shelf_decoration_image.dart';
 import 'package:gameshelf/core/widgets/shelf_list.dart';
 import 'package:gameshelf/core/widgets/wood_drawer_container.dart';
+import 'package:gameshelf/features/profile/all_reviews_page.dart';
+import 'package:gameshelf/features/profile/widgets/review_card.dart';
 import 'package:gameshelf/features/home/widgets/game_card.dart';
 import 'package:gameshelf/features/llamp/my_shelves_page.dart';
+import 'package:gameshelf/features/profile/settings_page.dart';
 import 'package:gameshelf/features/profile/share_profile_page.dart';
 import 'package:gameshelf/models/game.dart';
 import 'package:gameshelf/models/game_status.dart';
 import 'package:gameshelf/models/library_game.dart';
 import 'package:gameshelf/models/profile.dart';
 import 'package:gameshelf/models/shelf.dart';
+import 'package:gameshelf/models/shelf_style.dart';
 import 'package:gameshelf/repositories/profile_repository.dart';
 import 'package:gameshelf/repositories/shelf_repository.dart';
 import 'package:gameshelf/repositories/supabase_library_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:gameshelf/core/services/user_tags_service.dart';
-import 'package:gameshelf/features/profile/edit_profile_page.dart';
 import 'package:gameshelf/repositories/friendship_repository.dart';
-import 'package:gameshelf/core/services/auth_service.dart';
 import 'package:gameshelf/core/utils/error_messages.dart';
 import 'package:gameshelf/features/profile/widgets/user_tags_row.dart';
 import 'package:gameshelf/features/game/pages/game_detail_page.dart';
@@ -173,6 +175,11 @@ class _UserProfilePageState extends State<UserProfilePage> {
   }
 
   Future<void> reloadProfile() async {
+    // Des de Configuració es pot haver tancat la sessió: en aquest cas
+    // no hi ha res a recarregar (i `profiles_public` no és accessible
+    // sense sessió, cosa que faria fallar la consulta).
+    if (Supabase.instance.client.auth.currentUser == null) return;
+
     final profile = await profileRepository.getProfileById(widget.profile.id);
 
     if (!mounted || profile == null) return;
@@ -627,6 +634,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
 
   Widget _buildReviewsSummary() {
     final reviews = reviewedGames.take(3).toList();
+    final isLightWood = currentProfile.shelfWoodColor.isLight;
 
     if (reviews.isEmpty) {
       return WoodDrawerContainer(
@@ -636,12 +644,16 @@ class _UserProfilePageState extends State<UserProfilePage> {
             Icon(
               Icons.rate_review_outlined,
               size: 32,
-              color: Colors.grey.shade400,
+              color: isLightWood ? Colors.grey.shade700 : Colors.grey.shade400,
             ),
             const SizedBox(height: 10),
             Text(
               ProfileStrings.noReviewsYet,
-              style: TextStyle(color: Colors.grey.shade300),
+              style: TextStyle(
+                color: isLightWood
+                    ? Colors.grey.shade800
+                    : Colors.grey.shade300,
+              ),
             ),
           ],
         ),
@@ -651,131 +663,35 @@ class _UserProfilePageState extends State<UserProfilePage> {
     return Column(
       children: [
         ...reviews.map((libraryGame) {
-          final game = libraryGame.game;
-          final userGame = libraryGame.userGame;
-          final likes = reviewLikes[game.igdbId];
-
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: WoodDrawerContainer(
-              padding: const EdgeInsets.all(12),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // PORTADA
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: game.coverUrl != null && game.coverUrl!.isNotEmpty
-                        ? Image.network(
-                            game.coverUrl!,
-                            width: 65,
-                            height: 95,
-                            fit: BoxFit.cover,
-                            cacheWidth: 130,
-                            errorBuilder: (_, _, _) {
-                              return _buildReviewPlaceholder();
-                            },
-                          )
-                        : _buildReviewPlaceholder(),
-                  ),
-
-                  const SizedBox(width: 14),
-
-                  // INFORMACIÓ
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          game.title,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-
-                        const SizedBox(height: 6),
-
-                        if (userGame.rating != null)
-                          Row(
-                            children: List.generate(5, (index) {
-                              return Icon(
-                                index < userGame.rating!.round()
-                                    ? Icons.star
-                                    : Icons.star_border,
-                                size: 18,
-                                color: Colors.amber,
-                              );
-                            }),
-                          ),
-
-                        const SizedBox(height: 8),
-
-                        Text(
-                          '"${userGame.review!}"',
-                          maxLines: 4,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 13,
-                            height: 1.35,
-                            fontStyle: FontStyle.italic,
-                            color: Colors.grey.shade700,
-                          ),
-                        ),
-
-                        if (likes != null && likes.likeCount > 0) ...[
-                          const SizedBox(height: 8),
-                          Row(
-                            children: [
-                              Icon(
-                                likes.likedByMe
-                                    ? Icons.star
-                                    : Icons.star_border,
-                                size: 15,
-                                color: Colors.amber,
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                '${likes.likeCount}',
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.amber,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
+          return ReviewCard(
+            libraryGame: libraryGame,
+            likes: reviewLikes[libraryGame.game.igdbId],
+            isLightWood: isLightWood,
+            onTap: () async {
+              await pushFade(
+                context,
+                (_) => GameDetailPage(game: libraryGame.game),
+              );
+            },
           );
         }),
 
         if (reviewedGames.length > 3)
           TextButton.icon(
-            onPressed: () {
-              // Més endavant:
-              // obrir pantalla amb totes les reviews.
+            onPressed: () async {
+              await pushFade(
+                context,
+                (_) => AllReviewsPage(
+                  profile: currentProfile,
+                  reviewedGames: reviewedGames,
+                  reviewLikes: reviewLikes,
+                ),
+              );
             },
             icon: const Icon(Icons.arrow_forward),
             label: Text(ProfileStrings.seeAllReviews(reviewedGames.length)),
           ),
       ],
-    );
-  }
-
-  Widget _buildReviewPlaceholder() {
-    return Container(
-      width: 65,
-      height: 95,
-      color: Colors.grey.shade800,
-      child: const Icon(Icons.videogame_asset, color: Colors.white54),
     );
   }
 
@@ -805,11 +721,9 @@ class _UserProfilePageState extends State<UserProfilePage> {
             ),
           if (isMyProfile)
             IconButton(
-              tooltip: ProfileStrings.logoutTooltip,
-              icon: const Icon(Icons.logout),
-              onPressed: () async {
-                await AuthService().signOut();
-              },
+              tooltip: ProfileStrings.settingsTooltip,
+              icon: const Icon(Icons.settings_outlined),
+              onPressed: _openSettings,
             ),
         ],
       ),
@@ -817,45 +731,27 @@ class _UserProfilePageState extends State<UserProfilePage> {
           ? const Center(child: CircularProgressIndicator())
           : Stack(
               children: [
+                Positioned.fill(
+                  child: BookshelfBackground(
+                    color: currentProfile.shelfWoodColor,
+                  ),
+                ),
                 _buildContent(),
-                if (isMyProfile)
-                  Positioned(
-                    top: 12,
-                    right: 12,
-                    child: IconButton.filled(
-                      icon: const Icon(Icons.edit),
-                      tooltip: ProfileStrings.editProfileTooltip,
-                      onPressed: _openEditProfile,
-                    ),
-                  )
-                else if (_buildFriendshipCornerAction() case final action?)
-                  Positioned(top: 12, right: 12, child: action),
+                if (!isMyProfile)
+                  if (_buildFriendshipCornerAction() case final action?)
+                    Positioned(top: 12, right: 12, child: action),
               ],
             ),
     );
   }
 
   // ----------------------------------------------
-  // EDICIÓ PERFIL
+  // CONFIGURACIÓ
   // ----------------------------------------------
-  Future<void> _openEditProfile() async {
-    // currentProfile pot venir de profiles_public (sense email) si hem
-    // arribat aquí per cerca; per editar cal el perfil complet.
-    final profileToEdit =
-        await profileRepository.getMyProfile() ?? currentProfile;
+  Future<void> _openSettings() async {
+    await pushFade(context, (_) => SettingsPage(profile: currentProfile));
 
-    if (!mounted) return;
-
-    final updatedProfile = await pushFade<Profile>(
-      context,
-      (_) => EditProfilePage(profile: profileToEdit),
-    );
-
-    if (updatedProfile != null && mounted) {
-      setState(() {
-        currentProfile = updatedProfile;
-      });
-    }
+    await reloadProfile();
   }
 
   // ─────────────────────────────────────────────
@@ -999,27 +895,28 @@ class _UserProfilePageState extends State<UserProfilePage> {
                   if (pinnedShelf != null) ...[
                     const SizedBox(height: 36),
 
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            pinnedShelf!.displayTitle,
-                            style: const TextStyle(
-                              fontSize: 22,
-                              fontWeight: FontWeight.bold,
+                    if (isMyProfile) ...[
+                      Row(
+                        children: [
+                          const Expanded(
+                            child: Text(
+                              LlampStrings.myShelvesTitle,
+                              style: TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
-                        ),
-                        if (isMyProfile)
                           IconButton(
                             visualDensity: VisualDensity.compact,
                             icon: const Icon(Icons.edit_outlined),
                             onPressed: _openMyShelves,
                           ),
-                      ],
-                    ),
+                        ],
+                      ),
 
-                    const SizedBox(height: 14),
+                      const SizedBox(height: 14),
+                    ],
 
                     _buildPinnedShelf(),
                   ] else if (isMyProfile) ...[
@@ -1214,17 +1111,44 @@ class _UserProfilePageState extends State<UserProfilePage> {
   // PREFERITS
   // ─────────────────────────────────────────────
 
+  /// Element d'una lleixa destacada (coberta de joc o planta que
+  /// n'ocupa el lloc -- vegeu `buildShelfLane`).
+  Widget _buildLaneItem(BuildContext context, ShelfLaneItem<Widget> item) {
+    return switch (item) {
+      ShelfLaneGame(value: final tile) => tile,
+      ShelfLaneDecoration(decoration: final decoration) => ShelfDecorationImage(
+        decoration: decoration,
+      ),
+    };
+  }
+
   Widget _buildFavoritesShelf() {
     final favorites = favoriteGames;
+
+    final tiles = [
+      for (final favorite in favorites)
+        _GameCoverTile(
+          libraryGame: favorite,
+          onOpened: loadProfile,
+          coverStyle: currentProfile.shelfCoverStyle,
+        ),
+    ];
+
+    final lane = buildShelfLane<Widget>(
+      games: tiles,
+      decorations: currentProfile.shelfDecorations,
+    );
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(18),
       child: Stack(
         children: [
-          const Positioned.fill(child: BookshelfBackground()),
+          Positioned.fill(
+            child: BookshelfBackground(color: currentProfile.shelfWoodColor),
+          ),
 
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -1244,32 +1168,16 @@ class _UserProfilePageState extends State<UserProfilePage> {
 
                 const SizedBox(height: 12),
 
-                LayoutBuilder(
-                  builder: (context, constraints) {
-                    return ShelfLedStrip(width: constraints.maxWidth);
-                  },
+                ShelfList<ShelfLaneItem<Widget>>(
+                  items: lane,
+                  scrollable: false,
+                  minItemWidth: 90,
+                  minColumns: 3,
+                  itemAspectRatio: 3 / 4,
+                  lightStyle: currentProfile.shelfLightStyle,
+                  woodColor: currentProfile.shelfWoodColor,
+                  itemBuilder: _buildLaneItem,
                 ),
-
-                const SizedBox(height: 4),
-
-                SizedBox(
-                  height: 120,
-                  child: ListView.separated(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: favorites.length,
-                    separatorBuilder: (_, _) => const SizedBox(width: 10),
-                    itemBuilder: (context, index) {
-                      return _GameCoverTile(
-                        libraryGame: favorites[index],
-                        width: 88,
-                        onOpened: loadProfile,
-                      );
-                    },
-                  ),
-                ),
-
-                const SizedBox(height: 10),
-                const ShelfLedge(),
               ],
             ),
           ),
@@ -1282,6 +1190,41 @@ class _UserProfilePageState extends State<UserProfilePage> {
   // ESTANTERIA FIXADA
   // ─────────────────────────────────────────────
 
+  Widget _pinnedGameTile(Game game) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(10),
+      onTap: () async {
+        await pushFade(context, (_) => GameDetailPage(game: game));
+      },
+      child: Builder(
+        builder: (context) {
+          final coverArt = AspectRatio(
+            aspectRatio: 3 / 4,
+            child: game.coverUrl != null && game.coverUrl!.isNotEmpty
+                ? Image.network(
+                    game.coverUrl!,
+                    fit: BoxFit.cover,
+                    cacheWidth: 180,
+                  )
+                : Container(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.surfaceContainerHighest,
+                    child: const Icon(Icons.videogame_asset),
+                  ),
+          );
+
+          return currentProfile.shelfCoverStyle == ShelfCoverStyle.plain
+              ? ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: coverArt,
+                )
+              : CartridgeCover(cover: coverArt);
+        },
+      ),
+    );
+  }
+
   Widget _buildPinnedShelf() {
     final shelf = pinnedShelf!;
     final games = shelf.gameIds
@@ -1289,14 +1232,21 @@ class _UserProfilePageState extends State<UserProfilePage> {
         .whereType<Game>()
         .toList();
 
+    final lane = buildShelfLane<Widget>(
+      games: [for (final game in games) _pinnedGameTile(game)],
+      decorations: currentProfile.shelfDecorations,
+    );
+
     return ClipRRect(
       borderRadius: BorderRadius.circular(18),
       child: Stack(
         children: [
-          const Positioned.fill(child: BookshelfBackground()),
+          Positioned.fill(
+            child: BookshelfBackground(color: currentProfile.shelfWoodColor),
+          ),
 
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -1308,65 +1258,18 @@ class _UserProfilePageState extends State<UserProfilePage> {
                   ),
                 ),
 
-                const SizedBox(height: 10),
+                const SizedBox(height: 12),
 
-                LayoutBuilder(
-                  builder: (context, constraints) {
-                    return ShelfLedStrip(width: constraints.maxWidth);
-                  },
+                ShelfList<ShelfLaneItem<Widget>>(
+                  items: lane,
+                  scrollable: false,
+                  minItemWidth: 90,
+                  minColumns: 3,
+                  itemAspectRatio: 3 / 4,
+                  lightStyle: currentProfile.shelfLightStyle,
+                  woodColor: currentProfile.shelfWoodColor,
+                  itemBuilder: _buildLaneItem,
                 ),
-
-                const SizedBox(height: 4),
-
-                SizedBox(
-                  height: 120,
-                  child: ListView.separated(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: games.length,
-                    separatorBuilder: (_, _) => const SizedBox(width: 10),
-                    itemBuilder: (context, index) {
-                      final game = games[index];
-
-                      return SizedBox(
-                        width: 88,
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(12),
-                          onTap: () async {
-                            await pushFade(
-                              context,
-                              (_) => GameDetailPage(game: game),
-                            );
-                          },
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
-                            child: AspectRatio(
-                              aspectRatio: 3 / 4,
-                              child:
-                                  game.coverUrl != null &&
-                                      game.coverUrl!.isNotEmpty
-                                  ? Image.network(
-                                      game.coverUrl!,
-                                      fit: BoxFit.cover,
-                                      cacheWidth: 180,
-                                    )
-                                  : Container(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .surfaceContainerHighest,
-                                      child: const Icon(
-                                        Icons.videogame_asset,
-                                      ),
-                                    ),
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-
-                const SizedBox(height: 10),
-                const ShelfLedge(),
               ],
             ),
           ),
@@ -1412,7 +1315,11 @@ class _UserProfilePageState extends State<UserProfilePage> {
             borderRadius: BorderRadius.circular(16),
             child: Stack(
               children: [
-                const Positioned.fill(child: BookshelfBackground()),
+                Positioned.fill(
+                  child: BookshelfBackground(
+                    color: currentProfile.shelfWoodColor,
+                  ),
+                ),
                 ShelfList<LibraryGame>(
                   items: entry.value,
                   scrollable: false,
@@ -1420,9 +1327,12 @@ class _UserProfilePageState extends State<UserProfilePage> {
                   minColumns: 4,
                   itemAspectRatio: 3 / 4,
                   padding: const EdgeInsets.all(14),
+                  lightStyle: currentProfile.shelfLightStyle,
+                  woodColor: currentProfile.shelfWoodColor,
                   itemBuilder: (context, libraryGame) => _GameCoverTile(
                     libraryGame: libraryGame,
                     onOpened: loadProfile,
+                    coverStyle: currentProfile.shelfCoverStyle,
                   ),
                 ),
               ],
@@ -1535,7 +1445,9 @@ class _UserProfilePageState extends State<UserProfilePage> {
       borderRadius: BorderRadius.circular(16),
       child: Stack(
         children: [
-          const Positioned.fill(child: BookshelfBackground()),
+          Positioned.fill(
+            child: BookshelfBackground(color: currentProfile.shelfWoodColor),
+          ),
           ShelfList<LibraryGame>(
             items: filteredGames,
             scrollable: false,
@@ -1543,6 +1455,8 @@ class _UserProfilePageState extends State<UserProfilePage> {
             minColumns: 3,
             itemAspectRatio: 2 / 3,
             padding: const EdgeInsets.all(14),
+            lightStyle: currentProfile.shelfLightStyle,
+            woodColor: currentProfile.shelfWoodColor,
             itemBuilder: (context, libraryGame) {
               final gameId = libraryGame.game.igdbId;
 
@@ -1558,6 +1472,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                 },
 
                 socialNickname: currentProfile.nickname,
+                coverStyle: currentProfile.shelfCoverStyle,
               );
             },
           ),
@@ -1605,12 +1520,12 @@ class _ProfileStat extends StatelessWidget {
 class _GameCoverTile extends StatelessWidget {
   final LibraryGame libraryGame;
   final Future<void> Function() onOpened;
-  final double? width;
+  final ShelfCoverStyle coverStyle;
 
   const _GameCoverTile({
     required this.libraryGame,
     required this.onOpened,
-    this.width,
+    required this.coverStyle,
   });
 
   Future<void> _open(BuildContext context) async {
@@ -1628,33 +1543,38 @@ class _GameCoverTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final game = libraryGame.game;
 
-    final cover = ClipRRect(
-      borderRadius: BorderRadius.circular(12),
-      child: AspectRatio(
-        aspectRatio: 3 / 4,
-        child: game.coverUrl != null && game.coverUrl!.isNotEmpty
-            ? Image.network(
-                game.coverUrl!,
-                fit: BoxFit.cover,
-                cacheWidth: 220,
-                errorBuilder: (_, _, _) => Container(
-                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                  child: const Icon(Icons.videogame_asset),
-                ),
-              )
-            : Container(
+    final coverArt = AspectRatio(
+      aspectRatio: 3 / 4,
+      child: game.coverUrl != null && game.coverUrl!.isNotEmpty
+          ? Image.network(
+              game.coverUrl!,
+              fit: BoxFit.cover,
+              cacheWidth: 220,
+              errorBuilder: (_, _, _) => Container(
                 color: Theme.of(context).colorScheme.surfaceContainerHighest,
                 child: const Icon(Icons.videogame_asset),
               ),
-      ),
+            )
+          : Container(
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
+              child: const Icon(Icons.videogame_asset),
+            ),
     );
 
-    final tile = InkWell(
-      borderRadius: BorderRadius.circular(12),
+    final cover = coverStyle == ShelfCoverStyle.plain
+        ? ClipRRect(borderRadius: BorderRadius.circular(8), child: coverArt)
+        : CartridgeCover(
+            cover: coverArt,
+            shellColor: cartridgeShellColorFor(
+              platform: libraryGame.userGame.platform,
+              favorite: libraryGame.userGame.favorite,
+            ),
+          );
+
+    return InkWell(
+      borderRadius: BorderRadius.circular(10),
       onTap: () => _open(context),
       child: cover,
     );
-
-    return width != null ? SizedBox(width: width, child: tile) : tile;
   }
 }

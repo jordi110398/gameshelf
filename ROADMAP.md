@@ -31,13 +31,12 @@
 - [x] Compartir perfil
 - [x] Sistema de likes
 - [x] Notificacions
-- [ ] Themes app (light/dark?, colors interfície, etc.)
 - [x] Recomanació de jocs/llistes/jugadors (al llamp)
 - [x] Playlists de jocs (que es publiquen al llamp)
 - [x] Escollir plataforma de joc i mostrar-la
-- [ ] Personalització estanteria: colors, elements decoratius, etc.
+- [x] Personalització estanteria: colors, elements decoratius, etc.
 - [ ] Desplegable escollir idioma
-- [ ] Apartat configuració
+- [x] Apartat configuració
 - [ ] Animated handlers
 - [ ] More tags and more colors
 - [x] Creació de shelves/estanteries/col·leccions (de 8 jocs maxim) des del perfil de cada usuari, per mostrar i fixar o per publicar (al llamp) si es vol.

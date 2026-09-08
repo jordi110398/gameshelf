@@ -114,8 +114,42 @@ class ProfileStrings {
   static const shareQrCaption = 'Escaneja per trobar-me a GameShelf';
   static const shareDownloadAction = 'Descarregar imatge';
   static const shareDownloadedMessage = 'Imatge descarregada.';
-  static const shareGenerateFailedPrefix =
-      'No s\'ha pogut generar la imatge: ';
+  static const shareGenerateFailedPrefix = 'No s\'ha pogut generar la imatge: ';
+
+  // ─────────────────────────────────────────────
+  // CONFIGURACIÓ
+  // ─────────────────────────────────────────────
+
+  static const settingsTooltip = 'Configuració';
+  static const settingsAppBarTitle = 'Configuració';
+
+  static const settingsEditProfileSubtitle =
+      'Nickname, bio, foto, contrasenya i compte';
+
+  static const shelfStyleSectionTitle = 'Estètica';
+  static const shelfStyleSectionSubtitle =
+      'El color de la fusta defineix l\'aspecte de tota l\'app i de les '
+      'teves estanteries.';
+  static const shelfLightsLabel = 'Llums';
+  static const shelfLightsNeon = 'Neó';
+  static const shelfLightsBulbs = 'Bombetes';
+  static const shelfWoodLabel = 'Color de la fusta';
+  static const shelfWoodWalnut = 'Noguera';
+  static const shelfWoodOak = 'Roure';
+  static const shelfWoodEbony = 'Banús';
+  static const shelfWoodCherry = 'Cirerer';
+  static const shelfWoodBirch = 'Bedoll';
+  static const shelfDecorationLabel = 'Decoració';
+  static const shelfDecorationHint = 'Pots triar-ne més d\'una.';
+  static const shelfDecorationNone = 'Cap';
+  static const shelfDecorationPoppy = 'Rosella';
+  static const shelfDecorationCactus = 'Cactus';
+  static const shelfDecorationAzalea = 'Azalea';
+  static const shelfCoverStyleLabel = 'Cobertes de joc';
+  static const shelfCoverStylePlain = 'Planes';
+  static const shelfCoverStyleCartridge = 'Cartutx';
+  static const shelfStyleChangeFailedPrefix =
+      'No s\'ha pogut canviar l\'estètica: ';
 
   // ─────────────────────────────────────────────
   // PÀGINA CANVIAR CONTRASENYA (standalone)
@@ -125,7 +159,8 @@ class ProfileStrings {
   static const fillAllFields = 'Omple tots els camps.';
   static const passwordMinLength6 =
       'La contrasenya ha de tenir almenys 6 caràcters.';
-  static const passwordUpdatedSuccess = 'Contrasenya actualitzada correctament.';
+  static const passwordUpdatedSuccess =
+      'Contrasenya actualitzada correctament.';
   static const newPasswordFieldLabel = 'Nova contrasenya';
   static const repeatPasswordFieldLabel = 'Repetir contrasenya';
   static const updating = 'Actualitzant...';

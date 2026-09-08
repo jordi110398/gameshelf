@@ -188,9 +188,9 @@ class _EditShelfPageState extends State<EditShelfPage> {
 
   Future<void> _pickGame() async {
     if (shelf.gameIds.length >= _maxGamesPerShelf) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text(LlampStrings.shelfFullMessage)));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text(LlampStrings.shelfFullMessage)),
+      );
       return;
     }
 
@@ -216,7 +216,10 @@ class _EditShelfPageState extends State<EditShelfPage> {
                     padding: EdgeInsets.all(16),
                     child: Text(
                       LlampStrings.pickGameSheetTitle,
-                      style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                   Expanded(
@@ -254,11 +257,14 @@ class _EditShelfPageState extends State<EditShelfPage> {
                                             fit: BoxFit.cover,
                                             cacheWidth: 80,
                                           )
-                                        : Container(color: Colors.grey.shade800),
+                                        : Container(
+                                            color: Colors.grey.shade800,
+                                          ),
                                   ),
                                 ),
                                 title: Text(game.title),
-                                onTap: () => Navigator.pop(context, libraryGame),
+                                onTap: () =>
+                                    Navigator.pop(context, libraryGame),
                               );
                             },
                           ),
@@ -453,14 +459,19 @@ class _ShelfSlot extends StatelessWidget {
         Positioned.fill(
           child: ClipRRect(
             borderRadius: BorderRadius.circular(10),
-            child: game != null && game!.coverUrl != null && game!.coverUrl!.isNotEmpty
+            child:
+                game != null &&
+                    game!.coverUrl != null &&
+                    game!.coverUrl!.isNotEmpty
                 ? Image.network(
                     game!.coverUrl!,
                     fit: BoxFit.cover,
                     cacheWidth: 160,
                   )
                 : Container(
-                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.surfaceContainerHighest,
                     child: const Icon(Icons.videogame_asset),
                   ),
           ),

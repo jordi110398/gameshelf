@@ -106,6 +106,8 @@ class SupabaseLibraryRepository implements LibraryRepository {
     DateTime? completedAt,
     DateTime? droppedAt,
     DateTime? pausedAt,
+    int hoursPlayed = 0,
+    bool favorite = false,
   }) async {
     final user = client.auth.currentUser;
 
@@ -120,8 +122,8 @@ class SupabaseLibraryRepository implements LibraryRepository {
       'igdb_id': game.igdbId,
       'status': status.databaseValue,
       'rating': rating,
-      'hours_played': 0,
-      'favorite': false,
+      'hours_played': hoursPlayed,
+      'favorite': favorite,
       'review': review,
       'platform': platform,
       'started_at': startedAt?.toIso8601String(),

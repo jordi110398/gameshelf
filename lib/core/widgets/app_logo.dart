@@ -26,11 +26,16 @@ class AppLogo extends StatelessWidget {
         children: [
           Image.asset('assets/logo.png', width: logoSize, height: logoSize),
           const SizedBox(width: 8),
-          Text(
-            isMobile ? "GS" : "GameShelf",
-            style: TextStyle(
-              fontSize: isMobile ? 18 : 20,
-              fontWeight: FontWeight.bold,
+          Flexible(
+            child: Text(
+              isMobile ? "GS" : "GameShelf",
+              maxLines: 1,
+              softWrap: false,
+              overflow: TextOverflow.fade,
+              style: TextStyle(
+                fontSize: isMobile ? 18 : 20,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         ],

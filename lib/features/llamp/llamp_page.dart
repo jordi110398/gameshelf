@@ -1,17 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:gameshelf/core/navigation/page_transitions.dart';
+import 'package:gameshelf/core/services/shelf_skin_service.dart';
 import 'package:gameshelf/core/strings/llamp_strings.dart';
 import 'package:gameshelf/core/utils/error_messages.dart';
 import 'package:gameshelf/core/widgets/app_logo.dart';
 import 'package:gameshelf/core/widgets/bookshelf_background.dart';
+import 'package:gameshelf/core/widgets/cartridge_cover.dart';
 import 'package:gameshelf/core/widgets/responsive_center.dart';
-import 'package:gameshelf/core/widgets/shelf_led_strip.dart';
+import 'package:gameshelf/core/widgets/shelf_decoration_image.dart';
 import 'package:gameshelf/core/widgets/shelf_ledge.dart';
+import 'package:gameshelf/core/widgets/shelf_light_fixture.dart';
 import 'package:gameshelf/core/widgets/shimmer_box.dart';
 import 'package:gameshelf/core/widgets/wood_drawer_container.dart';
 import 'package:gameshelf/features/game/pages/game_detail_page.dart';
 import 'package:gameshelf/features/llamp/my_shelves_page.dart';
 import 'package:gameshelf/models/game.dart';
+import 'package:gameshelf/models/profile.dart';
+import 'package:gameshelf/models/shelf_style.dart';
 import 'package:gameshelf/repositories/shelf_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -214,7 +219,9 @@ class _FriendShelfCard extends StatelessWidget {
       borderRadius: BorderRadius.circular(18),
       child: Stack(
         children: [
-          const Positioned.fill(child: BookshelfBackground()),
+          Positioned.fill(
+            child: BookshelfBackground(color: profile.shelfWoodColor),
+          ),
           Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -254,36 +261,63 @@ class _FriendShelfCard extends StatelessWidget {
 
                 LayoutBuilder(
                   builder: (context, constraints) {
-                    return ShelfLedStrip(width: constraints.maxWidth);
+                    return ShelfLightFixture(
+                      width: constraints.maxWidth,
+                      style: profile.shelfLightStyle,
+                    );
                   },
                 ),
 
                 const SizedBox(height: 4),
 
-                SizedBox(
-                  height: 110,
-                  child: ListView.separated(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: item.games.length,
-                    separatorBuilder: (_, _) => const SizedBox(width: 10),
-                    itemBuilder: (context, index) {
-                      final game = item.games[index];
+                _buildRow(profile),
 
-                      return _GameCoverTile(
-                        game: game,
-                        width: 80,
-                        onTap: () => onOpenGame(game),
-                      );
-                    },
-                  ),
-                ),
-
-                const SizedBox(height: 10),
-                const ShelfLedge(),
+                const SizedBox(height: 2),
+                ShelfLedge(color: profile.shelfWoodColor),
               ],
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  /// Cobertes + decoracions que n'omplen els slots buits (com si fossin
+  /// un joc més), totes tocant la base de la lleixa.
+  Widget _buildRow(Profile profile) {
+    final lane = buildShelfLane<Game>(
+      games: item.games,
+      decorations: profile.shelfDecorations,
+    );
+
+    return SizedBox(
+      height: 118,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        itemCount: lane.length,
+        separatorBuilder: (_, _) => const SizedBox(width: 10),
+        itemBuilder: (context, index) {
+          final laneItem = lane[index];
+
+          return Align(
+            alignment: Alignment.bottomCenter,
+            child: switch (laneItem) {
+              ShelfLaneGame(value: final game) => _GameCoverTile(
+                game: game,
+                width: 80,
+                onTap: () => onOpenGame(game),
+                coverStyle: profile.shelfCoverStyle,
+              ),
+              ShelfLaneDecoration(decoration: final decoration) => SizedBox(
+                width: 80,
+                child: ShelfDecorationImage(
+                  height: 100,
+                  decoration: decoration,
+                ),
+              ),
+            },
+          );
+        },
       ),
     );
   }
@@ -294,33 +328,53 @@ class _GameCoverTile extends StatelessWidget {
   final double width;
   final VoidCallback onTap;
 
+  /// `null` -- segueix la preferència de l'usuari actual (recomanacions,
+  /// que són pròpies); explícit quan la coberta pertany a l'estanteria
+  /// d'un amic concret.
+  final ShelfCoverStyle? coverStyle;
+
   const _GameCoverTile({
     required this.game,
     required this.width,
     required this.onTap,
+    this.coverStyle,
   });
 
   @override
   Widget build(BuildContext context) {
+    if (coverStyle != null) {
+      return _build(context, coverStyle!);
+    }
+
+    return ValueListenableBuilder<ShelfCoverStyle>(
+      valueListenable: ShelfSkinService.instance.coverStyle,
+      builder: (context, ambientStyle, _) => _build(context, ambientStyle),
+    );
+  }
+
+  Widget _build(BuildContext context, ShelfCoverStyle resolvedStyle) {
+    final coverArt = AspectRatio(
+      aspectRatio: 3 / 4,
+      child: game.coverUrl != null && game.coverUrl!.isNotEmpty
+          ? Image.network(
+              game.coverUrl!,
+              fit: BoxFit.cover,
+              cacheWidth: 200,
+              errorBuilder: (_, _, _) => _placeholder(context),
+            )
+          : _placeholder(context),
+    );
+
+    final cover = resolvedStyle == ShelfCoverStyle.plain
+        ? ClipRRect(borderRadius: BorderRadius.circular(8), child: coverArt)
+        : CartridgeCover(cover: coverArt);
+
     return SizedBox(
       width: width,
       child: InkWell(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(10),
         onTap: onTap,
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(12),
-          child: AspectRatio(
-            aspectRatio: 3 / 4,
-            child: game.coverUrl != null && game.coverUrl!.isNotEmpty
-                ? Image.network(
-                    game.coverUrl!,
-                    fit: BoxFit.cover,
-                    cacheWidth: 200,
-                    errorBuilder: (_, _, _) => _placeholder(context),
-                  )
-                : _placeholder(context),
-          ),
-        ),
+        child: cover,
       ),
     );
   }
