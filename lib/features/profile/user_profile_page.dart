@@ -19,6 +19,7 @@ import 'package:gameshelf/models/game_status.dart';
 import 'package:gameshelf/models/library_game.dart';
 import 'package:gameshelf/models/profile.dart';
 import 'package:gameshelf/models/shelf.dart';
+import 'package:gameshelf/models/shelf_style.dart';
 import 'package:gameshelf/repositories/profile_repository.dart';
 import 'package:gameshelf/repositories/shelf_repository.dart';
 import 'package:gameshelf/repositories/supabase_library_repository.dart';
@@ -626,6 +627,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
 
   Widget _buildReviewsSummary() {
     final reviews = reviewedGames.take(3).toList();
+    final isLightWood = currentProfile.shelfWoodColor.isLight;
 
     if (reviews.isEmpty) {
       return WoodDrawerContainer(
@@ -635,12 +637,16 @@ class _UserProfilePageState extends State<UserProfilePage> {
             Icon(
               Icons.rate_review_outlined,
               size: 32,
-              color: Colors.grey.shade400,
+              color: isLightWood ? Colors.grey.shade700 : Colors.grey.shade400,
             ),
             const SizedBox(height: 10),
             Text(
               ProfileStrings.noReviewsYet,
-              style: TextStyle(color: Colors.grey.shade300),
+              style: TextStyle(
+                color: isLightWood
+                    ? Colors.grey.shade800
+                    : Colors.grey.shade300,
+              ),
             ),
           ],
         ),
@@ -720,7 +726,9 @@ class _UserProfilePageState extends State<UserProfilePage> {
                             fontSize: 13,
                             height: 1.35,
                             fontStyle: FontStyle.italic,
-                            color: Colors.grey.shade700,
+                            color: isLightWood
+                                ? Colors.grey.shade900
+                                : Colors.grey.shade700,
                           ),
                         ),
 

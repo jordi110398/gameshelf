@@ -59,4 +59,9 @@ extension ShelfWoodColorX on ShelfWoodColor {
         return 'birch';
     }
   }
+
+  /// El bedoll és l'única fusta clara -- la resta són fosques. Útil per
+  /// triar colors de text/icona que contrastin bé quan seuen directament
+  /// sobre la fusta (`BookshelfBackground`, `WoodDrawerContainer`).
+  bool get isLight => this == ShelfWoodColor.birch;
 }
