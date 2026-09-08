@@ -8,6 +8,7 @@ class Profile {
   final DateTime? createdAt;
   final ShelfLightStyle shelfLightStyle;
   final ShelfWoodColor shelfWoodColor;
+  final ShelfDecoration shelfDecoration;
 
   // Només ve informat quan el perfil és el de l'usuari autenticat
   // (profiles_public, usat per veure altres usuaris, no exposa l'email).
@@ -21,6 +22,7 @@ class Profile {
     this.createdAt,
     this.shelfLightStyle = ShelfLightStyle.neon,
     this.shelfWoodColor = ShelfWoodColor.walnut,
+    this.shelfDecoration = ShelfDecoration.none,
     this.email,
   });
 
@@ -39,6 +41,9 @@ class Profile {
       shelfWoodColor: ShelfWoodColorX.fromDb(
         map['shelf_wood_color'] as String?,
       ),
+      shelfDecoration: ShelfDecorationX.fromDb(
+        map['shelf_decoration'] as String?,
+      ),
       email: map['email'] as String?,
     );
   }
@@ -52,6 +57,7 @@ class Profile {
       'created_at': createdAt?.toIso8601String(),
       'shelf_light_style': shelfLightStyle.databaseValue,
       'shelf_wood_color': shelfWoodColor.databaseValue,
+      'shelf_decoration': shelfDecoration.databaseValue,
       'email': email,
     };
   }
@@ -62,6 +68,7 @@ class Profile {
     String? bio,
     ShelfLightStyle? shelfLightStyle,
     ShelfWoodColor? shelfWoodColor,
+    ShelfDecoration? shelfDecoration,
   }) {
     return Profile(
       id: id,
@@ -71,6 +78,7 @@ class Profile {
       createdAt: createdAt,
       shelfLightStyle: shelfLightStyle ?? this.shelfLightStyle,
       shelfWoodColor: shelfWoodColor ?? this.shelfWoodColor,
+      shelfDecoration: shelfDecoration ?? this.shelfDecoration,
       email: email,
     );
   }

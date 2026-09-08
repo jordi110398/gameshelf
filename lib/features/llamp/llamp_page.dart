@@ -5,6 +5,7 @@ import 'package:gameshelf/core/utils/error_messages.dart';
 import 'package:gameshelf/core/widgets/app_logo.dart';
 import 'package:gameshelf/core/widgets/bookshelf_background.dart';
 import 'package:gameshelf/core/widgets/responsive_center.dart';
+import 'package:gameshelf/core/widgets/shelf_decoration_image.dart';
 import 'package:gameshelf/core/widgets/shelf_ledge.dart';
 import 'package:gameshelf/core/widgets/shelf_light_fixture.dart';
 import 'package:gameshelf/core/widgets/shimmer_box.dart';
@@ -267,24 +268,36 @@ class _FriendShelfCard extends StatelessWidget {
 
                 SizedBox(
                   height: 110,
-                  child: ListView.separated(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: item.games.length,
-                    separatorBuilder: (_, _) => const SizedBox(width: 10),
-                    itemBuilder: (context, index) {
-                      final game = item.games[index];
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Expanded(
+                        child: ListView.separated(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: item.games.length,
+                          separatorBuilder: (_, _) =>
+                              const SizedBox(width: 10),
+                          itemBuilder: (context, index) {
+                            final game = item.games[index];
 
-                      return _GameCoverTile(
-                        game: game,
-                        width: 80,
-                        onTap: () => onOpenGame(game),
-                      );
-                    },
+                            return _GameCoverTile(
+                              game: game,
+                              width: 80,
+                              onTap: () => onOpenGame(game),
+                            );
+                          },
+                        ),
+                      ),
+                      ShelfDecorationImage(
+                        height: 90,
+                        decoration: profile.shelfDecoration,
+                      ),
+                    ],
                   ),
                 ),
 
                 const SizedBox(height: 10),
-                const ShelfLedge(),
+                ShelfLedge(color: profile.shelfWoodColor),
               ],
             ),
           ),

@@ -139,6 +139,11 @@ class ProfileStrings {
   static const shelfWoodEbony = 'Banús';
   static const shelfWoodCherry = 'Cirerer';
   static const shelfWoodBirch = 'Bedoll';
+  static const shelfDecorationLabel = 'Decoració';
+  static const shelfDecorationNone = 'Cap';
+  static const shelfDecorationPoppy = 'Rosella';
+  static const shelfDecorationCactus = 'Cactus';
+  static const shelfDecorationAzalea = 'Azalea';
   static const shelfStyleChangeFailedPrefix =
       'No s\'ha pogut canviar l\'estètica: ';
 

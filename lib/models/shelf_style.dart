@@ -65,3 +65,51 @@ extension ShelfWoodColorX on ShelfWoodColor {
   /// sobre la fusta (`BookshelfBackground`, `WoodDrawerContainer`).
   bool get isLight => this == ShelfWoodColor.birch;
 }
+
+/// Element decoratiu opcional a l'extrem d'una estanteria destacada
+/// (preferits, estanteria fixada, targetes del llamp) -- no es mostra a
+/// les graelles denses (Inici, cerca...).
+enum ShelfDecoration { none, poppy, cactus, azalea }
+
+extension ShelfDecorationX on ShelfDecoration {
+  static ShelfDecoration fromDb(String? value) {
+    switch (value) {
+      case 'poppy':
+        return ShelfDecoration.poppy;
+      case 'cactus':
+        return ShelfDecoration.cactus;
+      case 'azalea':
+        return ShelfDecoration.azalea;
+      case 'none':
+      default:
+        return ShelfDecoration.none;
+    }
+  }
+
+  String get databaseValue {
+    switch (this) {
+      case ShelfDecoration.none:
+        return 'none';
+      case ShelfDecoration.poppy:
+        return 'poppy';
+      case ShelfDecoration.cactus:
+        return 'cactus';
+      case ShelfDecoration.azalea:
+        return 'azalea';
+    }
+  }
+
+  /// `null` per a `none` -- vegeu `ShelfDecorationImage`.
+  String? get assetPath {
+    switch (this) {
+      case ShelfDecoration.none:
+        return null;
+      case ShelfDecoration.poppy:
+        return 'assets/decorations/poppy.png';
+      case ShelfDecoration.cactus:
+        return 'assets/decorations/cactus.png';
+      case ShelfDecoration.azalea:
+        return 'assets/decorations/azalea.png';
+    }
+  }
+}

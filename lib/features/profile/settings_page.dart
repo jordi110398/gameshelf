@@ -28,6 +28,13 @@ const _woodLabels = {
   ShelfWoodColor.birch: ProfileStrings.shelfWoodBirch,
 };
 
+const _decorationLabels = {
+  ShelfDecoration.none: ProfileStrings.shelfDecorationNone,
+  ShelfDecoration.poppy: ProfileStrings.shelfDecorationPoppy,
+  ShelfDecoration.cactus: ProfileStrings.shelfDecorationCactus,
+  ShelfDecoration.azalea: ProfileStrings.shelfDecorationAzalea,
+};
+
 class SettingsPage extends StatefulWidget {
   final Profile profile;
 
@@ -90,6 +97,26 @@ class _SettingsPageState extends State<SettingsPage> {
 
     try {
       await ShelfSkinService.instance.setWoodColor(color);
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            '${ProfileStrings.shelfStyleChangeFailedPrefix}${friendlyError(e)}',
+          ),
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => isSavingShelfStyle = false);
+    }
+  }
+
+  Future<void> _setDecoration(ShelfDecoration decoration) async {
+    setState(() => isSavingShelfStyle = true);
+
+    try {
+      await ShelfSkinService.instance.setDecoration(decoration);
     } catch (e) {
       if (!mounted) return;
 
@@ -229,6 +256,74 @@ class _SettingsPageState extends State<SettingsPage> {
                       onSelectionChanged: isSavingShelfStyle
                           ? null
                           : (selection) => _setLightStyle(selection.first),
+                    );
+                  },
+                ),
+
+                const SizedBox(height: 20),
+
+                Text(
+                  ProfileStrings.shelfDecorationLabel,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey.shade400,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                ValueListenableBuilder<ShelfDecoration>(
+                  valueListenable: ShelfSkinService.instance.decoration,
+                  builder: (context, currentDecoration, _) {
+                    return Wrap(
+                      spacing: 14,
+                      runSpacing: 10,
+                      children: ShelfDecoration.values.map((decoration) {
+                        final isSelected = currentDecoration == decoration;
+                        final path = decoration.assetPath;
+
+                        return GestureDetector(
+                          onTap: isSavingShelfStyle
+                              ? null
+                              : () => _setDecoration(decoration),
+                          child: Column(
+                            children: [
+                              Container(
+                                width: 48,
+                                height: 48,
+                                padding: const EdgeInsets.all(4),
+                                decoration: BoxDecoration(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.surfaceContainerHighest,
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: isSelected
+                                        ? Theme.of(context).colorScheme.primary
+                                        : Colors.transparent,
+                                    width: 3,
+                                  ),
+                                ),
+                                child: path == null
+                                    ? Icon(
+                                        Icons.not_interested,
+                                        size: 20,
+                                        color: Colors.grey.shade500,
+                                      )
+                                    : Image.asset(
+                                        path,
+                                        fit: BoxFit.contain,
+                                        cacheHeight: 96,
+                                      ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                _decorationLabels[decoration]!,
+                                style: const TextStyle(fontSize: 11),
+                              ),
+                            ],
+                          ),
+                        );
+                      }).toList(),
                     );
                   },
                 ),

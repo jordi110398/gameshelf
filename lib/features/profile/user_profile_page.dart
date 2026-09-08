@@ -6,6 +6,7 @@ import 'package:gameshelf/core/strings/profile_strings.dart';
 import 'package:gameshelf/core/widgets/app_logo.dart';
 import 'package:gameshelf/core/widgets/bookshelf_background.dart';
 import 'package:gameshelf/core/widgets/dither_banner.dart';
+import 'package:gameshelf/core/widgets/shelf_decoration_image.dart';
 import 'package:gameshelf/core/widgets/shelf_ledge.dart';
 import 'package:gameshelf/core/widgets/shelf_light_fixture.dart';
 import 'package:gameshelf/core/widgets/shelf_list.dart';
@@ -1247,17 +1248,28 @@ class _UserProfilePageState extends State<UserProfilePage> {
 
                 SizedBox(
                   height: 120,
-                  child: ListView.separated(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: favorites.length,
-                    separatorBuilder: (_, _) => const SizedBox(width: 10),
-                    itemBuilder: (context, index) {
-                      return _GameCoverTile(
-                        libraryGame: favorites[index],
-                        width: 88,
-                        onOpened: loadProfile,
-                      );
-                    },
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Expanded(
+                        child: ListView.separated(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: favorites.length,
+                          separatorBuilder: (_, _) =>
+                              const SizedBox(width: 10),
+                          itemBuilder: (context, index) {
+                            return _GameCoverTile(
+                              libraryGame: favorites[index],
+                              width: 88,
+                              onOpened: loadProfile,
+                            );
+                          },
+                        ),
+                      ),
+                      ShelfDecorationImage(
+                        decoration: currentProfile.shelfDecoration,
+                      ),
+                    ],
                   ),
                 ),
 
@@ -1318,46 +1330,59 @@ class _UserProfilePageState extends State<UserProfilePage> {
 
                 SizedBox(
                   height: 120,
-                  child: ListView.separated(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: games.length,
-                    separatorBuilder: (_, _) => const SizedBox(width: 10),
-                    itemBuilder: (context, index) {
-                      final game = games[index];
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Expanded(
+                        child: ListView.separated(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: games.length,
+                          separatorBuilder: (_, _) =>
+                              const SizedBox(width: 10),
+                          itemBuilder: (context, index) {
+                            final game = games[index];
 
-                      return SizedBox(
-                        width: 88,
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(12),
-                          onTap: () async {
-                            await pushFade(
-                              context,
-                              (_) => GameDetailPage(game: game),
+                            return SizedBox(
+                              width: 88,
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(12),
+                                onTap: () async {
+                                  await pushFade(
+                                    context,
+                                    (_) => GameDetailPage(game: game),
+                                  );
+                                },
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: AspectRatio(
+                                    aspectRatio: 3 / 4,
+                                    child:
+                                        game.coverUrl != null &&
+                                            game.coverUrl!.isNotEmpty
+                                        ? Image.network(
+                                            game.coverUrl!,
+                                            fit: BoxFit.cover,
+                                            cacheWidth: 180,
+                                          )
+                                        : Container(
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .surfaceContainerHighest,
+                                            child: const Icon(
+                                              Icons.videogame_asset,
+                                            ),
+                                          ),
+                                  ),
+                                ),
+                              ),
                             );
                           },
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
-                            child: AspectRatio(
-                              aspectRatio: 3 / 4,
-                              child:
-                                  game.coverUrl != null &&
-                                      game.coverUrl!.isNotEmpty
-                                  ? Image.network(
-                                      game.coverUrl!,
-                                      fit: BoxFit.cover,
-                                      cacheWidth: 180,
-                                    )
-                                  : Container(
-                                      color: Theme.of(
-                                        context,
-                                      ).colorScheme.surfaceContainerHighest,
-                                      child: const Icon(Icons.videogame_asset),
-                                    ),
-                            ),
-                          ),
                         ),
-                      );
-                    },
+                      ),
+                      ShelfDecorationImage(
+                        decoration: currentProfile.shelfDecoration,
+                      ),
+                    ],
                   ),
                 ),
 
