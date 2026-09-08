@@ -175,6 +175,11 @@ class _UserProfilePageState extends State<UserProfilePage> {
   }
 
   Future<void> reloadProfile() async {
+    // Des de Configuració es pot haver tancat la sessió: en aquest cas
+    // no hi ha res a recarregar (i `profiles_public` no és accessible
+    // sense sessió, cosa que faria fallar la consulta).
+    if (Supabase.instance.client.auth.currentUser == null) return;
+
     final profile = await profileRepository.getProfileById(widget.profile.id);
 
     if (!mounted || profile == null) return;
