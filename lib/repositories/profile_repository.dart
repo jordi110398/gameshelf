@@ -105,7 +105,7 @@ class ProfileRepository {
   Future<void> updateShelfSkin({
     ShelfLightStyle? lightStyle,
     ShelfWoodColor? woodColor,
-    ShelfDecoration? decoration,
+    Set<ShelfDecoration>? decorations,
     ShelfCoverStyle? coverStyle,
   }) async {
     final user = client.auth.currentUser;
@@ -124,8 +124,8 @@ class ProfileRepository {
       update['shelf_wood_color'] = woodColor.databaseValue;
     }
 
-    if (decoration != null) {
-      update['shelf_decoration'] = decoration.databaseValue;
+    if (decorations != null) {
+      update['shelf_decorations'] = decorations.databaseValues;
     }
 
     if (coverStyle != null) {

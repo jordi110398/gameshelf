@@ -21,6 +21,13 @@ class ShelfList<T> extends StatelessWidget {
 
   final double horizontalGap;
   final double rowGap;
+
+  /// Espai entre la fila d'elements i la lleixa de sota. Petit (p. ex.
+  /// 2) perquè cobertes i decoracions quedin tocant la fusta a les
+  /// estanteries destacades (preferits, fixada); el valor per defecte
+  /// és més generós per a graelles dens es on no cal aquest efecte.
+  final double preLedgeGap;
+
   final EdgeInsetsGeometry padding;
 
   /// `true` (per defecte) quan la llista és el contingut principal
@@ -46,6 +53,7 @@ class ShelfList<T> extends StatelessWidget {
     this.itemAspectRatio,
     this.horizontalGap = 12,
     this.rowGap = 22,
+    this.preLedgeGap = 10,
     this.padding = EdgeInsets.zero,
     this.scrollable = true,
     this.lightStyle,
@@ -97,7 +105,7 @@ class ShelfList<T> extends StatelessWidget {
                 ],
               ),
 
-              const SizedBox(height: 10),
+              SizedBox(height: preLedgeGap),
               ShelfLedge(color: woodColor),
             ],
           );

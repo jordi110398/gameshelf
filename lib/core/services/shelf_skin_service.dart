@@ -12,7 +12,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 ///
 /// Quan es mostra l'estanteria d'UNA ALTRA PERSONA (el seu perfil, una
 /// targeta del llamp), es continua passant explícitament
-/// `profile.shelfWoodColor`/`shelfLightStyle`/`shelfDecoration` d'aquell
+/// `profile.shelfWoodColor`/`shelfLightStyle`/`shelfDecorations` d'aquell
 /// perfil -- això només és per a la pròpia experiència de l'usuari que
 /// mira l'app.
 class ShelfSkinService {
@@ -26,8 +26,8 @@ class ShelfSkinService {
   final ValueNotifier<ShelfWoodColor> woodColor = ValueNotifier(
     ShelfWoodColor.walnut,
   );
-  final ValueNotifier<ShelfDecoration> decoration = ValueNotifier(
-    ShelfDecoration.none,
+  final ValueNotifier<Set<ShelfDecoration>> decorations = ValueNotifier(
+    const {},
   );
   final ValueNotifier<ShelfCoverStyle> coverStyle = ValueNotifier(
     ShelfCoverStyle.cartridge,
@@ -57,7 +57,7 @@ class ShelfSkinService {
       if (profile != null) {
         lightStyle.value = profile.shelfLightStyle;
         woodColor.value = profile.shelfWoodColor;
-        decoration.value = profile.shelfDecoration;
+        decorations.value = profile.shelfDecorations;
         coverStyle.value = profile.shelfCoverStyle;
       }
     } catch (_) {
@@ -82,12 +82,12 @@ class ShelfSkinService {
     ).updateShelfSkin(woodColor: value);
   }
 
-  Future<void> setDecoration(ShelfDecoration value) async {
-    decoration.value = value;
+  Future<void> setDecorations(Set<ShelfDecoration> value) async {
+    decorations.value = value;
 
     await ProfileRepository(
       Supabase.instance.client,
-    ).updateShelfSkin(decoration: value);
+    ).updateShelfSkin(decorations: value);
   }
 
   Future<void> setCoverStyle(ShelfCoverStyle value) async {

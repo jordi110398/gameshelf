@@ -8,7 +8,7 @@ class Profile {
   final DateTime? createdAt;
   final ShelfLightStyle shelfLightStyle;
   final ShelfWoodColor shelfWoodColor;
-  final ShelfDecoration shelfDecoration;
+  final Set<ShelfDecoration> shelfDecorations;
   final ShelfCoverStyle shelfCoverStyle;
 
   // Només ve informat quan el perfil és el de l'usuari autenticat
@@ -23,7 +23,7 @@ class Profile {
     this.createdAt,
     this.shelfLightStyle = ShelfLightStyle.neon,
     this.shelfWoodColor = ShelfWoodColor.walnut,
-    this.shelfDecoration = ShelfDecoration.none,
+    this.shelfDecorations = const {},
     this.shelfCoverStyle = ShelfCoverStyle.cartridge,
     this.email,
   });
@@ -43,8 +43,8 @@ class Profile {
       shelfWoodColor: ShelfWoodColorX.fromDb(
         map['shelf_wood_color'] as String?,
       ),
-      shelfDecoration: ShelfDecorationX.fromDb(
-        map['shelf_decoration'] as String?,
+      shelfDecorations: shelfDecorationsFromDb(
+        map['shelf_decorations'] as List<dynamic>?,
       ),
       shelfCoverStyle: ShelfCoverStyleX.fromDb(
         map['shelf_cover_style'] as String?,
@@ -62,7 +62,7 @@ class Profile {
       'created_at': createdAt?.toIso8601String(),
       'shelf_light_style': shelfLightStyle.databaseValue,
       'shelf_wood_color': shelfWoodColor.databaseValue,
-      'shelf_decoration': shelfDecoration.databaseValue,
+      'shelf_decorations': shelfDecorations.databaseValues,
       'shelf_cover_style': shelfCoverStyle.databaseValue,
       'email': email,
     };
@@ -74,7 +74,7 @@ class Profile {
     String? bio,
     ShelfLightStyle? shelfLightStyle,
     ShelfWoodColor? shelfWoodColor,
-    ShelfDecoration? shelfDecoration,
+    Set<ShelfDecoration>? shelfDecorations,
     ShelfCoverStyle? shelfCoverStyle,
   }) {
     return Profile(
@@ -85,7 +85,7 @@ class Profile {
       createdAt: createdAt,
       shelfLightStyle: shelfLightStyle ?? this.shelfLightStyle,
       shelfWoodColor: shelfWoodColor ?? this.shelfWoodColor,
-      shelfDecoration: shelfDecoration ?? this.shelfDecoration,
+      shelfDecorations: shelfDecorations ?? this.shelfDecorations,
       shelfCoverStyle: shelfCoverStyle ?? this.shelfCoverStyle,
       email: email,
     );

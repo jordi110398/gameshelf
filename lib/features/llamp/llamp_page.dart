@@ -285,42 +285,37 @@ class _FriendShelfCard extends StatelessWidget {
   /// Cobertes + decoracions que n'omplen els slots buits (com si fossin
   /// un joc més), totes tocant la base de la lleixa.
   Widget _buildRow(Profile profile) {
-    final decorations = decorationSlotsFor(
-      primary: profile.shelfDecoration,
-      gameCount: item.games.length,
+    final lane = buildShelfLane<Game>(
+      games: item.games,
+      decorations: profile.shelfDecorations,
     );
-
-    final itemCount = item.games.length + decorations.length;
 
     return SizedBox(
       height: 118,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
-        itemCount: itemCount,
+        itemCount: lane.length,
         separatorBuilder: (_, _) => const SizedBox(width: 10),
         itemBuilder: (context, index) {
-          if (index < item.games.length) {
-            final game = item.games[index];
+          final laneItem = lane[index];
 
-            return Align(
-              alignment: Alignment.bottomCenter,
-              child: _GameCoverTile(
+          return Align(
+            alignment: Alignment.bottomCenter,
+            child: switch (laneItem) {
+              ShelfLaneGame(value: final game) => _GameCoverTile(
                 game: game,
                 width: 80,
                 onTap: () => onOpenGame(game),
                 coverStyle: profile.shelfCoverStyle,
               ),
-            );
-          }
-
-          final decoration = decorations[index - item.games.length];
-
-          return Align(
-            alignment: Alignment.bottomCenter,
-            child: SizedBox(
-              width: 80,
-              child: ShelfDecorationImage(height: 100, decoration: decoration),
-            ),
+              ShelfLaneDecoration(decoration: final decoration) => SizedBox(
+                width: 80,
+                child: ShelfDecorationImage(
+                  height: 100,
+                  decoration: decoration,
+                ),
+              ),
+            },
           );
         },
       ),

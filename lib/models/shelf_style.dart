@@ -140,30 +140,104 @@ extension ShelfDecorationX on ShelfDecoration {
   }
 }
 
-/// Quantes decoracions mostrar i de quin tipus, per ocupar els slots
-/// buits d'una estanteria (com si cada planta fos un joc més) sense
-/// repetir sempre la mateixa: comença per [primary] (la triada a
-/// Configuració) i, si calen més d'una, hi intercala els altres tipus.
-/// Buida si [primary] és `none` o si l'estanteria ja està plena.
-List<ShelfDecoration> decorationSlotsFor({
-  required ShelfDecoration primary,
-  required int gameCount,
+/// Conjunt de plantes triades a Configuració (0 o més -- `none` mai hi
+/// és present, un conjunt buit ja ho representa).
+extension ShelfDecorationSetX on Set<ShelfDecoration> {
+  List<String> get databaseValues => where(
+    (d) => d != ShelfDecoration.none,
+  ).map((d) => d.databaseValue).toList();
+}
+
+Set<ShelfDecoration> shelfDecorationsFromDb(List<dynamic>? values) {
+  if (values == null) return const {};
+
+  return values
+      .map((v) => ShelfDecorationX.fromDb(v as String?))
+      .where((d) => d != ShelfDecoration.none)
+      .toSet();
+}
+
+/// Element d'una lleixa destacada: o bé un joc, o bé una planta ocupant
+/// el seu lloc (vegeu `buildShelfLane`).
+sealed class ShelfLaneItem<T> {
+  const ShelfLaneItem();
+}
+
+class ShelfLaneGame<T> extends ShelfLaneItem<T> {
+  final T value;
+  const ShelfLaneGame(this.value);
+}
+
+class ShelfLaneDecoration<T> extends ShelfLaneItem<T> {
+  final ShelfDecoration decoration;
+  const ShelfLaneDecoration(this.decoration);
+}
+
+/// Combina els jocs d'una estanteria destacada amb les plantes triades a
+/// Configuració, ocupant slots buits com si cada planta fos un joc més.
+///
+/// Amb poques jocs (menys de [manyGamesThreshold]) només se'n mostra
+/// una, al final, sense repartir-la: barrejar-ne vàries quan la lleixa
+/// és quasi buida sembla un hivernacle, no una estanteria de jocs. Amb
+/// moltes jocs, se'n reparteixen fins a [maxDecorationSlots] (ciclant
+/// els tipus triats) intercalades entre els jocs. Sense cap planta
+/// triada, o amb l'estanteria ja plena, retorna només els jocs.
+List<ShelfLaneItem<T>> buildShelfLane<T>({
+  required List<T> games,
+  required Set<ShelfDecoration> decorations,
   int capacity = 8,
-  int maxSlots = 3,
+  int maxDecorationSlots = 3,
+  int manyGamesThreshold = 4,
 }) {
-  if (primary == ShelfDecoration.none) return const [];
+  final selected = decorations.where((d) => d != ShelfDecoration.none).toList();
 
-  final emptySlots = capacity - gameCount;
-  if (emptySlots <= 0) return const [];
+  if (selected.isEmpty) {
+    return [for (final g in games) ShelfLaneGame<T>(g)];
+  }
 
-  final slotCount = emptySlots < maxSlots ? emptySlots : maxSlots;
+  final emptySlots = capacity - games.length;
 
-  final otherTypes = ShelfDecoration.values
-      .where((d) => d != ShelfDecoration.none && d != primary)
-      .toList();
+  if (emptySlots <= 0) {
+    return [for (final g in games) ShelfLaneGame<T>(g)];
+  }
 
-  return List.generate(slotCount, (i) {
-    if (i == 0 || otherTypes.isEmpty) return primary;
-    return otherTypes[(i - 1) % otherTypes.length];
-  });
+  final manyGames = games.length >= manyGamesThreshold;
+
+  final decorationCount = manyGames
+      ? (emptySlots < maxDecorationSlots ? emptySlots : maxDecorationSlots)
+      : 1;
+
+  final types = List.generate(
+    decorationCount,
+    (i) => selected[i % selected.length],
+  );
+
+  if (!manyGames) {
+    return [
+      for (final g in games) ShelfLaneGame<T>(g),
+      for (final d in types) ShelfLaneDecoration<T>(d),
+    ];
+  }
+
+  // Reparteix les decoracions uniformement entre els jocs perquè sembli
+  // una estanteria viscuda, no un bloc de plantes al final.
+  final lane = <ShelfLaneItem<T>>[];
+  final step = games.length / (types.length + 1);
+  var placed = 0;
+
+  for (var i = 0; i < games.length; i++) {
+    lane.add(ShelfLaneGame<T>(games[i]));
+
+    if (placed < types.length && (i + 1) >= (placed + 1) * step) {
+      lane.add(ShelfLaneDecoration<T>(types[placed]));
+      placed++;
+    }
+  }
+
+  while (placed < types.length) {
+    lane.add(ShelfLaneDecoration<T>(types[placed]));
+    placed++;
+  }
+
+  return lane;
 }

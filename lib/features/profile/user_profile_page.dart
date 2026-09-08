@@ -8,8 +8,6 @@ import 'package:gameshelf/core/widgets/bookshelf_background.dart';
 import 'package:gameshelf/core/widgets/cartridge_cover.dart';
 import 'package:gameshelf/core/widgets/dither_banner.dart';
 import 'package:gameshelf/core/widgets/shelf_decoration_image.dart';
-import 'package:gameshelf/core/widgets/shelf_ledge.dart';
-import 'package:gameshelf/core/widgets/shelf_light_fixture.dart';
 import 'package:gameshelf/core/widgets/shelf_list.dart';
 import 'package:gameshelf/core/widgets/wood_drawer_container.dart';
 import 'package:gameshelf/features/home/widgets/game_card.dart';
@@ -1209,55 +1207,33 @@ class _UserProfilePageState extends State<UserProfilePage> {
   // PREFERITS
   // ─────────────────────────────────────────────
 
-  /// Fila d'una estanteria destacada: cobertes + decoracions que
-  /// n'ompentn els slots buits (com si fossin un joc més -- vegeu
-  /// `decorationSlotsFor`), totes tocant la base de la lleixa.
-  Widget _buildShelfRow({
-    required List<Widget> gameTiles,
-    required int gameCount,
-    double laneHeight = 130,
-    double decorationHeight = 112,
-  }) {
-    final decorations = decorationSlotsFor(
-      primary: currentProfile.shelfDecoration,
-      gameCount: gameCount,
-    );
-
-    final itemCount = gameTiles.length + decorations.length;
-
-    return SizedBox(
-      height: laneHeight,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        itemCount: itemCount,
-        separatorBuilder: (_, _) => const SizedBox(width: 10),
-        itemBuilder: (context, index) {
-          if (index < gameTiles.length) {
-            return Align(
-              alignment: Alignment.bottomCenter,
-              child: gameTiles[index],
-            );
-          }
-
-          final decoration = decorations[index - gameTiles.length];
-
-          return Align(
-            alignment: Alignment.bottomCenter,
-            child: SizedBox(
-              width: 88,
-              child: ShelfDecorationImage(
-                height: decorationHeight,
-                decoration: decoration,
-              ),
-            ),
-          );
-        },
+  /// Element d'una lleixa destacada (coberta de joc o planta que
+  /// n'ocupa el lloc -- vegeu `buildShelfLane`).
+  Widget _buildLaneItem(BuildContext context, ShelfLaneItem<Widget> item) {
+    return switch (item) {
+      ShelfLaneGame(value: final tile) => tile,
+      ShelfLaneDecoration(decoration: final decoration) => ShelfDecorationImage(
+        decoration: decoration,
       ),
-    );
+    };
   }
 
   Widget _buildFavoritesShelf() {
     final favorites = favoriteGames;
+
+    final tiles = [
+      for (final favorite in favorites)
+        _GameCoverTile(
+          libraryGame: favorite,
+          onOpened: loadProfile,
+          coverStyle: currentProfile.shelfCoverStyle,
+        ),
+    ];
+
+    final lane = buildShelfLane<Widget>(
+      games: tiles,
+      decorations: currentProfile.shelfDecorations,
+    );
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(18),
@@ -1268,7 +1244,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
           ),
 
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -1288,32 +1264,17 @@ class _UserProfilePageState extends State<UserProfilePage> {
 
                 const SizedBox(height: 12),
 
-                LayoutBuilder(
-                  builder: (context, constraints) {
-                    return ShelfLightFixture(
-                      width: constraints.maxWidth,
-                      style: currentProfile.shelfLightStyle,
-                    );
-                  },
+                ShelfList<ShelfLaneItem<Widget>>(
+                  items: lane,
+                  scrollable: false,
+                  minItemWidth: 90,
+                  minColumns: 3,
+                  itemAspectRatio: 3 / 4,
+                  preLedgeGap: 2,
+                  lightStyle: currentProfile.shelfLightStyle,
+                  woodColor: currentProfile.shelfWoodColor,
+                  itemBuilder: _buildLaneItem,
                 ),
-
-                const SizedBox(height: 4),
-
-                _buildShelfRow(
-                  gameCount: favorites.length,
-                  gameTiles: [
-                    for (final favorite in favorites)
-                      _GameCoverTile(
-                        libraryGame: favorite,
-                        width: 88,
-                        onOpened: loadProfile,
-                        coverStyle: currentProfile.shelfCoverStyle,
-                      ),
-                  ],
-                ),
-
-                const SizedBox(height: 2),
-                ShelfLedge(color: currentProfile.shelfWoodColor),
               ],
             ),
           ),
@@ -1326,12 +1287,52 @@ class _UserProfilePageState extends State<UserProfilePage> {
   // ESTANTERIA FIXADA
   // ─────────────────────────────────────────────
 
+  Widget _pinnedGameTile(Game game) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(10),
+      onTap: () async {
+        await pushFade(context, (_) => GameDetailPage(game: game));
+      },
+      child: Builder(
+        builder: (context) {
+          final coverArt = AspectRatio(
+            aspectRatio: 3 / 4,
+            child: game.coverUrl != null && game.coverUrl!.isNotEmpty
+                ? Image.network(
+                    game.coverUrl!,
+                    fit: BoxFit.cover,
+                    cacheWidth: 180,
+                  )
+                : Container(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.surfaceContainerHighest,
+                    child: const Icon(Icons.videogame_asset),
+                  ),
+          );
+
+          return currentProfile.shelfCoverStyle == ShelfCoverStyle.plain
+              ? ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: coverArt,
+                )
+              : CartridgeCover(cover: coverArt);
+        },
+      ),
+    );
+  }
+
   Widget _buildPinnedShelf() {
     final shelf = pinnedShelf!;
     final games = shelf.gameIds
         .map((id) => pinnedShelfGames[id])
         .whereType<Game>()
         .toList();
+
+    final lane = buildShelfLane<Widget>(
+      games: [for (final game in games) _pinnedGameTile(game)],
+      decorations: currentProfile.shelfDecorations,
+    );
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(18),
@@ -1342,7 +1343,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
           ),
 
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -1354,71 +1355,19 @@ class _UserProfilePageState extends State<UserProfilePage> {
                   ),
                 ),
 
-                const SizedBox(height: 10),
+                const SizedBox(height: 12),
 
-                LayoutBuilder(
-                  builder: (context, constraints) {
-                    return ShelfLightFixture(
-                      width: constraints.maxWidth,
-                      style: currentProfile.shelfLightStyle,
-                    );
-                  },
+                ShelfList<ShelfLaneItem<Widget>>(
+                  items: lane,
+                  scrollable: false,
+                  minItemWidth: 90,
+                  minColumns: 3,
+                  itemAspectRatio: 3 / 4,
+                  preLedgeGap: 2,
+                  lightStyle: currentProfile.shelfLightStyle,
+                  woodColor: currentProfile.shelfWoodColor,
+                  itemBuilder: _buildLaneItem,
                 ),
-
-                const SizedBox(height: 4),
-
-                _buildShelfRow(
-                  gameCount: games.length,
-                  gameTiles: [
-                    for (final game in games)
-                      SizedBox(
-                        width: 88,
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(10),
-                          onTap: () async {
-                            await pushFade(
-                              context,
-                              (_) => GameDetailPage(game: game),
-                            );
-                          },
-                          child: Builder(
-                            builder: (context) {
-                              final coverArt = AspectRatio(
-                                aspectRatio: 3 / 4,
-                                child:
-                                    game.coverUrl != null &&
-                                        game.coverUrl!.isNotEmpty
-                                    ? Image.network(
-                                        game.coverUrl!,
-                                        fit: BoxFit.cover,
-                                        cacheWidth: 180,
-                                      )
-                                    : Container(
-                                        color: Theme.of(
-                                          context,
-                                        ).colorScheme.surfaceContainerHighest,
-                                        child: const Icon(
-                                          Icons.videogame_asset,
-                                        ),
-                                      ),
-                              );
-
-                              return currentProfile.shelfCoverStyle ==
-                                      ShelfCoverStyle.plain
-                                  ? ClipRRect(
-                                      borderRadius: BorderRadius.circular(8),
-                                      child: coverArt,
-                                    )
-                                  : CartridgeCover(cover: coverArt);
-                            },
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-
-                const SizedBox(height: 2),
-                ShelfLedge(color: currentProfile.shelfWoodColor),
               ],
             ),
           ),
@@ -1669,14 +1618,12 @@ class _ProfileStat extends StatelessWidget {
 class _GameCoverTile extends StatelessWidget {
   final LibraryGame libraryGame;
   final Future<void> Function() onOpened;
-  final double? width;
   final ShelfCoverStyle coverStyle;
 
   const _GameCoverTile({
     required this.libraryGame,
     required this.onOpened,
     required this.coverStyle,
-    this.width,
   });
 
   Future<void> _open(BuildContext context) async {
@@ -1722,12 +1669,10 @@ class _GameCoverTile extends StatelessWidget {
             ),
           );
 
-    final tile = InkWell(
+    return InkWell(
       borderRadius: BorderRadius.circular(10),
       onTap: () => _open(context),
       child: cover,
     );
-
-    return width != null ? SizedBox(width: width, child: tile) : tile;
   }
 }

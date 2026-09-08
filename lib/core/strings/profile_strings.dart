@@ -140,6 +140,7 @@ class ProfileStrings {
   static const shelfWoodCherry = 'Cirerer';
   static const shelfWoodBirch = 'Bedoll';
   static const shelfDecorationLabel = 'Decoració';
+  static const shelfDecorationHint = 'Pots triar-ne més d\'una.';
   static const shelfDecorationNone = 'Cap';
   static const shelfDecorationPoppy = 'Rosella';
   static const shelfDecorationCactus = 'Cactus';

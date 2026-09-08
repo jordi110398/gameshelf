@@ -112,11 +112,24 @@ class _SettingsPageState extends State<SettingsPage> {
     }
   }
 
-  Future<void> _setDecoration(ShelfDecoration decoration) async {
+  Set<ShelfDecoration> _toggled(
+    Set<ShelfDecoration> current,
+    ShelfDecoration decoration,
+  ) {
+    final next = {...current};
+
+    if (!next.remove(decoration)) {
+      next.add(decoration);
+    }
+
+    return next;
+  }
+
+  Future<void> _setDecorations(Set<ShelfDecoration> decorations) async {
     setState(() => isSavingShelfStyle = true);
 
     try {
-      await ShelfSkinService.instance.setDecoration(decoration);
+      await ShelfSkinService.instance.setDecorations(decorations);
     } catch (e) {
       if (!mounted) return;
 
@@ -290,21 +303,36 @@ class _SettingsPageState extends State<SettingsPage> {
                     color: Colors.grey.shade400,
                   ),
                 ),
+                const SizedBox(height: 2),
+                Text(
+                  ProfileStrings.shelfDecorationHint,
+                  style: TextStyle(fontSize: 11, color: Colors.grey.shade500),
+                ),
                 const SizedBox(height: 10),
-                ValueListenableBuilder<ShelfDecoration>(
-                  valueListenable: ShelfSkinService.instance.decoration,
-                  builder: (context, currentDecoration, _) {
+                ValueListenableBuilder<Set<ShelfDecoration>>(
+                  valueListenable: ShelfSkinService.instance.decorations,
+                  builder: (context, currentDecorations, _) {
                     return Wrap(
                       spacing: 14,
                       runSpacing: 10,
                       children: ShelfDecoration.values.map((decoration) {
-                        final isSelected = currentDecoration == decoration;
+                        final isNone = decoration == ShelfDecoration.none;
+                        final isSelected = isNone
+                            ? currentDecorations.isEmpty
+                            : currentDecorations.contains(decoration);
                         final path = decoration.assetPath;
 
                         return GestureDetector(
                           onTap: isSavingShelfStyle
                               ? null
-                              : () => _setDecoration(decoration),
+                              : () => _setDecorations(
+                                  isNone
+                                      ? const {}
+                                      : _toggled(
+                                          currentDecorations,
+                                          decoration,
+                                        ),
+                                ),
                           child: Column(
                             children: [
                               Container(
