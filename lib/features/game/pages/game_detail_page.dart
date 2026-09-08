@@ -271,7 +271,20 @@ class _GameDetailPageState extends State<GameDetailPage> {
                         value: completedAt,
                         onChanged: (d) => setDialogState(() => completedAt = d),
                       ),
+                    ],
 
+                    if (status == GameStatus.dropped) ...[
+                      const SizedBox(height: 16),
+                      DateField(
+                        label: GameStrings.dateDroppedLabel,
+                        value: droppedAt,
+                        onChanged: (d) => setDialogState(() => droppedAt = d),
+                      ),
+                    ],
+
+                    // Puntuació i review: Completat o Abandonat.
+                    if (status == GameStatus.completed ||
+                        status == GameStatus.dropped) ...[
                       const SizedBox(height: 16),
                       Center(
                         child: RatingStars(
@@ -293,7 +306,10 @@ class _GameDetailPageState extends State<GameDetailPage> {
                           alignLabelWithHint: true,
                         ),
                       ),
+                    ],
 
+                    // Favorit i hores: només Completat.
+                    if (status == GameStatus.completed) ...[
                       const SizedBox(height: 12),
                       SwitchListTile(
                         contentPadding: EdgeInsets.zero,
@@ -317,15 +333,6 @@ class _GameDetailPageState extends State<GameDetailPage> {
                           hintText: "0",
                           suffixText: GameStrings.hoursSuffix,
                         ),
-                      ),
-                    ],
-
-                    if (status == GameStatus.dropped) ...[
-                      const SizedBox(height: 16),
-                      DateField(
-                        label: GameStrings.dateDroppedLabel,
-                        value: droppedAt,
-                        onChanged: (d) => setDialogState(() => droppedAt = d),
                       ),
                     ],
 
@@ -366,8 +373,14 @@ class _GameDetailPageState extends State<GameDetailPage> {
 
     return (
       platform: platform == platformNotSpecified ? null : platform,
-      rating: status == GameStatus.completed && rating > 0 ? rating : null,
-      review: status == GameStatus.completed && review.isNotEmpty
+      rating:
+          (status == GameStatus.completed || status == GameStatus.dropped) &&
+              rating > 0
+          ? rating
+          : null,
+      review:
+          (status == GameStatus.completed || status == GameStatus.dropped) &&
+              review.isNotEmpty
           ? review
           : null,
       startedAt: startedAt,

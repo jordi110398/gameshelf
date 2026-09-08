@@ -203,14 +203,17 @@ List<ShelfLaneItem<T>> buildShelfLane<T>({
 
   final manyGames = games.length >= manyGamesThreshold;
 
+  // Mai es repeteix un mateix tipus: repetir-lo (p. ex. amb només dues
+  // plantes triades i 3 slots) donava patrons estranys com A-B-A.
   final decorationCount = manyGames
-      ? (emptySlots < maxDecorationSlots ? emptySlots : maxDecorationSlots)
+      ? [
+          emptySlots,
+          maxDecorationSlots,
+          selected.length,
+        ].reduce((a, b) => a < b ? a : b)
       : 1;
 
-  final types = List.generate(
-    decorationCount,
-    (i) => selected[i % selected.length],
-  );
+  final types = selected.take(decorationCount).toList();
 
   if (!manyGames) {
     return [

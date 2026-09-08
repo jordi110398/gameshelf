@@ -10,6 +10,8 @@ import 'package:gameshelf/core/widgets/dither_banner.dart';
 import 'package:gameshelf/core/widgets/shelf_decoration_image.dart';
 import 'package:gameshelf/core/widgets/shelf_list.dart';
 import 'package:gameshelf/core/widgets/wood_drawer_container.dart';
+import 'package:gameshelf/features/profile/all_reviews_page.dart';
+import 'package:gameshelf/features/profile/widgets/review_card.dart';
 import 'package:gameshelf/features/home/widgets/game_card.dart';
 import 'package:gameshelf/features/llamp/my_shelves_page.dart';
 import 'package:gameshelf/features/profile/settings_page.dart';
@@ -661,133 +663,35 @@ class _UserProfilePageState extends State<UserProfilePage> {
     return Column(
       children: [
         ...reviews.map((libraryGame) {
-          final game = libraryGame.game;
-          final userGame = libraryGame.userGame;
-          final likes = reviewLikes[game.igdbId];
-
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: WoodDrawerContainer(
-              padding: const EdgeInsets.all(12),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // PORTADA
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: game.coverUrl != null && game.coverUrl!.isNotEmpty
-                        ? Image.network(
-                            game.coverUrl!,
-                            width: 65,
-                            height: 95,
-                            fit: BoxFit.cover,
-                            cacheWidth: 130,
-                            errorBuilder: (_, _, _) {
-                              return _buildReviewPlaceholder();
-                            },
-                          )
-                        : _buildReviewPlaceholder(),
-                  ),
-
-                  const SizedBox(width: 14),
-
-                  // INFORMACIÓ
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          game.title,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-
-                        const SizedBox(height: 6),
-
-                        if (userGame.rating != null)
-                          Row(
-                            children: List.generate(5, (index) {
-                              return Icon(
-                                index < userGame.rating!.round()
-                                    ? Icons.star
-                                    : Icons.star_border,
-                                size: 18,
-                                color: Colors.amber,
-                              );
-                            }),
-                          ),
-
-                        const SizedBox(height: 8),
-
-                        Text(
-                          '"${userGame.review!}"',
-                          maxLines: 4,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 13,
-                            height: 1.35,
-                            fontStyle: FontStyle.italic,
-                            color: isLightWood
-                                ? Colors.grey.shade900
-                                : Colors.grey.shade700,
-                          ),
-                        ),
-
-                        if (likes != null && likes.likeCount > 0) ...[
-                          const SizedBox(height: 8),
-                          Row(
-                            children: [
-                              Icon(
-                                likes.likedByMe
-                                    ? Icons.star
-                                    : Icons.star_border,
-                                size: 15,
-                                color: Colors.amber,
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                '${likes.likeCount}',
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.amber,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
+          return ReviewCard(
+            libraryGame: libraryGame,
+            likes: reviewLikes[libraryGame.game.igdbId],
+            isLightWood: isLightWood,
+            onTap: () async {
+              await pushFade(
+                context,
+                (_) => GameDetailPage(game: libraryGame.game),
+              );
+            },
           );
         }),
 
         if (reviewedGames.length > 3)
           TextButton.icon(
-            onPressed: () {
-              // Més endavant:
-              // obrir pantalla amb totes les reviews.
+            onPressed: () async {
+              await pushFade(
+                context,
+                (_) => AllReviewsPage(
+                  profile: currentProfile,
+                  reviewedGames: reviewedGames,
+                  reviewLikes: reviewLikes,
+                ),
+              );
             },
             icon: const Icon(Icons.arrow_forward),
             label: Text(ProfileStrings.seeAllReviews(reviewedGames.length)),
           ),
       ],
-    );
-  }
-
-  Widget _buildReviewPlaceholder() {
-    return Container(
-      width: 65,
-      height: 95,
-      color: Colors.grey.shade800,
-      child: const Icon(Icons.videogame_asset, color: Colors.white54),
     );
   }
 
@@ -1270,7 +1174,6 @@ class _UserProfilePageState extends State<UserProfilePage> {
                   minItemWidth: 90,
                   minColumns: 3,
                   itemAspectRatio: 3 / 4,
-                  preLedgeGap: 2,
                   lightStyle: currentProfile.shelfLightStyle,
                   woodColor: currentProfile.shelfWoodColor,
                   itemBuilder: _buildLaneItem,
@@ -1363,7 +1266,6 @@ class _UserProfilePageState extends State<UserProfilePage> {
                   minItemWidth: 90,
                   minColumns: 3,
                   itemAspectRatio: 3 / 4,
-                  preLedgeGap: 2,
                   lightStyle: currentProfile.shelfLightStyle,
                   woodColor: currentProfile.shelfWoodColor,
                   itemBuilder: _buildLaneItem,
