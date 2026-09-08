@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:gameshelf/app/theme.dart';
 import 'package:gameshelf/core/navigation/page_transitions.dart';
 import 'package:gameshelf/core/widgets/rating_stars.dart';
 import 'package:gameshelf/features/game/pages/edit_game_page.dart';
@@ -258,8 +257,7 @@ class _GameDetailPageState extends State<GameDetailPage> {
                       DateField(
                         label: GameStrings.dateCompletedLabel,
                         value: completedAt,
-                        onChanged: (d) =>
-                            setDialogState(() => completedAt = d),
+                        onChanged: (d) => setDialogState(() => completedAt = d),
                       ),
 
                       const SizedBox(height: 16),
@@ -571,7 +569,7 @@ class _GameDetailPageState extends State<GameDetailPage> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   ClipRRect(
-                    borderRadius: appRadius(context, 6),
+                    borderRadius: BorderRadius.circular(6),
                     child: widget.game.coverUrl != null
                         ? Image.network(
                             widget.game.coverUrl!,

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:gameshelf/app/theme.dart';
 import 'package:gameshelf/core/navigation/page_transitions.dart';
 import 'package:gameshelf/core/strings/app_strings.dart';
 import 'package:gameshelf/core/strings/llamp_strings.dart';
@@ -107,10 +106,10 @@ class _MyShelvesPageState extends State<MyShelvesPage> {
                       decoration: const InputDecoration(
                         hintText: LlampStrings.shelfTitleHint,
                       ),
-                      onSubmitted: (value) => Navigator.pop(
-                        context,
-                        (title: value, emoji: selectedEmoji),
-                      ),
+                      onSubmitted: (value) => Navigator.pop(context, (
+                        title: value,
+                        emoji: selectedEmoji,
+                      )),
                     ),
                   ),
                 ],
@@ -121,10 +120,10 @@ class _MyShelvesPageState extends State<MyShelvesPage> {
                   child: const Text(AppStrings.actionCancel),
                 ),
                 FilledButton(
-                  onPressed: () => Navigator.pop(
-                    context,
-                    (title: controller.text, emoji: selectedEmoji),
-                  ),
+                  onPressed: () => Navigator.pop(context, (
+                    title: controller.text,
+                    emoji: selectedEmoji,
+                  )),
                   child: const Text(AppStrings.actionSave),
                 ),
               ],
@@ -240,7 +239,7 @@ class _ShelfTile extends StatelessWidget {
       padding: const EdgeInsets.all(14),
       child: InkWell(
         onTap: onTap,
-        borderRadius: appRadius(context, 12),
+        borderRadius: BorderRadius.circular(12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -289,7 +288,7 @@ class _ShelfTile extends StatelessWidget {
                         final game = games[index];
 
                         return ClipRRect(
-                          borderRadius: appRadius(context, 6),
+                          borderRadius: BorderRadius.circular(6),
                           child: AspectRatio(
                             aspectRatio: 3 / 4,
                             child:
@@ -321,7 +320,7 @@ class _ShelfTile extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
         color: Colors.deepPurple.withValues(alpha: 0.25),
-        borderRadius: appRadius(context, 20),
+        borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
         label,

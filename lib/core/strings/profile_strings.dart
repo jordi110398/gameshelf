@@ -114,8 +114,7 @@ class ProfileStrings {
   static const shareQrCaption = 'Escaneja per trobar-me a GameShelf';
   static const shareDownloadAction = 'Descarregar imatge';
   static const shareDownloadedMessage = 'Imatge descarregada.';
-  static const shareGenerateFailedPrefix =
-      'No s\'ha pogut generar la imatge: ';
+  static const shareGenerateFailedPrefix = 'No s\'ha pogut generar la imatge: ';
 
   // ─────────────────────────────────────────────
   // CONFIGURACIÓ
@@ -127,14 +126,10 @@ class ProfileStrings {
   static const settingsEditProfileSubtitle =
       'Nickname, bio, foto, contrasenya i compte';
 
-  static const themeSectionTitle = 'Tema de l\'app';
-  static const themeLight = 'Clar';
-  static const themeDark = 'Fosc';
-  static const themeGba = 'Game Boy Advance';
-  static const themeChangeFailedPrefix =
-      'No s\'ha pogut canviar el tema: ';
-
-  static const shelfStyleSectionTitle = 'Estètica de l\'estanteria';
+  static const shelfStyleSectionTitle = 'Estètica';
+  static const shelfStyleSectionSubtitle =
+      'El color de la fusta defineix l\'aspecte de tota l\'app i de les '
+      'teves estanteries.';
   static const shelfLightsLabel = 'Llums';
   static const shelfLightsNeon = 'Neó';
   static const shelfLightsBulbs = 'Bombetes';
@@ -155,7 +150,8 @@ class ProfileStrings {
   static const fillAllFields = 'Omple tots els camps.';
   static const passwordMinLength6 =
       'La contrasenya ha de tenir almenys 6 caràcters.';
-  static const passwordUpdatedSuccess = 'Contrasenya actualitzada correctament.';
+  static const passwordUpdatedSuccess =
+      'Contrasenya actualitzada correctament.';
   static const newPasswordFieldLabel = 'Nova contrasenya';
   static const repeatPasswordFieldLabel = 'Repetir contrasenya';
   static const updating = 'Actualitzant...';

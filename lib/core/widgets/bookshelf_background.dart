@@ -91,9 +91,7 @@ class _WoodGrainPainter extends CustomPainter {
 
       grainPaint.color = isLight
           ? Colors.black.withValues(alpha: 0.05 + random.nextDouble() * 0.05)
-          : Colors.white.withValues(
-              alpha: 0.025 + random.nextDouble() * 0.035,
-            );
+          : Colors.white.withValues(alpha: 0.025 + random.nextDouble() * 0.035);
 
       canvas.drawPath(path, grainPaint);
     }

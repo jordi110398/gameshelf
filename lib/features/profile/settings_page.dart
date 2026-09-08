@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:gameshelf/core/navigation/page_transitions.dart';
 import 'package:gameshelf/core/services/auth_service.dart';
 import 'package:gameshelf/core/services/shelf_skin_service.dart';
-import 'package:gameshelf/core/services/theme_service.dart';
 import 'package:gameshelf/core/strings/app_strings.dart';
 import 'package:gameshelf/core/strings/profile_strings.dart';
 import 'package:gameshelf/core/utils/error_messages.dart';
@@ -66,22 +65,6 @@ class _SettingsPageState extends State<SettingsPage> {
     }
   }
 
-  Future<void> _setTheme(AppThemeOption option) async {
-    try {
-      await ThemeService.instance.setTheme(option);
-    } catch (e) {
-      if (!mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            '${ProfileStrings.themeChangeFailedPrefix}${friendlyError(e)}',
-          ),
-        ),
-      );
-    }
-  }
-
   Future<void> _setLightStyle(ShelfLightStyle style) async {
     setState(() => isSavingShelfStyle = true);
 
@@ -125,9 +108,7 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(ProfileStrings.settingsAppBarTitle),
-      ),
+      appBar: AppBar(title: const Text(ProfileStrings.settingsAppBarTitle)),
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
@@ -145,51 +126,13 @@ class _SettingsPageState extends State<SettingsPage> {
           const SizedBox(height: 32),
 
           const Text(
-            ProfileStrings.themeSectionTitle,
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 14),
-          ValueListenableBuilder<AppThemeOption>(
-            valueListenable: ThemeService.instance.current,
-            builder: (context, selected, _) {
-              return Row(
-                children: [
-                  Expanded(
-                    child: _ThemeOptionCard(
-                      label: ProfileStrings.themeLight,
-                      colors: const [Color(0xFFF5F4F8), Color(0xFF8B5CF6)],
-                      selected: selected == AppThemeOption.light,
-                      onTap: () => _setTheme(AppThemeOption.light),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _ThemeOptionCard(
-                      label: ProfileStrings.themeDark,
-                      colors: const [Color(0xFF0D0D14), Color(0xFF8B5CF6)],
-                      selected: selected == AppThemeOption.dark,
-                      onTap: () => _setTheme(AppThemeOption.dark),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _ThemeOptionCard(
-                      label: ProfileStrings.themeGba,
-                      colors: const [Color(0xFF6E2FE0), Color(0xFFFF3B6B)],
-                      selected: selected == AppThemeOption.gba,
-                      onTap: () => _setTheme(AppThemeOption.gba),
-                    ),
-                  ),
-                ],
-              );
-            },
-          ),
-
-          const SizedBox(height: 32),
-
-          const Text(
             ProfileStrings.shelfStyleSectionTitle,
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            ProfileStrings.shelfStyleSectionSubtitle,
+            style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
           ),
           const SizedBox(height: 14),
 
@@ -197,41 +140,6 @@ class _SettingsPageState extends State<SettingsPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  ProfileStrings.shelfLightsLabel,
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.grey.shade400,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                ValueListenableBuilder<ShelfLightStyle>(
-                  valueListenable: ShelfSkinService.instance.lightStyle,
-                  builder: (context, currentStyle, _) {
-                    return SegmentedButton<ShelfLightStyle>(
-                      segments: const [
-                        ButtonSegment(
-                          value: ShelfLightStyle.neon,
-                          label: Text(ProfileStrings.shelfLightsNeon),
-                          icon: Icon(Icons.bolt),
-                        ),
-                        ButtonSegment(
-                          value: ShelfLightStyle.bulbs,
-                          label: Text(ProfileStrings.shelfLightsBulbs),
-                          icon: Icon(Icons.lightbulb_outline),
-                        ),
-                      ],
-                      selected: {currentStyle},
-                      onSelectionChanged: isSavingShelfStyle
-                          ? null
-                          : (selection) => _setLightStyle(selection.first),
-                    );
-                  },
-                ),
-
-                const SizedBox(height: 20),
-
                 Text(
                   ProfileStrings.shelfWoodLabel,
                   style: TextStyle(
@@ -289,6 +197,41 @@ class _SettingsPageState extends State<SettingsPage> {
                     );
                   },
                 ),
+
+                const SizedBox(height: 20),
+
+                Text(
+                  ProfileStrings.shelfLightsLabel,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey.shade400,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                ValueListenableBuilder<ShelfLightStyle>(
+                  valueListenable: ShelfSkinService.instance.lightStyle,
+                  builder: (context, currentStyle, _) {
+                    return SegmentedButton<ShelfLightStyle>(
+                      segments: const [
+                        ButtonSegment(
+                          value: ShelfLightStyle.neon,
+                          label: Text(ProfileStrings.shelfLightsNeon),
+                          icon: Icon(Icons.bolt),
+                        ),
+                        ButtonSegment(
+                          value: ShelfLightStyle.bulbs,
+                          label: Text(ProfileStrings.shelfLightsBulbs),
+                          icon: Icon(Icons.lightbulb_outline),
+                        ),
+                      ],
+                      selected: {currentStyle},
+                      onSelectionChanged: isSavingShelfStyle
+                          ? null
+                          : (selection) => _setLightStyle(selection.first),
+                    );
+                  },
+                ),
               ],
             ),
           ),
@@ -303,62 +246,6 @@ class _SettingsPageState extends State<SettingsPage> {
             label: const Text(AppStrings.actionLogout),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _ThemeOptionCard extends StatelessWidget {
-  final String label;
-  final List<Color> colors;
-  final bool selected;
-  final VoidCallback onTap;
-
-  const _ThemeOptionCard({
-    required this.label,
-    required this.colors,
-    required this.selected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(14),
-      child: Container(
-        padding: const EdgeInsets.all(10),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(
-            color: selected
-                ? Theme.of(context).colorScheme.primary
-                : Colors.grey.shade700,
-            width: selected ? 2 : 1,
-          ),
-        ),
-        child: Column(
-          children: [
-            AspectRatio(
-              aspectRatio: 1,
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8),
-                  gradient: LinearGradient(colors: colors),
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              label,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: selected ? FontWeight.bold : FontWeight.normal,
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

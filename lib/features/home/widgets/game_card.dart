@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:gameshelf/app/theme.dart';
 import 'package:gameshelf/core/navigation/page_transitions.dart';
 import 'package:gameshelf/core/strings/app_strings.dart';
 import 'package:gameshelf/core/strings/home_strings.dart';
@@ -102,9 +101,7 @@ class _GameCardState extends State<GameCard> {
 
     if (userGame.status != GameStatus.completed) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(HomeStrings.favoriteNotCompletedMessage),
-        ),
+        const SnackBar(content: Text(HomeStrings.favoriteNotCompletedMessage)),
       );
       return;
     }
@@ -254,7 +251,7 @@ class _GameCardState extends State<GameCard> {
             duration: const Duration(milliseconds: 180),
 
             decoration: BoxDecoration(
-              borderRadius: appRadius(context, 16),
+              borderRadius: BorderRadius.circular(16),
 
               boxShadow: isActive
                   ? [
@@ -268,7 +265,7 @@ class _GameCardState extends State<GameCard> {
             ),
 
             child: ClipRRect(
-              borderRadius: appRadius(context, 16),
+              borderRadius: BorderRadius.circular(16),
 
               child: AspectRatio(
                 aspectRatio: 2 / 3,

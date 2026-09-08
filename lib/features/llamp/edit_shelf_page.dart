@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:gameshelf/app/theme.dart';
 import 'package:gameshelf/core/strings/app_strings.dart';
 import 'package:gameshelf/core/strings/llamp_strings.dart';
 import 'package:gameshelf/core/utils/error_messages.dart';
@@ -189,9 +188,9 @@ class _EditShelfPageState extends State<EditShelfPage> {
 
   Future<void> _pickGame() async {
     if (shelf.gameIds.length >= _maxGamesPerShelf) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text(LlampStrings.shelfFullMessage)));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text(LlampStrings.shelfFullMessage)),
+      );
       return;
     }
 
@@ -217,7 +216,10 @@ class _EditShelfPageState extends State<EditShelfPage> {
                     padding: EdgeInsets.all(16),
                     child: Text(
                       LlampStrings.pickGameSheetTitle,
-                      style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                   Expanded(
@@ -246,7 +248,7 @@ class _EditShelfPageState extends State<EditShelfPage> {
                                   width: 40,
                                   height: 56,
                                   child: ClipRRect(
-                                    borderRadius: appRadius(context, 6),
+                                    borderRadius: BorderRadius.circular(6),
                                     child:
                                         game.coverUrl != null &&
                                             game.coverUrl!.isNotEmpty
@@ -255,11 +257,14 @@ class _EditShelfPageState extends State<EditShelfPage> {
                                             fit: BoxFit.cover,
                                             cacheWidth: 80,
                                           )
-                                        : Container(color: Colors.grey.shade800),
+                                        : Container(
+                                            color: Colors.grey.shade800,
+                                          ),
                                   ),
                                 ),
                                 title: Text(game.title),
-                                onTap: () => Navigator.pop(context, libraryGame),
+                                onTap: () =>
+                                    Navigator.pop(context, libraryGame),
                               );
                             },
                           ),
@@ -453,15 +458,20 @@ class _ShelfSlot extends StatelessWidget {
       children: [
         Positioned.fill(
           child: ClipRRect(
-            borderRadius: appRadius(context, 10),
-            child: game != null && game!.coverUrl != null && game!.coverUrl!.isNotEmpty
+            borderRadius: BorderRadius.circular(10),
+            child:
+                game != null &&
+                    game!.coverUrl != null &&
+                    game!.coverUrl!.isNotEmpty
                 ? Image.network(
                     game!.coverUrl!,
                     fit: BoxFit.cover,
                     cacheWidth: 160,
                   )
                 : Container(
-                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.surfaceContainerHighest,
                     child: const Icon(Icons.videogame_asset),
                   ),
           ),
@@ -495,7 +505,7 @@ class _EmptySlot extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      borderRadius: appRadius(context, 10),
+      borderRadius: BorderRadius.circular(10),
       onTap: onTap,
       child: DottedSlotBorder(
         child: Icon(Icons.add, color: Colors.grey.shade500),
@@ -515,7 +525,7 @@ class DottedSlotBorder extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        borderRadius: appRadius(context, 10),
+        borderRadius: BorderRadius.circular(10),
         border: Border.all(color: Colors.grey.shade600),
       ),
       child: Center(child: child),

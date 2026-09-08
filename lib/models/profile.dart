@@ -10,10 +10,8 @@ class Profile {
   final ShelfWoodColor shelfWoodColor;
 
   // Només ve informat quan el perfil és el de l'usuari autenticat
-  // (profiles_public, usat per veure altres usuaris, no exposa l'email
-  // ni el tema -- que és una preferència personal, no pública).
+  // (profiles_public, usat per veure altres usuaris, no exposa l'email).
   final String? email;
-  final AppThemeOption? themePreference;
 
   const Profile({
     required this.id,
@@ -24,7 +22,6 @@ class Profile {
     this.shelfLightStyle = ShelfLightStyle.neon,
     this.shelfWoodColor = ShelfWoodColor.walnut,
     this.email,
-    this.themePreference,
   });
 
   factory Profile.fromMap(Map<String, dynamic> map) {
@@ -43,9 +40,6 @@ class Profile {
         map['shelf_wood_color'] as String?,
       ),
       email: map['email'] as String?,
-      themePreference: map['theme_preference'] != null
-          ? AppThemeOptionX.fromDb(map['theme_preference'] as String?)
-          : null,
     );
   }
 
@@ -59,7 +53,6 @@ class Profile {
       'shelf_light_style': shelfLightStyle.databaseValue,
       'shelf_wood_color': shelfWoodColor.databaseValue,
       'email': email,
-      'theme_preference': themePreference?.databaseValue,
     };
   }
 
@@ -69,7 +62,6 @@ class Profile {
     String? bio,
     ShelfLightStyle? shelfLightStyle,
     ShelfWoodColor? shelfWoodColor,
-    AppThemeOption? themePreference,
   }) {
     return Profile(
       id: id,
@@ -80,7 +72,6 @@ class Profile {
       shelfLightStyle: shelfLightStyle ?? this.shelfLightStyle,
       shelfWoodColor: shelfWoodColor ?? this.shelfWoodColor,
       email: email,
-      themePreference: themePreference ?? this.themePreference,
     );
   }
 }

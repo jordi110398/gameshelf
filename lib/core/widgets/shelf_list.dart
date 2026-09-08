@@ -33,6 +33,10 @@ class ShelfList<T> extends StatelessWidget {
   /// segueix la preferència de l'usuari actual.
   final ShelfLightStyle? lightStyle;
 
+  /// Color de la fusta de la lleixa de cada fila -- vegeu [ShelfLedge].
+  /// `null` segueix la preferència de l'usuari actual.
+  final ShelfWoodColor? woodColor;
+
   const ShelfList({
     super.key,
     required this.items,
@@ -45,6 +49,7 @@ class ShelfList<T> extends StatelessWidget {
     this.padding = EdgeInsets.zero,
     this.scrollable = true,
     this.lightStyle,
+    this.woodColor,
   });
 
   List<List<T>> _buildRows(int columns) {
@@ -93,7 +98,7 @@ class ShelfList<T> extends StatelessWidget {
               ),
 
               const SizedBox(height: 10),
-              const ShelfLedge(),
+              ShelfLedge(color: woodColor),
             ],
           );
         },

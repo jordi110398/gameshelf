@@ -28,7 +28,10 @@ BoxDecoration woodDrawerDecoration({
     gradient: LinearGradient(
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
-      colors: [tones[0].withValues(alpha: 0.78), tones[1].withValues(alpha: 0.86)],
+      colors: [
+        tones[0].withValues(alpha: 0.78),
+        tones[1].withValues(alpha: 0.86),
+      ],
     ),
     border: Border.all(color: Colors.black.withValues(alpha: 0.25)),
     boxShadow: [

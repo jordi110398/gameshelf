@@ -99,21 +99,8 @@ class ProfileRepository {
   }
 
   // ─────────────────────────────────────────────
-  // CONFIGURACIÓ: TEMA I ESTÈTICA DE L'ESTANTERIA
+  // CONFIGURACIÓ: ESTÈTICA DE L'ESTANTERIA (I DE L'APP)
   // ─────────────────────────────────────────────
-
-  Future<void> updateThemePreference(AppThemeOption value) async {
-    final user = client.auth.currentUser;
-
-    if (user == null) {
-      throw Exception('Usuari no autenticat');
-    }
-
-    await client
-        .from('profiles')
-        .update({'theme_preference': value.databaseValue})
-        .eq('id', user.id);
-  }
 
   Future<void> updateShelfSkin({
     ShelfLightStyle? lightStyle,

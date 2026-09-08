@@ -1,6 +1,7 @@
-// Preferències personalitzables del perfil: aparença de l'estanteria
-// (pública -- els altres usuaris la veuen en visitar el perfil) i tema de
-// l'app (personal -- només afecta com tu veus l'aplicació).
+// Preferència pública d'estètica de l'estanteria: els altres usuaris la
+// veuen en visitar el perfil. El color de la fusta, a més, determina el
+// tema visual de tota l'app (vegeu `app/theme.dart`) -- no hi ha un
+// selector de tema separat, per mantenir-ho tot homogeni.
 
 enum ShelfLightStyle { neon, bulbs }
 
@@ -56,33 +57,6 @@ extension ShelfWoodColorX on ShelfWoodColor {
         return 'cherry';
       case ShelfWoodColor.birch:
         return 'birch';
-    }
-  }
-}
-
-enum AppThemeOption { light, dark, gba }
-
-extension AppThemeOptionX on AppThemeOption {
-  static AppThemeOption fromDb(String? value) {
-    switch (value) {
-      case 'light':
-        return AppThemeOption.light;
-      case 'gba':
-        return AppThemeOption.gba;
-      case 'dark':
-      default:
-        return AppThemeOption.dark;
-    }
-  }
-
-  String get databaseValue {
-    switch (this) {
-      case AppThemeOption.light:
-        return 'light';
-      case AppThemeOption.dark:
-        return 'dark';
-      case AppThemeOption.gba:
-        return 'gba';
     }
   }
 }

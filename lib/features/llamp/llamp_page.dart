@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:gameshelf/app/theme.dart';
 import 'package:gameshelf/core/navigation/page_transitions.dart';
 import 'package:gameshelf/core/strings/llamp_strings.dart';
 import 'package:gameshelf/core/utils/error_messages.dart';
@@ -212,7 +211,7 @@ class _FriendShelfCard extends StatelessWidget {
     final profile = item.profile;
 
     return ClipRRect(
-      borderRadius: appRadius(context, 18),
+      borderRadius: BorderRadius.circular(18),
       child: Stack(
         children: [
           Positioned.fill(
@@ -311,10 +310,10 @@ class _GameCoverTile extends StatelessWidget {
     return SizedBox(
       width: width,
       child: InkWell(
-        borderRadius: appRadius(context, 12),
+        borderRadius: BorderRadius.circular(12),
         onTap: onTap,
         child: ClipRRect(
-          borderRadius: appRadius(context, 12),
+          borderRadius: BorderRadius.circular(12),
           child: AspectRatio(
             aspectRatio: 3 / 4,
             child: game.coverUrl != null && game.coverUrl!.isNotEmpty

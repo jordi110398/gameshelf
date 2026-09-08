@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:gameshelf/app/theme.dart';
 import 'package:gameshelf/core/navigation/page_transitions.dart';
 import 'package:gameshelf/core/strings/app_strings.dart';
 import 'package:gameshelf/core/strings/llamp_strings.dart';
@@ -664,7 +663,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                 children: [
                   // PORTADA
                   ClipRRect(
-                    borderRadius: appRadius(context, 8),
+                    borderRadius: BorderRadius.circular(8),
                     child: game.coverUrl != null && game.coverUrl!.isNotEmpty
                         ? Image.network(
                             game.coverUrl!,
@@ -815,6 +814,11 @@ class _UserProfilePageState extends State<UserProfilePage> {
           ? const Center(child: CircularProgressIndicator())
           : Stack(
               children: [
+                Positioned.fill(
+                  child: BookshelfBackground(
+                    color: currentProfile.shelfWoodColor,
+                  ),
+                ),
                 _buildContent(),
                 if (!isMyProfile)
                   if (_buildFriendshipCornerAction() case final action?)
@@ -1146,7 +1150,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
               padding: const EdgeInsets.all(4),
               decoration: BoxDecoration(
                 color: Theme.of(context).scaffoldBackgroundColor,
-                borderRadius: appRadius(context, 22),
+                borderRadius: BorderRadius.circular(22),
                 border: Border.all(
                   color: Colors.black.withValues(alpha: 0.55),
                   width: 2,
@@ -1160,7 +1164,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                 ],
               ),
               child: ClipRRect(
-                borderRadius: appRadius(context, 18),
+                borderRadius: BorderRadius.circular(18),
                 child:
                     currentProfile.avatarUrl != null &&
                         currentProfile.avatarUrl!.isNotEmpty
@@ -1194,7 +1198,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
     final favorites = favoriteGames;
 
     return ClipRRect(
-      borderRadius: appRadius(context, 18),
+      borderRadius: BorderRadius.circular(18),
       child: Stack(
         children: [
           Positioned.fill(
@@ -1250,7 +1254,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                 ),
 
                 const SizedBox(height: 10),
-                const ShelfLedge(),
+                ShelfLedge(color: currentProfile.shelfWoodColor),
               ],
             ),
           ),
@@ -1271,7 +1275,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
         .toList();
 
     return ClipRRect(
-      borderRadius: appRadius(context, 18),
+      borderRadius: BorderRadius.circular(18),
       child: Stack(
         children: [
           Positioned.fill(
@@ -1316,7 +1320,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                       return SizedBox(
                         width: 88,
                         child: InkWell(
-                          borderRadius: appRadius(context, 12),
+                          borderRadius: BorderRadius.circular(12),
                           onTap: () async {
                             await pushFade(
                               context,
@@ -1324,7 +1328,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                             );
                           },
                           child: ClipRRect(
-                            borderRadius: appRadius(context, 12),
+                            borderRadius: BorderRadius.circular(12),
                             child: AspectRatio(
                               aspectRatio: 3 / 4,
                               child:
@@ -1336,12 +1340,10 @@ class _UserProfilePageState extends State<UserProfilePage> {
                                       cacheWidth: 180,
                                     )
                                   : Container(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .surfaceContainerHighest,
-                                      child: const Icon(
-                                        Icons.videogame_asset,
-                                      ),
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.surfaceContainerHighest,
+                                      child: const Icon(Icons.videogame_asset),
                                     ),
                             ),
                           ),
@@ -1352,7 +1354,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                 ),
 
                 const SizedBox(height: 10),
-                const ShelfLedge(),
+                ShelfLedge(color: currentProfile.shelfWoodColor),
               ],
             ),
           ),
@@ -1395,7 +1397,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
           const SizedBox(height: 10),
 
           ClipRRect(
-            borderRadius: appRadius(context, 16),
+            borderRadius: BorderRadius.circular(16),
             child: Stack(
               children: [
                 Positioned.fill(
@@ -1411,6 +1413,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                   itemAspectRatio: 3 / 4,
                   padding: const EdgeInsets.all(14),
                   lightStyle: currentProfile.shelfLightStyle,
+                  woodColor: currentProfile.shelfWoodColor,
                   itemBuilder: (context, libraryGame) => _GameCoverTile(
                     libraryGame: libraryGame,
                     onOpened: loadProfile,
@@ -1487,7 +1490,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
         color: Colors.deepPurple.withValues(alpha: selected ? 1 : 0.35),
       ),
 
-      shape: RoundedRectangleBorder(borderRadius: appRadius(context, 20)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
     );
   }
 
@@ -1523,7 +1526,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
 
   Widget _buildGameGrid() {
     return ClipRRect(
-      borderRadius: appRadius(context, 16),
+      borderRadius: BorderRadius.circular(16),
       child: Stack(
         children: [
           Positioned.fill(
@@ -1537,6 +1540,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
             itemAspectRatio: 2 / 3,
             padding: const EdgeInsets.all(14),
             lightStyle: currentProfile.shelfLightStyle,
+            woodColor: currentProfile.shelfWoodColor,
             itemBuilder: (context, libraryGame) {
               final gameId = libraryGame.game.igdbId;
 
@@ -1623,7 +1627,7 @@ class _GameCoverTile extends StatelessWidget {
     final game = libraryGame.game;
 
     final cover = ClipRRect(
-      borderRadius: appRadius(context, 12),
+      borderRadius: BorderRadius.circular(12),
       child: AspectRatio(
         aspectRatio: 3 / 4,
         child: game.coverUrl != null && game.coverUrl!.isNotEmpty
@@ -1644,7 +1648,7 @@ class _GameCoverTile extends StatelessWidget {
     );
 
     final tile = InkWell(
-      borderRadius: appRadius(context, 12),
+      borderRadius: BorderRadius.circular(12),
       onTap: () => _open(context),
       child: cover,
     );
