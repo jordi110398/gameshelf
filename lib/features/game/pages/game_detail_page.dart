@@ -23,6 +23,8 @@ typedef _GameDetails = ({
   DateTime? completedAt,
   DateTime? droppedAt,
   DateTime? pausedAt,
+  int hoursPlayed,
+  bool favorite,
 });
 
 class GameDetailPage extends StatefulWidget {
@@ -171,6 +173,8 @@ class _GameDetailPageState extends State<GameDetailPage> {
         completedAt: details.completedAt,
         droppedAt: details.droppedAt,
         pausedAt: details.pausedAt,
+        hoursPlayed: details.hoursPlayed,
+        favorite: details.favorite,
       );
 
       hasChanges = true;
@@ -205,6 +209,8 @@ class _GameDetailPageState extends State<GameDetailPage> {
         completedAt: null,
         droppedAt: null,
         pausedAt: null,
+        hoursPlayed: 0,
+        favorite: false,
       );
     }
 
@@ -217,6 +223,8 @@ class _GameDetailPageState extends State<GameDetailPage> {
     var completedAt = DateTime.now();
     var droppedAt = DateTime.now();
     var pausedAt = DateTime.now();
+    var favorite = false;
+    final hoursController = TextEditingController();
 
     final confirmed = await showDialog<bool>(
       context: context,
@@ -224,7 +232,11 @@ class _GameDetailPageState extends State<GameDetailPage> {
         return StatefulBuilder(
           builder: (context, setDialogState) {
             return AlertDialog(
-              title: const Text(GameStrings.confirmDatesTitle),
+              title: Text(
+                status == GameStatus.completed
+                    ? GameStrings.confirmCompletedTitle
+                    : GameStrings.confirmDatesTitle,
+              ),
               content: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -281,6 +293,31 @@ class _GameDetailPageState extends State<GameDetailPage> {
                           alignLabelWithHint: true,
                         ),
                       ),
+
+                      const SizedBox(height: 12),
+                      SwitchListTile(
+                        contentPadding: EdgeInsets.zero,
+                        value: favorite,
+                        title: const Text(GameStrings.markAsFavorite),
+                        secondary: Icon(
+                          favorite ? Icons.star : Icons.star_border,
+                          color: favorite ? Colors.amber : null,
+                        ),
+                        onChanged: (value) =>
+                            setDialogState(() => favorite = value),
+                      ),
+
+                      const SizedBox(height: 4),
+                      TextField(
+                        controller: hoursController,
+                        keyboardType: TextInputType.number,
+                        decoration: const InputDecoration(
+                          border: OutlineInputBorder(),
+                          labelText: GameStrings.hoursPlayedTitle,
+                          hintText: "0",
+                          suffixText: GameStrings.hoursSuffix,
+                        ),
+                      ),
                     ],
 
                     if (status == GameStatus.dropped) ...[
@@ -322,6 +359,9 @@ class _GameDetailPageState extends State<GameDetailPage> {
     final review = reviewController.text.trim();
     reviewController.dispose();
 
+    final hoursPlayed = int.tryParse(hoursController.text) ?? 0;
+    hoursController.dispose();
+
     if (confirmed != true) return null;
 
     return (
@@ -334,6 +374,8 @@ class _GameDetailPageState extends State<GameDetailPage> {
       completedAt: status == GameStatus.completed ? completedAt : null,
       droppedAt: status == GameStatus.dropped ? droppedAt : null,
       pausedAt: status == GameStatus.paused ? pausedAt : null,
+      hoursPlayed: status == GameStatus.completed ? hoursPlayed : 0,
+      favorite: status == GameStatus.completed ? favorite : false,
     );
   }
 
