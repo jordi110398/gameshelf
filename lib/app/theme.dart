@@ -57,6 +57,15 @@ class AppTheme {
         seedColor: seedColor,
         brightness: Brightness.dark,
       ).copyWith(surface: surface),
+      // Sense això, Material 3 acaba pintant l'AppBar amb un to derivat
+      // (surfaceTint sobre surface) massa semblant entre fustes com per
+      // notar-se -- es força que sigui exactament el color de superfície
+      // triat, pla, perquè el canvi de fusta es vegi també a la barra
+      // superior.
+      appBarTheme: AppBarTheme(
+        backgroundColor: surface,
+        surfaceTintColor: Colors.transparent,
+      ),
     );
   }
 }
