@@ -21,6 +21,7 @@ class GameStrings {
 
   static const platformLabel = 'Plataforma';
   static const confirmDatesTitle = 'Quan?';
+  static const confirmCompletedTitle = 'Joc completat';
   static const dateStartedLabel = 'Data d\'inici';
   static const dateCompletedLabel = 'Data de finalització';
   static const dateDroppedLabel = 'Data d\'abandonament';

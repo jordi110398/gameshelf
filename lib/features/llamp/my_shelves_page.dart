@@ -106,10 +106,10 @@ class _MyShelvesPageState extends State<MyShelvesPage> {
                       decoration: const InputDecoration(
                         hintText: LlampStrings.shelfTitleHint,
                       ),
-                      onSubmitted: (value) => Navigator.pop(
-                        context,
-                        (title: value, emoji: selectedEmoji),
-                      ),
+                      onSubmitted: (value) => Navigator.pop(context, (
+                        title: value,
+                        emoji: selectedEmoji,
+                      )),
                     ),
                   ),
                 ],
@@ -120,10 +120,10 @@ class _MyShelvesPageState extends State<MyShelvesPage> {
                   child: const Text(AppStrings.actionCancel),
                 ),
                 FilledButton(
-                  onPressed: () => Navigator.pop(
-                    context,
-                    (title: controller.text, emoji: selectedEmoji),
-                  ),
+                  onPressed: () => Navigator.pop(context, (
+                    title: controller.text,
+                    emoji: selectedEmoji,
+                  )),
                   child: const Text(AppStrings.actionSave),
                 ),
               ],
@@ -263,9 +263,10 @@ class _ShelfTile extends StatelessWidget {
               Wrap(
                 spacing: 6,
                 children: [
-                  if (shelf.isPinned) _buildBadge(LlampStrings.pinnedBadge),
+                  if (shelf.isPinned)
+                    _buildBadge(context, LlampStrings.pinnedBadge),
                   if (shelf.isPublished)
-                    _buildBadge(LlampStrings.publishedBadge),
+                    _buildBadge(context, LlampStrings.publishedBadge),
                 ],
               ),
             ],
@@ -314,7 +315,7 @@ class _ShelfTile extends StatelessWidget {
     );
   }
 
-  Widget _buildBadge(String label) {
+  Widget _buildBadge(BuildContext context, String label) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(

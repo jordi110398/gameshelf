@@ -6,6 +6,7 @@ import 'package:gameshelf/core/strings/notification_strings.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:gameshelf/core/utils/error_messages.dart';
+import 'package:gameshelf/core/widgets/bookshelf_background.dart';
 import 'package:gameshelf/core/widgets/responsive_center.dart';
 import 'package:gameshelf/models/notification_item.dart';
 import 'package:gameshelf/repositories/notification_repository.dart';
@@ -167,113 +168,120 @@ class _NotificationsPageState extends State<NotificationsPage> {
             ),
         ],
       ),
-      body: ResponsiveCenter(
-        maxWidth: 640,
-        child: _isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : _items.isEmpty
-            ? Center(
-                child: Text(
-                  NotificationStrings.emptyList,
-                  style: TextStyle(color: Colors.grey.shade600),
-                ),
-              )
-            : RefreshIndicator(
-                onRefresh: _load,
-                child: ListView.separated(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  padding: const EdgeInsets.all(16),
-                  itemCount: _items.length,
-                  separatorBuilder: (_, _) => const SizedBox(height: 8),
-                  itemBuilder: (context, index) {
-                    final item = _items[index];
+      body: Stack(
+        children: [
+          const Positioned.fill(child: BookshelfBackground()),
+          ResponsiveCenter(
+            maxWidth: 640,
+            child: _isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : _items.isEmpty
+                ? Center(
+                    child: Text(
+                      NotificationStrings.emptyList,
+                      style: TextStyle(color: Colors.grey.shade600),
+                    ),
+                  )
+                : RefreshIndicator(
+                    onRefresh: _load,
+                    child: ListView.separated(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      padding: const EdgeInsets.all(16),
+                      itemCount: _items.length,
+                      separatorBuilder: (_, _) => const SizedBox(height: 8),
+                      itemBuilder: (context, index) {
+                        final item = _items[index];
 
-                    return Material(
-                      color: item.isRead
-                          ? Theme.of(
-                              context,
-                            ).colorScheme.surfaceContainerHighest
-                          : Theme.of(context).colorScheme.primaryContainer,
-                      borderRadius: BorderRadius.circular(14),
-                      clipBehavior: Clip.antiAlias,
-                      child: InkWell(
-                        onTap: () => _handleTap(item),
-                        child: Padding(
-                          padding: const EdgeInsets.all(14),
-                          child: Row(
-                            children: [
-                              CircleAvatar(
-                                radius: 20,
-                                backgroundImage:
-                                    item.actorAvatarUrl != null &&
-                                        item.actorAvatarUrl!.isNotEmpty
-                                    ? ResizeImage(
-                                        NetworkImage(item.actorAvatarUrl!),
-                                        width: 80,
-                                      )
-                                    : null,
-                                child:
-                                    item.actorAvatarUrl == null ||
-                                        item.actorAvatarUrl!.isEmpty
-                                    ? const Icon(Icons.person, size: 20)
-                                    : null,
-                              ),
+                        return Material(
+                          color: item.isRead
+                              ? Theme.of(
+                                  context,
+                                ).colorScheme.surfaceContainerHighest
+                              : Theme.of(context).colorScheme.primaryContainer,
+                          borderRadius: BorderRadius.circular(14),
+                          clipBehavior: Clip.antiAlias,
+                          child: InkWell(
+                            onTap: () => _handleTap(item),
+                            child: Padding(
+                              padding: const EdgeInsets.all(14),
+                              child: Row(
+                                children: [
+                                  CircleAvatar(
+                                    radius: 20,
+                                    backgroundImage:
+                                        item.actorAvatarUrl != null &&
+                                            item.actorAvatarUrl!.isNotEmpty
+                                        ? ResizeImage(
+                                            NetworkImage(item.actorAvatarUrl!),
+                                            width: 80,
+                                          )
+                                        : null,
+                                    child:
+                                        item.actorAvatarUrl == null ||
+                                            item.actorAvatarUrl!.isEmpty
+                                        ? const Icon(Icons.person, size: 20)
+                                        : null,
+                                  ),
 
-                              const SizedBox(width: 12),
+                                  const SizedBox(width: 12),
 
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    RichText(
-                                      text: TextSpan(
-                                        style: DefaultTextStyle.of(
-                                          context,
-                                        ).style,
-                                        children: [
-                                          TextSpan(
-                                            text: '@${item.actorNickname} ',
-                                            style: const TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                            ),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        RichText(
+                                          text: TextSpan(
+                                            style: DefaultTextStyle.of(
+                                              context,
+                                            ).style,
+                                            children: [
+                                              TextSpan(
+                                                text: '@${item.actorNickname} ',
+                                                style: const TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                              TextSpan(text: _messageFor(item)),
+                                            ],
                                           ),
-                                          TextSpan(text: _messageFor(item)),
-                                        ],
-                                      ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          timeago.format(
+                                            item.createdAt,
+                                            locale: 'ca',
+                                          ),
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            color: Colors.grey.shade500,
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      timeago.format(
-                                        item.createdAt,
-                                        locale: 'ca',
-                                      ),
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        color: Colors.grey.shade500,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
+                                  ),
 
-                              const SizedBox(width: 8),
+                                  const SizedBox(width: 8),
 
-                              Icon(
-                                _iconFor(item.type),
-                                size: 20,
-                                color:
-                                    item.type == NotificationType.activityLike
-                                    ? Colors.amber
-                                    : Colors.grey.shade500,
+                                  Icon(
+                                    _iconFor(item.type),
+                                    size: 20,
+                                    color:
+                                        item.type ==
+                                            NotificationType.activityLike
+                                        ? Colors.amber
+                                        : Colors.grey.shade500,
+                                  ),
+                                ],
                               ),
-                            ],
+                            ),
                           ),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
+                        );
+                      },
+                    ),
+                  ),
+          ),
+        ],
       ),
     );
   }
