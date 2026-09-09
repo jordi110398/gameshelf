@@ -4,6 +4,11 @@ Tots els canvis importants d'aquest projecte es documentaran en aquest fitxer.
 
 Aquest projecte segueix el format de Keep a Changelog.
 
+## [1.0.3] - 09-09-2026
+
+### Fixed
+- No es podien desar hores jugades amb decimals (p. ex. 12.5h) -- `hores_played` era un enter tant a la base de dades com a l'app.
+
 ## [1.0.2] - 08-09-2026
 
 ### Added
