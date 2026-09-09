@@ -4,7 +4,7 @@ class UserGame {
   final int igdbId;
   final GameStatus status;
   final int? rating;
-  final int hoursPlayed;
+  final double hoursPlayed;
   final bool favorite;
   final String? review;
   final String? platform;
@@ -67,7 +67,7 @@ class UserGame {
       igdbId: map["igdb_id"],
       status: status,
       rating: map["rating"],
-      hoursPlayed: map["hours_played"] ?? 0,
+      hoursPlayed: (map["hours_played"] as num?)?.toDouble() ?? 0,
       favorite: map["favorite"] ?? false,
       review: map["review"],
       platform: map["platform"],

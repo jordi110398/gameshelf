@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:gameshelf/core/strings/profile_strings.dart';
 import 'package:gameshelf/core/utils/error_messages.dart';
+import 'package:gameshelf/core/utils/hours_format.dart';
 import 'package:gameshelf/core/widgets/dither_banner.dart';
 import 'package:gameshelf/models/profile.dart';
 import 'package:gameshelf/repositories/profile_repository.dart';
@@ -277,7 +278,10 @@ class _ShareCard extends StatelessWidget {
                       _statDivider(),
                       _Stat(value: '${stats.completed}', label: 'Completats'),
                       _statDivider(),
-                      _Stat(value: '${stats.hours}h', label: 'Hores'),
+                      _Stat(
+                        value: '${formatHours(stats.hours)}h',
+                        label: 'Hores',
+                      ),
                     ],
                   ),
 

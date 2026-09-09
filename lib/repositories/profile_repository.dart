@@ -153,7 +153,7 @@ class ProfileRepository {
 
     int completed = 0;
     int reviews = 0;
-    int hours = 0;
+    double hours = 0;
 
     for (final game in games) {
       if (game['status'] == 'completed') {
@@ -166,7 +166,7 @@ class ProfileRepository {
         reviews++;
       }
 
-      hours += (game['hours_played'] as num?)?.toInt() ?? 0;
+      hours += (game['hours_played'] as num?)?.toDouble() ?? 0;
     }
 
     return ProfileStats(
@@ -213,7 +213,7 @@ class ProfileStats {
   final int games;
   final int completed;
   final int reviews;
-  final int hours;
+  final double hours;
 
   const ProfileStats({
     required this.games,

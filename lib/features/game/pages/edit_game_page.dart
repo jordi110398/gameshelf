@@ -5,6 +5,7 @@ import 'package:gameshelf/models/game_status.dart';
 import 'package:gameshelf/repositories/supabase_library_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:gameshelf/core/strings/game_strings.dart';
+import 'package:gameshelf/core/utils/hours_format.dart';
 import 'package:gameshelf/core/utils/platform_visuals.dart';
 import 'package:gameshelf/core/widgets/date_field.dart';
 import 'package:gameshelf/core/widgets/responsive_center.dart';
@@ -45,7 +46,7 @@ class _EditGamePageState extends State<EditGamePage> {
     rating = widget.userGame.rating ?? 0;
 
     hoursController = TextEditingController(
-      text: widget.userGame.hoursPlayed.toString(),
+      text: formatHours(widget.userGame.hoursPlayed),
     );
 
     favorite = widget.userGame.favorite;
@@ -110,7 +111,10 @@ class _EditGamePageState extends State<EditGamePage> {
       rating: canReview ? rating : null,
 
       // Want to Play no té hores
-      hoursPlayed: isWantToPlay ? 0 : int.tryParse(hoursController.text) ?? 0,
+      hoursPlayed: isWantToPlay
+          ? 0
+          : double.tryParse(hoursController.text.trim().replaceAll(',', '.')) ??
+                0,
 
       // Només Completed pot ser favorit
       favorite: canFavorite ? favorite : false,
@@ -351,7 +355,9 @@ class _EditGamePageState extends State<EditGamePage> {
 
                 TextFormField(
                   controller: hoursController,
-                  keyboardType: TextInputType.number,
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
 
                   decoration: const InputDecoration(
                     border: OutlineInputBorder(),
