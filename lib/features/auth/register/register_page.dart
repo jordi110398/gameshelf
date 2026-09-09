@@ -1,9 +1,8 @@
+import 'package:gameshelf/core/localization/app_localizations_x.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:go_router/go_router.dart';
 import 'package:gameshelf/core/services/auth_service.dart';
-import 'package:gameshelf/core/strings/auth_strings.dart';
-import 'package:gameshelf/core/strings/legal_strings.dart';
 import 'package:gameshelf/features/auth/widgets/auth_text_field.dart';
 import 'package:gameshelf/core/utils/error_messages.dart';
 
@@ -88,9 +87,9 @@ class _RegisterPageState extends State<RegisterPage> {
     final email = emailController.text.trim();
 
     if (nickname.isEmpty || email.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text(AuthStrings.registerEmptyFields)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(context.l10n.registerEmptyFields)));
       return;
     }
 
@@ -105,11 +104,12 @@ class _RegisterPageState extends State<RegisterPage> {
         nickname: nicknameController.text.trim(),
         emailRedirectTo: '${Uri.base.origin}/auth/callback',
       );
-      if (response.user == null) {
-        throw Exception(AuthStrings.registerUserCreationFailed);
-      }
 
       if (!mounted) return;
+
+      if (response.user == null) {
+        throw Exception(context.l10n.registerUserCreationFailed);
+      }
 
       // Amb confirmació de correu activada, no intentem entrar
       // directament a l'aplicació.
@@ -119,7 +119,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text(friendlyError(e))));
+      ).showSnackBar(SnackBar(content: Text(friendlyError(context, e))));
 
       setState(() {
         _isRegistering = false;
@@ -183,8 +183,8 @@ class _RegisterPageState extends State<RegisterPage> {
 
                 const SizedBox(height: 24),
 
-                const Text(
-                  AuthStrings.appName,
+                Text(
+                  context.l10n.appName,
                   style: TextStyle(fontSize: 34, fontWeight: FontWeight.bold),
                 ),
 
@@ -195,7 +195,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 // ─────────────────────────────
                 AuthTextField(
                   controller: nicknameController,
-                  label: AuthStrings.registerNicknameLabel,
+                  label: context.l10n.registerNicknameLabel,
                   icon: Icons.person,
                 ),
 
@@ -206,7 +206,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 // ─────────────────────────────
                 AuthTextField(
                   controller: emailController,
-                  label: AuthStrings.registerEmailLabel,
+                  label: context.l10n.registerEmailLabel,
                   icon: Icons.email,
                 ),
 
@@ -217,7 +217,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 // ─────────────────────────────
                 AuthTextField(
                   controller: passwordController,
-                  label: AuthStrings.registerPasswordLabel,
+                  label: context.l10n.registerPasswordLabel,
                   icon: Icons.lock,
                   obscureText: true,
                 ),
@@ -232,8 +232,8 @@ class _RegisterPageState extends State<RegisterPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        AuthStrings.passwordRequirementsTitle,
+                      Text(
+                        context.l10n.passwordRequirementsTitle,
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.bold,
@@ -244,27 +244,27 @@ class _RegisterPageState extends State<RegisterPage> {
 
                       _buildPasswordRequirement(
                         fulfilled: _hasMinLength,
-                        text: AuthStrings.passwordReqMinLength,
+                        text: context.l10n.passwordReqMinLength,
                       ),
 
                       _buildPasswordRequirement(
                         fulfilled: _hasUppercase,
-                        text: AuthStrings.passwordReqUppercase,
+                        text: context.l10n.passwordReqUppercase,
                       ),
 
                       _buildPasswordRequirement(
                         fulfilled: _hasLowercase,
-                        text: AuthStrings.passwordReqLowercase,
+                        text: context.l10n.passwordReqLowercase,
                       ),
 
                       _buildPasswordRequirement(
                         fulfilled: _hasNumber,
-                        text: AuthStrings.passwordReqNumber,
+                        text: context.l10n.passwordReqNumber,
                       ),
 
                       _buildPasswordRequirement(
                         fulfilled: _hasSymbol,
-                        text: AuthStrings.passwordReqSymbol,
+                        text: context.l10n.passwordReqSymbol,
                       ),
                     ],
                   ),
@@ -285,9 +285,9 @@ class _RegisterPageState extends State<RegisterPage> {
                         color: Colors.grey.shade500,
                       ),
                       children: [
-                        const TextSpan(text: AuthStrings.registerLegalPrefix),
+                        TextSpan(text: context.l10n.registerLegalPrefix),
                         TextSpan(
-                          text: LegalStrings.privacyTitle,
+                          text: context.l10n.privacyTitle,
                           style: const TextStyle(
                             decoration: TextDecoration.underline,
                             fontWeight: FontWeight.w600,
@@ -295,9 +295,9 @@ class _RegisterPageState extends State<RegisterPage> {
                           recognizer: TapGestureRecognizer()
                             ..onTap = () => context.push('/legal/privacy'),
                         ),
-                        const TextSpan(text: AuthStrings.registerLegalAnd),
+                        TextSpan(text: context.l10n.registerLegalAnd),
                         TextSpan(
-                          text: LegalStrings.cookiesTitle,
+                          text: context.l10n.cookiesTitle,
                           style: const TextStyle(
                             decoration: TextDecoration.underline,
                             fontWeight: FontWeight.w600,
@@ -305,7 +305,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           recognizer: TapGestureRecognizer()
                             ..onTap = () => context.push('/legal/cookies'),
                         ),
-                        const TextSpan(text: AuthStrings.registerLegalSuffix),
+                        TextSpan(text: context.l10n.registerLegalSuffix),
                       ],
                     ),
                   ),
@@ -325,7 +325,7 @@ class _RegisterPageState extends State<RegisterPage> {
                             height: 20,
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
-                        : const Text(AuthStrings.registerSubmit),
+                        : Text(context.l10n.registerSubmit),
                   ),
                 ),
 
@@ -333,7 +333,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
                 TextButton(
                   onPressed: _isRegistering ? null : () => context.go("/"),
-                  child: const Text(AuthStrings.registerAlreadyHaveAccount),
+                  child: Text(context.l10n.registerAlreadyHaveAccount),
                 ),
               ],
             ),

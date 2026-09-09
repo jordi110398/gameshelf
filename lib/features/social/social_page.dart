@@ -1,7 +1,6 @@
+import 'package:gameshelf/core/localization/app_localizations_x.dart';
 import 'package:flutter/material.dart';
 import 'package:gameshelf/core/navigation/page_transitions.dart';
-import 'package:gameshelf/core/strings/app_strings.dart';
-import 'package:gameshelf/core/strings/social_strings.dart';
 import 'package:gameshelf/core/widgets/app_logo.dart';
 import 'package:gameshelf/core/widgets/bookshelf_background.dart';
 import 'package:gameshelf/core/widgets/shelf_list.dart';
@@ -106,7 +105,7 @@ class SocialPageState extends State<SocialPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            '${SocialStrings.searchUsersFailedPrefix}${friendlyError(e)}',
+            '${context.l10n.searchUsersFailedPrefix}${friendlyError(context, e)}',
           ),
         ),
       );
@@ -151,7 +150,7 @@ class SocialPageState extends State<SocialPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            '${SocialStrings.loadSocialFailedPrefix}${friendlyError(e)}',
+            '${context.l10n.loadSocialFailedPrefix}${friendlyError(context, e)}',
           ),
         ),
       );
@@ -164,7 +163,7 @@ class SocialPageState extends State<SocialPage> {
       appBar: AppBar(
         leadingWidth: AppLogo.width(context),
         leading: AppLogo(onTap: widget.onLogoTap),
-        title: const Text(SocialStrings.appBarTitle),
+        title: Text(context.l10n.socialAppBarTitle),
       ),
       body: Stack(
         children: [
@@ -185,7 +184,7 @@ class SocialPageState extends State<SocialPage> {
                       searchProfiles();
                     },
                     decoration: InputDecoration(
-                      hintText: SocialStrings.searchHint,
+                      hintText: context.l10n.socialSearchHint,
                       prefixIcon: const Icon(Icons.search),
                       suffixIcon: IconButton(
                         icon: const Icon(Icons.arrow_forward),
@@ -226,12 +225,12 @@ class SocialPageState extends State<SocialPage> {
           Icon(Icons.people_outline, size: 42, color: Colors.grey.shade500),
           const SizedBox(height: 12),
           Text(
-            SocialStrings.emptyFriendsTitle,
+            context.l10n.emptyFriendsTitle,
             style: const TextStyle(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 4),
           Text(
-            SocialStrings.emptyFriendsSubtitle,
+            context.l10n.emptyFriendsSubtitle,
             textAlign: TextAlign.center,
             style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
           ),
@@ -260,7 +259,7 @@ class SocialPageState extends State<SocialPage> {
     if (profiles.isEmpty) {
       return _buildEmptyState(
         icon: Icons.person_search,
-        text: SocialStrings.emptySearchResults,
+        text: context.l10n.emptySearchResults,
       );
     }
 
@@ -296,7 +295,7 @@ class SocialPageState extends State<SocialPage> {
           if (pendingRequests.isNotEmpty) ...[
             _buildSectionTile(
               icon: Icons.person_add_outlined,
-              title: SocialStrings.sectionRequests,
+              title: context.l10n.sectionRequests,
               count: pendingRequests.length,
               isExpanded: isRequestsExpanded,
               onExpansionChanged: (value) {
@@ -321,7 +320,7 @@ class SocialPageState extends State<SocialPage> {
           // ─────────────────────────────
           _buildSectionTile(
             icon: Icons.people_outline,
-            title: SocialStrings.sectionFriends,
+            title: context.l10n.sectionFriends,
             count: friends.length,
             isExpanded: isFriendsExpanded,
             onExpansionChanged: (value) {
@@ -364,7 +363,7 @@ class SocialPageState extends State<SocialPage> {
           if (activityFeed.isNotEmpty)
             _buildSectionTile(
               icon: Icons.dynamic_feed_outlined,
-              title: SocialStrings.sectionActivitySummary,
+              title: context.l10n.sectionActivitySummary,
               count: activityFeed.length,
               isExpanded: isActivityExpanded,
               onExpansionChanged: (value) {
@@ -402,7 +401,7 @@ class SocialPageState extends State<SocialPage> {
                                 );
                               },
                               icon: const Icon(Icons.arrow_forward),
-                              label: const Text(SocialStrings.seeMore),
+                              label: Text(context.l10n.seeMore),
                             ),
                           ),
                         ),
@@ -661,13 +660,13 @@ class _PendingRequestTile extends StatelessWidget {
             ),
 
             IconButton(
-              tooltip: AppStrings.actionReject,
+              tooltip: context.l10n.actionReject,
               onPressed: onReject,
               icon: const Icon(Icons.close),
             ),
 
             IconButton(
-              tooltip: AppStrings.actionAccept,
+              tooltip: context.l10n.actionAccept,
               onPressed: onAccept,
               icon: const Icon(Icons.check),
             ),

@@ -1,8 +1,7 @@
+import 'package:gameshelf/core/localization/app_localizations_x.dart';
 import 'package:flutter/material.dart';
 import 'package:gameshelf/core/navigation/page_transitions.dart';
 import 'package:gameshelf/core/services/shelf_skin_service.dart';
-import 'package:gameshelf/core/strings/app_strings.dart';
-import 'package:gameshelf/core/strings/home_strings.dart';
 import 'package:gameshelf/core/utils/error_messages.dart';
 import 'package:gameshelf/core/utils/platform_visuals.dart';
 import 'package:gameshelf/core/widgets/cartridge_cover.dart';
@@ -111,7 +110,7 @@ class _GameCardState extends State<GameCard> {
 
     if (userGame.status != GameStatus.completed) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text(HomeStrings.favoriteNotCompletedMessage)),
+        SnackBar(content: Text(context.l10n.favoriteNotCompletedMessage)),
       );
       return;
     }
@@ -125,20 +124,20 @@ class _GameCardState extends State<GameCard> {
           title: Text(widget.libraryGame.game.title),
           content: Text(
             addingFavorite
-                ? HomeStrings.favoriteConfirmAddBody
-                : HomeStrings.favoriteConfirmRemoveBody,
+                ? context.l10n.favoriteConfirmAddBody
+                : context.l10n.favoriteConfirmRemoveBody,
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: const Text(AppStrings.actionCancel),
+              child: Text(context.l10n.actionCancel),
             ),
             FilledButton(
               onPressed: () => Navigator.pop(context, true),
               child: Text(
                 addingFavorite
-                    ? HomeStrings.favoriteConfirmAddAction
-                    : HomeStrings.favoriteConfirmRemoveAction,
+                    ? context.l10n.favoriteConfirmAddAction
+                    : context.l10n.favoriteConfirmRemoveAction,
               ),
             ),
           ],
@@ -180,8 +179,8 @@ class _GameCardState extends State<GameCard> {
         SnackBar(
           content: Text(
             addingFavorite
-                ? HomeStrings.favoriteAddedMessage
-                : HomeStrings.favoriteRemovedMessage,
+                ? context.l10n.favoriteAddedMessage
+                : context.l10n.favoriteRemovedMessage,
           ),
         ),
       );
@@ -195,7 +194,7 @@ class _GameCardState extends State<GameCard> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            '${HomeStrings.favoriteUpdateFailedPrefix}${friendlyError(e)}',
+            '${context.l10n.favoriteUpdateFailedPrefix}${friendlyError(context, e)}',
           ),
         ),
       );

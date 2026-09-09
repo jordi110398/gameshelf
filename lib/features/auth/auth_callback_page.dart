@@ -1,6 +1,6 @@
+import 'package:gameshelf/core/localization/app_localizations_x.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:gameshelf/core/strings/auth_strings.dart';
 import 'package:gameshelf/core/utils/error_messages.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -50,7 +50,7 @@ class _AuthCallbackPageState extends State<AuthCallbackPage> {
 
       setState(() {
         _loading = false;
-        _error = friendlyError(e);
+        _error = friendlyError(context, e);
       });
     }
   }
@@ -60,12 +60,12 @@ class _AuthCallbackPageState extends State<AuthCallbackPage> {
     return Scaffold(
       body: Center(
         child: _loading
-            ? const Column(
+            ? Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   CircularProgressIndicator(),
                   SizedBox(height: 16),
-                  Text(AuthStrings.callbackVerifying),
+                  Text(context.l10n.callbackVerifying),
                 ],
               )
             : Column(
@@ -73,16 +73,16 @@ class _AuthCallbackPageState extends State<AuthCallbackPage> {
                 children: [
                   const Icon(Icons.error_outline, size: 60, color: Colors.red),
                   const SizedBox(height: 16),
-                  const Text(AuthStrings.callbackFailedTitle),
+                  Text(context.l10n.callbackFailedTitle),
                   const SizedBox(height: 8),
                   Text(
-                    _error ?? AuthStrings.callbackUnknownError,
+                    _error ?? context.l10n.callbackUnknownError,
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 24),
                   FilledButton(
                     onPressed: () => context.go('/'),
-                    child: const Text(AuthStrings.callbackBackToLogin),
+                    child: Text(context.l10n.callbackBackToLogin),
                   ),
                 ],
               ),

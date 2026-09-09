@@ -1,8 +1,8 @@
+import 'package:gameshelf/core/localization/app_localizations_x.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:gameshelf/core/services/pwa_install_service.dart';
-import 'package:gameshelf/core/strings/legal_strings.dart';
 import 'package:gameshelf/features/legal/widgets/legal_page_scaffold.dart';
 
 const _appVersion = '1.0.0';
@@ -15,7 +15,7 @@ class AboutPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return LegalPageScaffold(
-      title: LegalStrings.aboutTitle,
+      title: context.l10n.aboutTitle,
       children: [
         const SizedBox(height: 8),
 
@@ -29,33 +29,33 @@ class AboutPage extends StatelessWidget {
 
         const SizedBox(height: 12),
 
-        const Center(
+        Center(
           child: Text(
-            LegalStrings.aboutAppName,
+            context.l10n.aboutAppName,
             style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
           ),
         ),
 
         Center(
           child: Text(
-            '${LegalStrings.aboutVersionLabel} $_appVersion',
+            '${context.l10n.aboutVersionLabel} $_appVersion',
             style: TextStyle(color: Colors.grey.shade500, fontSize: 13),
           ),
         ),
 
         const SizedBox(height: 28),
 
-        const LegalParagraph(LegalStrings.aboutDescription),
+        LegalParagraph(context.l10n.aboutDescription),
 
-        const LegalSectionTitle(LegalStrings.aboutDeveloperTitle),
-        const LegalParagraph(LegalStrings.aboutDeveloperName),
-        const LegalParagraph(LegalStrings.aboutDeveloperBio),
+        LegalSectionTitle(context.l10n.aboutDeveloperTitle),
+        LegalParagraph(context.l10n.aboutDeveloperName),
+        LegalParagraph(context.l10n.aboutDeveloperBio),
 
         Padding(
           padding: const EdgeInsets.only(bottom: 10),
           child: InkWell(
             onTap: () => launchUrl(
-              Uri.parse(LegalStrings.aboutDeveloperPortfolioUrl),
+              Uri.parse(context.l10n.aboutDeveloperPortfolioUrl),
               webOnlyWindowName: '_blank',
             ),
             child: Row(
@@ -64,7 +64,7 @@ class AboutPage extends StatelessWidget {
                 const Icon(Icons.open_in_new, size: 16),
                 const SizedBox(width: 6),
                 Text(
-                  LegalStrings.aboutDeveloperPortfolioLabel,
+                  context.l10n.aboutDeveloperPortfolioLabel,
                   style: const TextStyle(
                     decoration: TextDecoration.underline,
                     fontWeight: FontWeight.w600,
@@ -75,34 +75,33 @@ class AboutPage extends StatelessWidget {
           ),
         ),
 
-        const LegalSectionTitle(LegalStrings.aboutDevelopmentTitle),
-        const LegalParagraph(LegalStrings.aboutDevelopmentBody),
+        LegalSectionTitle(context.l10n.aboutDevelopmentTitle),
+        LegalParagraph(context.l10n.aboutDevelopmentBody),
 
-        const LegalSectionTitle(LegalStrings.aboutContactTitle),
-        const LegalParagraph(LegalStrings.contactEmail),
+        LegalSectionTitle(context.l10n.aboutContactTitle),
+        LegalParagraph(context.l10n.contactEmail),
 
-        const LegalSectionTitle(LegalStrings.aboutCatalogDataTitle),
-        const LegalParagraph(LegalStrings.aboutCatalogDataBody),
+        LegalSectionTitle(context.l10n.aboutCatalogDataTitle),
+        LegalParagraph(context.l10n.aboutCatalogDataBody),
 
         if (!_installService.isStandalone) ...[
           ListTile(
             contentPadding: EdgeInsets.zero,
             leading: const Icon(Icons.install_mobile_outlined),
-            title: const Text(LegalStrings.installAppTitle),
-            subtitle: const Text(LegalStrings.installAppSubtitle),
+            title: Text(context.l10n.installAppTitle),
+            subtitle: Text(context.l10n.installAppSubtitle),
             trailing: const Icon(Icons.chevron_right),
-            onTap: () => _installService.promptOrShowInstallInstructions(
-              context,
-            ),
+            onTap: () =>
+                _installService.promptOrShowInstallInstructions(context),
           ),
         ],
 
-        const LegalSectionTitle(LegalStrings.aboutLegalDocumentsTitle),
+        LegalSectionTitle(context.l10n.aboutLegalDocumentsTitle),
 
         ListTile(
           contentPadding: EdgeInsets.zero,
           leading: const Icon(Icons.privacy_tip_outlined),
-          title: const Text(LegalStrings.privacyTitle),
+          title: Text(context.l10n.privacyTitle),
           trailing: const Icon(Icons.chevron_right),
           onTap: () => context.push('/legal/privacy'),
         ),
@@ -110,7 +109,7 @@ class AboutPage extends StatelessWidget {
         ListTile(
           contentPadding: EdgeInsets.zero,
           leading: const Icon(Icons.cookie_outlined),
-          title: const Text(LegalStrings.cookiesTitle),
+          title: Text(context.l10n.cookiesTitle),
           trailing: const Icon(Icons.chevron_right),
           onTap: () => context.push('/legal/cookies'),
         ),

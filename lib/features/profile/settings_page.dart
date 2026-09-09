@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:gameshelf/core/navigation/page_transitions.dart';
+import 'package:gameshelf/core/localization/app_localizations_x.dart';
 import 'package:gameshelf/core/services/auth_service.dart';
+import 'package:gameshelf/core/services/locale_service.dart';
 import 'package:gameshelf/core/services/shelf_skin_service.dart';
-import 'package:gameshelf/core/strings/app_strings.dart';
-import 'package:gameshelf/core/strings/profile_strings.dart';
 import 'package:gameshelf/core/utils/error_messages.dart';
 import 'package:gameshelf/core/widgets/wood_drawer_container.dart';
 import 'package:gameshelf/features/profile/edit_profile_page.dart';
@@ -20,19 +20,19 @@ const _woodSwatches = {
   ShelfWoodColor.birch: Color(0xFFC9B48C),
 };
 
-const _woodLabels = {
-  ShelfWoodColor.walnut: ProfileStrings.shelfWoodWalnut,
-  ShelfWoodColor.oak: ProfileStrings.shelfWoodOak,
-  ShelfWoodColor.ebony: ProfileStrings.shelfWoodEbony,
-  ShelfWoodColor.cherry: ProfileStrings.shelfWoodCherry,
-  ShelfWoodColor.birch: ProfileStrings.shelfWoodBirch,
+Map<ShelfWoodColor, String> _woodLabels(BuildContext context) => {
+  ShelfWoodColor.walnut: context.l10n.shelfWoodWalnut,
+  ShelfWoodColor.oak: context.l10n.shelfWoodOak,
+  ShelfWoodColor.ebony: context.l10n.shelfWoodEbony,
+  ShelfWoodColor.cherry: context.l10n.shelfWoodCherry,
+  ShelfWoodColor.birch: context.l10n.shelfWoodBirch,
 };
 
-const _decorationLabels = {
-  ShelfDecoration.none: ProfileStrings.shelfDecorationNone,
-  ShelfDecoration.poppy: ProfileStrings.shelfDecorationPoppy,
-  ShelfDecoration.cactus: ProfileStrings.shelfDecorationCactus,
-  ShelfDecoration.azalea: ProfileStrings.shelfDecorationAzalea,
+Map<ShelfDecoration, String> _decorationLabels(BuildContext context) => {
+  ShelfDecoration.none: context.l10n.shelfDecorationNone,
+  ShelfDecoration.poppy: context.l10n.shelfDecorationPoppy,
+  ShelfDecoration.cactus: context.l10n.shelfDecorationCactus,
+  ShelfDecoration.azalea: context.l10n.shelfDecorationAzalea,
 };
 
 class SettingsPage extends StatefulWidget {
@@ -83,7 +83,7 @@ class _SettingsPageState extends State<SettingsPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            '${ProfileStrings.shelfStyleChangeFailedPrefix}${friendlyError(e)}',
+            '${context.l10n.shelfStyleChangeFailedPrefix}${friendlyError(context, e)}',
           ),
         ),
       );
@@ -103,7 +103,7 @@ class _SettingsPageState extends State<SettingsPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            '${ProfileStrings.shelfStyleChangeFailedPrefix}${friendlyError(e)}',
+            '${context.l10n.shelfStyleChangeFailedPrefix}${friendlyError(context, e)}',
           ),
         ),
       );
@@ -136,7 +136,7 @@ class _SettingsPageState extends State<SettingsPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            '${ProfileStrings.shelfStyleChangeFailedPrefix}${friendlyError(e)}',
+            '${context.l10n.shelfStyleChangeFailedPrefix}${friendlyError(context, e)}',
           ),
         ),
       );
@@ -156,7 +156,7 @@ class _SettingsPageState extends State<SettingsPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            '${ProfileStrings.shelfStyleChangeFailedPrefix}${friendlyError(e)}',
+            '${context.l10n.shelfStyleChangeFailedPrefix}${friendlyError(context, e)}',
           ),
         ),
       );
@@ -165,10 +165,32 @@ class _SettingsPageState extends State<SettingsPage> {
     }
   }
 
+  bool isSavingLocale = false;
+
+  Future<void> _setLocale(Locale locale) async {
+    setState(() => isSavingLocale = true);
+
+    try {
+      await LocaleService.instance.setLocale(locale);
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            '${context.l10n.languageChangeFailedPrefix}${friendlyError(context, e)}',
+          ),
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => isSavingLocale = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text(ProfileStrings.settingsAppBarTitle)),
+      appBar: AppBar(title: Text(context.l10n.settingsAppBarTitle)),
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
@@ -176,8 +198,8 @@ class _SettingsPageState extends State<SettingsPage> {
             padding: EdgeInsets.zero,
             child: ListTile(
               leading: const Icon(Icons.person_outline),
-              title: const Text(ProfileStrings.editProfileTooltip),
-              subtitle: const Text(ProfileStrings.settingsEditProfileSubtitle),
+              title: Text(context.l10n.editProfileTooltip),
+              subtitle: Text(context.l10n.settingsEditProfileSubtitle),
               trailing: const Icon(Icons.chevron_right),
               onTap: _openEditProfile,
             ),
@@ -185,13 +207,13 @@ class _SettingsPageState extends State<SettingsPage> {
 
           const SizedBox(height: 32),
 
-          const Text(
-            ProfileStrings.shelfStyleSectionTitle,
+          Text(
+            context.l10n.shelfStyleSectionTitle,
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 4),
           Text(
-            ProfileStrings.shelfStyleSectionSubtitle,
+            context.l10n.shelfStyleSectionSubtitle,
             style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
           ),
           const SizedBox(height: 14),
@@ -201,7 +223,7 @@ class _SettingsPageState extends State<SettingsPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  ProfileStrings.shelfWoodLabel,
+                  context.l10n.shelfWoodLabel,
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
@@ -247,7 +269,7 @@ class _SettingsPageState extends State<SettingsPage> {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                _woodLabels[color]!,
+                                _woodLabels(context)[color]!,
                                 style: const TextStyle(fontSize: 11),
                               ),
                             ],
@@ -261,7 +283,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 const SizedBox(height: 20),
 
                 Text(
-                  ProfileStrings.shelfLightsLabel,
+                  context.l10n.shelfLightsLabel,
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
@@ -273,15 +295,15 @@ class _SettingsPageState extends State<SettingsPage> {
                   valueListenable: ShelfSkinService.instance.lightStyle,
                   builder: (context, currentStyle, _) {
                     return SegmentedButton<ShelfLightStyle>(
-                      segments: const [
+                      segments: [
                         ButtonSegment(
                           value: ShelfLightStyle.neon,
-                          label: Text(ProfileStrings.shelfLightsNeon),
+                          label: Text(context.l10n.shelfLightsNeon),
                           icon: Icon(Icons.bolt),
                         ),
                         ButtonSegment(
                           value: ShelfLightStyle.bulbs,
-                          label: Text(ProfileStrings.shelfLightsBulbs),
+                          label: Text(context.l10n.shelfLightsBulbs),
                           icon: Icon(Icons.lightbulb_outline),
                         ),
                       ],
@@ -296,7 +318,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 const SizedBox(height: 20),
 
                 Text(
-                  ProfileStrings.shelfDecorationLabel,
+                  context.l10n.shelfDecorationLabel,
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
@@ -305,7 +327,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  ProfileStrings.shelfDecorationHint,
+                  context.l10n.shelfDecorationHint,
                   style: TextStyle(fontSize: 11, color: Colors.grey.shade500),
                 ),
                 const SizedBox(height: 10),
@@ -365,7 +387,7 @@ class _SettingsPageState extends State<SettingsPage> {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                _decorationLabels[decoration]!,
+                                _decorationLabels(context)[decoration]!,
                                 style: const TextStyle(fontSize: 11),
                               ),
                             ],
@@ -379,7 +401,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 const SizedBox(height: 20),
 
                 Text(
-                  ProfileStrings.shelfCoverStyleLabel,
+                  context.l10n.shelfCoverStyleLabel,
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
@@ -391,15 +413,15 @@ class _SettingsPageState extends State<SettingsPage> {
                   valueListenable: ShelfSkinService.instance.coverStyle,
                   builder: (context, currentStyle, _) {
                     return SegmentedButton<ShelfCoverStyle>(
-                      segments: const [
+                      segments: [
                         ButtonSegment(
                           value: ShelfCoverStyle.plain,
-                          label: Text(ProfileStrings.shelfCoverStylePlain),
+                          label: Text(context.l10n.shelfCoverStylePlain),
                           icon: Icon(Icons.crop_square),
                         ),
                         ButtonSegment(
                           value: ShelfCoverStyle.cartridge,
-                          label: Text(ProfileStrings.shelfCoverStyleCartridge),
+                          label: Text(context.l10n.shelfCoverStyleCartridge),
                           icon: Icon(Icons.videogame_asset),
                         ),
                       ],
@@ -414,6 +436,42 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
           ),
 
+          const SizedBox(height: 32),
+
+          Text(
+            context.l10n.languageSectionTitle,
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 14),
+
+          WoodDrawerContainer(
+            child: ValueListenableBuilder<Locale>(
+              valueListenable: LocaleService.instance.locale,
+              builder: (context, currentLocale, _) {
+                return SegmentedButton<Locale>(
+                  segments: [
+                    ButtonSegment(
+                      value: const Locale('ca'),
+                      label: Text(context.l10n.languageCatalan),
+                    ),
+                    ButtonSegment(
+                      value: const Locale('es'),
+                      label: Text(context.l10n.languageSpanish),
+                    ),
+                    ButtonSegment(
+                      value: const Locale('en'),
+                      label: Text(context.l10n.languageEnglish),
+                    ),
+                  ],
+                  selected: {currentLocale},
+                  onSelectionChanged: isSavingLocale
+                      ? null
+                      : (selection) => _setLocale(selection.first),
+                );
+              },
+            ),
+          ),
+
           const SizedBox(height: 40),
 
           OutlinedButton.icon(
@@ -421,7 +479,7 @@ class _SettingsPageState extends State<SettingsPage> {
               await AuthService().signOut();
             },
             icon: const Icon(Icons.logout),
-            label: const Text(AppStrings.actionLogout),
+            label: Text(context.l10n.actionLogout),
           ),
         ],
       ),

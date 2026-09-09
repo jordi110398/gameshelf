@@ -1,12 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:gameshelf/core/localization/app_localizations_x.dart';
 
-enum GameStatus {
-  wantToPlay,
-  playing,
-  completed,
-  dropped,
-  paused,
-}
+enum GameStatus { wantToPlay, playing, completed, dropped, paused }
 
 extension GameStatusExtension on GameStatus {
   IconData get icon {
@@ -66,22 +61,22 @@ extension GameStatusExtension on GameStatus {
     }
   }
 
-  String get displayName {
+  String localizedDisplayName(BuildContext context) {
     switch (this) {
       case GameStatus.wantToPlay:
-        return "Want to Play";
+        return context.l10n.gameStatusWantToPlay;
 
       case GameStatus.playing:
-        return "Playing";
+        return context.l10n.gameStatusPlaying;
 
       case GameStatus.completed:
-        return "Completed";
+        return context.l10n.gameStatusCompleted;
 
       case GameStatus.dropped:
-        return "Dropped";
+        return context.l10n.gameStatusDropped;
 
       case GameStatus.paused:
-        return "Paused";
+        return context.l10n.gameStatusPaused;
     }
   }
 }

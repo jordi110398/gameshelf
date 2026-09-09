@@ -1,8 +1,8 @@
+import 'package:gameshelf/core/localization/app_localizations_x.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:gameshelf/core/navigation/page_transitions.dart';
-import 'package:gameshelf/core/strings/notification_strings.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:gameshelf/core/utils/error_messages.dart';
@@ -53,7 +53,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            '${NotificationStrings.loadFailedPrefix}${friendlyError(e)}',
+            '${context.l10n.notificationLoadFailedPrefix}${friendlyError(context, e)}',
           ),
         ),
       );
@@ -91,7 +91,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text(friendlyError(e))));
+      ).showSnackBar(SnackBar(content: Text(friendlyError(context, e))));
     }
   }
 
@@ -128,12 +128,12 @@ class _NotificationsPageState extends State<NotificationsPage> {
   String _messageFor(NotificationItem item) {
     switch (item.type) {
       case NotificationType.friendRequest:
-        return NotificationStrings.listFriendRequest;
+        return context.l10n.listFriendRequest;
       case NotificationType.friendAccepted:
-        return NotificationStrings.listFriendAccepted;
+        return context.l10n.listFriendAccepted;
       case NotificationType.activityLike:
-        return '${NotificationStrings.listActivityLikePrefix}'
-            '${item.gameTitle ?? NotificationStrings.listActivityLikeUnknownGame}';
+        return '${context.l10n.listActivityLikePrefix}'
+            '${item.gameTitle ?? context.l10n.listActivityLikeUnknownGame}';
       case NotificationType.unknown:
         // NotificationRepository ja el descarta abans que arribi aquí.
         return '';
@@ -159,12 +159,12 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text(NotificationStrings.appBarTitle),
+        title: Text(context.l10n.notificationAppBarTitle),
         actions: [
           if (hasUnread)
             TextButton(
               onPressed: _markAllAsRead,
-              child: const Text(NotificationStrings.markAllAsRead),
+              child: Text(context.l10n.markAllAsRead),
             ),
         ],
       ),
@@ -178,7 +178,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                 : _items.isEmpty
                 ? Center(
                     child: Text(
-                      NotificationStrings.emptyList,
+                      context.l10n.emptyList,
                       style: TextStyle(color: Colors.grey.shade600),
                     ),
                   )

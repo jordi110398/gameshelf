@@ -1,10 +1,10 @@
+import 'package:gameshelf/core/localization/app_localizations_x.dart';
 import 'package:flutter/material.dart';
 import 'package:gameshelf/features/home/widgets/games_grid.dart';
 import 'package:gameshelf/core/widgets/bookshelf_background.dart';
 import 'package:gameshelf/core/widgets/floating_pill.dart';
 import 'package:gameshelf/core/widgets/pressable_scale.dart';
 import 'package:gameshelf/core/widgets/shimmer_box.dart';
-import 'package:gameshelf/core/strings/home_strings.dart';
 import 'package:gameshelf/models/game_status.dart';
 import 'package:gameshelf/models/library_game.dart';
 import 'package:gameshelf/repositories/supabase_library_repository.dart';
@@ -18,18 +18,18 @@ enum LibraryFilter { library, dropped, wantToPlay }
 enum LibrarySort { dateAdded, datePlayed, hoursPlayed, status, title }
 
 extension on LibrarySort {
-  String get label {
+  String label(BuildContext context) {
     switch (this) {
       case LibrarySort.dateAdded:
-        return HomeStrings.sortDateAdded;
+        return context.l10n.sortDateAdded;
       case LibrarySort.datePlayed:
-        return HomeStrings.sortDatePlayed;
+        return context.l10n.sortDatePlayed;
       case LibrarySort.hoursPlayed:
-        return HomeStrings.sortHoursPlayed;
+        return context.l10n.sortHoursPlayed;
       case LibrarySort.status:
-        return HomeStrings.sortStatus;
+        return context.l10n.sortStatus;
       case LibrarySort.title:
-        return HomeStrings.sortTitle;
+        return context.l10n.sortTitle;
     }
   }
 
@@ -225,8 +225,8 @@ class HomePageState extends State<HomePage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            "${profile?.nickname ?? HomeStrings.defaultNickname}"
-            "${HomeStrings.titleSuffix}",
+            "${profile?.nickname ?? context.l10n.defaultNickname}"
+            "${context.l10n.titleSuffix}",
             style: Theme.of(context).textTheme.headlineMedium?.copyWith(
               fontWeight: FontWeight.w800,
               letterSpacing: -0.8,
@@ -234,7 +234,7 @@ class HomePageState extends State<HomePage> {
           ),
           const SizedBox(height: 4),
           Text(
-            '$totalGames ${HomeStrings.gamesCountSuffix}',
+            '$totalGames ${context.l10n.gamesCountSuffix}',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: colorScheme.onSurfaceVariant,
             ),
@@ -281,7 +281,7 @@ class HomePageState extends State<HomePage> {
     final colorScheme = Theme.of(context).colorScheme;
 
     return PopupMenuButton<LibrarySort>(
-      tooltip: HomeStrings.sortTooltip,
+      tooltip: context.l10n.sortTooltip,
       initialValue: selectedSort,
       onSelected: (value) {
         setState(() {
@@ -297,7 +297,7 @@ class HomePageState extends State<HomePage> {
             children: [
               Icon(sort.icon, size: 18),
               const SizedBox(width: 10),
-              Text(sort.label),
+              Text(sort.label(context)),
               if (isSelected) ...[
                 const Spacer(),
                 Icon(Icons.check, size: 18, color: colorScheme.primary),
@@ -419,11 +419,11 @@ class HomePageState extends State<HomePage> {
           });
         },
         decoration: InputDecoration(
-          hintText: HomeStrings.searchHint,
+          hintText: context.l10n.homeSearchHint,
           prefixIcon: const Icon(Icons.search, size: 20),
           suffixIcon: IconButton(
             icon: const Icon(Icons.close, size: 20),
-            tooltip: HomeStrings.searchCloseTooltip,
+            tooltip: context.l10n.searchCloseTooltip,
             onPressed: _collapseSearch,
           ),
           filled: true,
@@ -494,7 +494,7 @@ class HomePageState extends State<HomePage> {
                               _buildFilterButton(
                                 context: context,
                                 icon: Icons.library_books_outlined,
-                                label: HomeStrings.filterLibrary,
+                                label: context.l10n.homeFilterLibrary,
                                 count: libraryCount,
                                 selected:
                                     selectedFilter == LibraryFilter.library,
@@ -509,7 +509,7 @@ class HomePageState extends State<HomePage> {
                               _buildFilterButton(
                                 context: context,
                                 icon: Icons.cancel_outlined,
-                                label: HomeStrings.filterDropped,
+                                label: context.l10n.homeFilterDropped,
                                 count: droppedCount,
                                 selected:
                                     selectedFilter == LibraryFilter.dropped,
@@ -524,7 +524,7 @@ class HomePageState extends State<HomePage> {
                               _buildFilterButton(
                                 context: context,
                                 icon: Icons.bookmark_outline,
-                                label: HomeStrings.filterWishlist,
+                                label: context.l10n.filterWishlist,
                                 count: wantToPlayCount,
                                 selected:
                                     selectedFilter == LibraryFilter.wantToPlay,
@@ -564,27 +564,27 @@ class HomePageState extends State<HomePage> {
     switch (selectedFilter) {
       case LibraryFilter.library:
         icon = Icons.videogame_asset_outlined;
-        title = HomeStrings.emptyLibraryTitle;
-        subtitle = HomeStrings.emptyLibrarySubtitle;
+        title = context.l10n.emptyLibraryTitle;
+        subtitle = context.l10n.emptyLibrarySubtitle;
         break;
 
       case LibraryFilter.dropped:
         icon = Icons.cancel_outlined;
-        title = HomeStrings.emptyDroppedTitle;
-        subtitle = HomeStrings.emptyDroppedSubtitle;
+        title = context.l10n.emptyDroppedTitle;
+        subtitle = context.l10n.emptyDroppedSubtitle;
         break;
 
       case LibraryFilter.wantToPlay:
         icon = Icons.bookmark_outline;
-        title = HomeStrings.emptyWishlistTitle;
-        subtitle = HomeStrings.emptyWishlistSubtitle;
+        title = context.l10n.emptyWishlistTitle;
+        subtitle = context.l10n.emptyWishlistSubtitle;
         break;
     }
 
     if (searchQuery.trim().isNotEmpty) {
       icon = Icons.search_off;
-      title = HomeStrings.emptySearchTitle;
-      subtitle = HomeStrings.emptySearchSubtitle;
+      title = context.l10n.emptySearchTitle;
+      subtitle = context.l10n.emptySearchSubtitle;
     }
 
     return Center(
@@ -654,7 +654,7 @@ class HomePageState extends State<HomePage> {
 
           if (snapshot.hasError) {
             return Center(
-              child: Text('${HomeStrings.loadErrorPrefix}${snapshot.error}'),
+              child: Text('${context.l10n.loadErrorPrefix}${snapshot.error}'),
             );
           }
 

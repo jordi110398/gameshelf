@@ -1,8 +1,6 @@
+import 'package:gameshelf/core/localization/app_localizations_x.dart';
 import 'package:flutter/material.dart';
 import 'package:gameshelf/core/navigation/page_transitions.dart';
-import 'package:gameshelf/core/strings/app_strings.dart';
-import 'package:gameshelf/core/strings/llamp_strings.dart';
-import 'package:gameshelf/core/strings/profile_strings.dart';
 import 'package:gameshelf/core/widgets/app_logo.dart';
 import 'package:gameshelf/core/widgets/bookshelf_background.dart';
 import 'package:gameshelf/core/widgets/cartridge_cover.dart';
@@ -34,19 +32,19 @@ import 'package:gameshelf/features/profile/widgets/user_tags_row.dart';
 import 'package:gameshelf/features/game/pages/game_detail_page.dart';
 import 'package:gameshelf/repositories/activity_repository.dart';
 
-const _monthNames = [
-  'Gener',
-  'Febrer',
-  'Març',
-  'Abril',
-  'Maig',
-  'Juny',
-  'Juliol',
-  'Agost',
-  'Setembre',
-  'Octubre',
-  'Novembre',
-  'Desembre',
+List<String> _monthNames(BuildContext context) => [
+  context.l10n.monthJanuary,
+  context.l10n.monthFebruary,
+  context.l10n.monthMarch,
+  context.l10n.monthApril,
+  context.l10n.monthMay,
+  context.l10n.monthJune,
+  context.l10n.monthJuly,
+  context.l10n.monthAugust,
+  context.l10n.monthSeptember,
+  context.l10n.monthOctober,
+  context.l10n.monthNovember,
+  context.l10n.monthDecember,
 ];
 
 class UserProfilePage extends StatefulWidget {
@@ -168,7 +166,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            '${ProfileStrings.loadFailedPrefix}${friendlyError(e)}',
+            '${context.l10n.profileLoadFailedPrefix}${friendlyError(context, e)}',
           ),
         ),
       );
@@ -274,7 +272,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            '${ProfileStrings.sendRequestFailedPrefix}${friendlyError(e)}',
+            '${context.l10n.sendRequestFailedPrefix}${friendlyError(context, e)}',
           ),
         ),
       );
@@ -306,7 +304,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            '${ProfileStrings.acceptRequestFailedPrefix}${friendlyError(e)}',
+            '${context.l10n.acceptRequestFailedPrefix}${friendlyError(context, e)}',
           ),
         ),
       );
@@ -338,7 +336,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            '${ProfileStrings.rejectRequestFailedPrefix}${friendlyError(e)}',
+            '${context.l10n.rejectRequestFailedPrefix}${friendlyError(context, e)}',
           ),
         ),
       );
@@ -370,7 +368,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            '${ProfileStrings.removeFriendFailedPrefix}${friendlyError(e)}',
+            '${context.l10n.removeFriendFailedPrefix}${friendlyError(context, e)}',
           ),
         ),
       );
@@ -409,7 +407,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
 
     if (status == null) {
       return IconButton.filled(
-        tooltip: AppStrings.friendshipAdd,
+        tooltip: context.l10n.friendshipAdd,
         onPressed: isFriendshipActionLoading ? null : sendFriendRequest,
         icon: isFriendshipActionLoading
             ? const SizedBox(
@@ -427,7 +425,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
 
     if (status == 'accepted') {
       return IconButton.filled(
-        tooltip: AppStrings.friendshipFriends,
+        tooltip: context.l10n.friendshipFriends,
         onPressed: isFriendshipActionLoading
             ? null
             : () async {
@@ -435,24 +433,22 @@ class _UserProfilePageState extends State<UserProfilePage> {
                   context: context,
                   builder: (context) {
                     return AlertDialog(
-                      title: const Text(ProfileStrings.removeFriendTitle),
+                      title: Text(context.l10n.removeFriendTitle),
                       content: Text(
-                        ProfileStrings.removeFriendBody(
-                          currentProfile.nickname,
-                        ),
+                        context.l10n.removeFriendBody(currentProfile.nickname),
                       ),
                       actions: [
                         TextButton(
                           onPressed: () {
                             Navigator.pop(context, false);
                           },
-                          child: const Text(AppStrings.actionCancel),
+                          child: Text(context.l10n.actionCancel),
                         ),
                         FilledButton(
                           onPressed: () {
                             Navigator.pop(context, true);
                           },
-                          child: const Text(AppStrings.actionDelete),
+                          child: Text(context.l10n.actionDelete),
                         ),
                       ],
                     );
@@ -484,7 +480,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
     // Jo he enviat la sol·licitud
     if (requesterId == currentUserId) {
       return IconButton.filled(
-        tooltip: AppStrings.friendshipRequestSent,
+        tooltip: context.l10n.friendshipRequestSent,
         onPressed: null,
         icon: const Icon(Icons.hourglass_empty),
       );
@@ -495,7 +491,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
       mainAxisSize: MainAxisSize.min,
       children: [
         IconButton.filled(
-          tooltip: AppStrings.actionReject,
+          tooltip: context.l10n.actionReject,
           onPressed: isFriendshipActionLoading ? null : rejectFriendRequest,
           icon: const Icon(Icons.close),
         ),
@@ -503,7 +499,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
         const SizedBox(width: 8),
 
         IconButton.filled(
-          tooltip: AppStrings.actionAccept,
+          tooltip: context.l10n.actionAccept,
           onPressed: isFriendshipActionLoading ? null : acceptFriendRequest,
           icon: isFriendshipActionLoading
               ? const SizedBox(
@@ -592,7 +588,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
 
     for (final libraryGame in completed) {
       final date = libraryGame.userGame.completedAt!;
-      final key = '${_monthNames[date.month - 1]} ${date.year}';
+      final key = '${_monthNames(context)[date.month - 1]} ${date.year}';
 
       grouped.putIfAbsent(key, () => []).add(libraryGame);
     }
@@ -649,7 +645,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
             ),
             const SizedBox(height: 10),
             Text(
-              ProfileStrings.noReviewsYet,
+              context.l10n.noReviewsYet,
               style: TextStyle(
                 color: isLightWood
                     ? Colors.grey.shade800
@@ -690,7 +686,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
               );
             },
             icon: const Icon(Icons.arrow_forward),
-            label: Text(ProfileStrings.seeAllReviews(reviewedGames.length)),
+            label: Text(context.l10n.seeAllReviews(reviewedGames.length)),
           ),
       ],
     );
@@ -716,13 +712,13 @@ class _UserProfilePageState extends State<UserProfilePage> {
         actions: [
           if (isMyProfile)
             IconButton(
-              tooltip: ProfileStrings.shareProfileTooltip,
+              tooltip: context.l10n.shareProfileTooltip,
               icon: const Icon(Icons.ios_share),
               onPressed: _openShareProfile,
             ),
           if (isMyProfile)
             IconButton(
-              tooltip: ProfileStrings.settingsTooltip,
+              tooltip: context.l10n.settingsTooltip,
               icon: const Icon(Icons.settings_outlined),
               onPressed: _openSettings,
             ),
@@ -854,28 +850,28 @@ class _UserProfilePageState extends State<UserProfilePage> {
                         Expanded(
                           child: _ProfileStat(
                             value: currentStats.games.toString(),
-                            label: ProfileStrings.statGames,
+                            label: context.l10n.statGames,
                           ),
                         ),
                         _statDivider(context),
                         Expanded(
                           child: _ProfileStat(
                             value: currentStats.completed.toString(),
-                            label: ProfileStrings.statCompleted,
+                            label: context.l10n.statCompleted,
                           ),
                         ),
                         _statDivider(context),
                         Expanded(
                           child: _ProfileStat(
                             value: currentStats.reviews.toString(),
-                            label: ProfileStrings.statReviews,
+                            label: context.l10n.statReviews,
                           ),
                         ),
                         _statDivider(context),
                         Expanded(
                           child: _ProfileStat(
                             value: '${formatHours(currentStats.hours)}h',
-                            label: ProfileStrings.statHours,
+                            label: context.l10n.statHours,
                           ),
                         ),
                       ],
@@ -899,9 +895,9 @@ class _UserProfilePageState extends State<UserProfilePage> {
                     if (isMyProfile) ...[
                       Row(
                         children: [
-                          const Expanded(
+                          Expanded(
                             child: Text(
-                              LlampStrings.myShelvesTitle,
+                              context.l10n.myShelvesTitle,
                               style: TextStyle(
                                 fontSize: 22,
                                 fontWeight: FontWeight.bold,
@@ -925,7 +921,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                     TextButton.icon(
                       onPressed: _openMyShelves,
                       icon: const Icon(Icons.grid_view_outlined),
-                      label: const Text(LlampStrings.myShelvesAction),
+                      label: Text(context.l10n.myShelvesAction),
                     ),
                   ],
 
@@ -938,8 +934,8 @@ class _UserProfilePageState extends State<UserProfilePage> {
 
                     Align(
                       alignment: Alignment.centerLeft,
-                      child: const Text(
-                        ProfileStrings.myReviewsTitle,
+                      child: Text(
+                        context.l10n.myReviewsTitle,
                         style: TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
@@ -970,7 +966,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                     Align(
                       alignment: Alignment.centerLeft,
                       child: Text(
-                        ProfileStrings.gameshelfOf(currentProfile.nickname),
+                        context.l10n.gameshelfOf(currentProfile.nickname),
                         style: const TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
@@ -1157,8 +1153,8 @@ class _UserProfilePageState extends State<UserProfilePage> {
                   children: [
                     const Icon(Icons.star, size: 16, color: Colors.amber),
                     const SizedBox(width: 6),
-                    const Text(
-                      ProfileStrings.favoritesTitle,
+                    Text(
+                      context.l10n.favoritesTitle,
                       style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.bold,
@@ -1291,8 +1287,8 @@ class _UserProfilePageState extends State<UserProfilePage> {
       children: [
         Align(
           alignment: Alignment.centerLeft,
-          child: const Text(
-            ProfileStrings.completedTitle,
+          child: Text(
+            context.l10n.completedTitle,
             style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
           ),
         ),
@@ -1355,19 +1351,22 @@ class _UserProfilePageState extends State<UserProfilePage> {
       scrollDirection: Axis.horizontal,
       child: Row(
         children: [
-          _buildFilterChip(label: ProfileStrings.filterLibrary, status: null),
+          _buildFilterChip(
+            label: context.l10n.profileFilterLibrary,
+            status: null,
+          ),
 
           const SizedBox(width: 8),
 
           _buildFilterChip(
-            label: ProfileStrings.filterDropped,
+            label: context.l10n.profileFilterDropped,
             status: GameStatus.dropped,
           ),
 
           const SizedBox(width: 8),
 
           _buildFilterChip(
-            label: ProfileStrings.filterWantToPlay,
+            label: context.l10n.filterWantToPlay,
             status: GameStatus.wantToPlay,
           ),
         ],
@@ -1418,22 +1417,22 @@ class _UserProfilePageState extends State<UserProfilePage> {
   String _emptyGamesText() {
     switch (selectedStatus) {
       case GameStatus.dropped:
-        return ProfileStrings.emptyGamesDropped;
+        return context.l10n.emptyGamesDropped;
 
       case GameStatus.wantToPlay:
-        return ProfileStrings.emptyGamesWantToPlay;
+        return context.l10n.emptyGamesWantToPlay;
 
       case GameStatus.playing:
-        return ProfileStrings.emptyGamesPlaying;
+        return context.l10n.emptyGamesPlaying;
 
       case GameStatus.completed:
-        return ProfileStrings.emptyGamesCompleted;
+        return context.l10n.emptyGamesCompleted;
 
       case GameStatus.paused:
-        return ProfileStrings.emptyGamesPaused;
+        return context.l10n.emptyGamesPaused;
 
       case null:
-        return ProfileStrings.emptyGamesAny;
+        return context.l10n.emptyGamesAny;
     }
   }
 

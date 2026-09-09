@@ -1,3 +1,4 @@
+import 'package:gameshelf/core/localization/app_localizations_x.dart';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -9,9 +10,6 @@ import 'package:gameshelf/models/profile.dart';
 import 'package:gameshelf/repositories/profile_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:gameshelf/core/services/auth_service.dart';
-import 'package:gameshelf/core/strings/app_strings.dart';
-import 'package:gameshelf/core/strings/legal_strings.dart';
-import 'package:gameshelf/core/strings/profile_strings.dart';
 import 'package:gameshelf/core/utils/error_messages.dart';
 
 class EditProfilePage extends StatefulWidget {
@@ -165,7 +163,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text(friendlyError(e))));
+      ).showSnackBar(SnackBar(content: Text(friendlyError(context, e))));
 
       setState(() {
         isSaving = false;
@@ -182,14 +180,14 @@ class _EditProfilePageState extends State<EditProfilePage> {
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
-          title: const Text(ProfileStrings.deleteAccountDialogTitle),
-          content: const Text(ProfileStrings.deleteAccountDialogBody),
+          title: Text(context.l10n.deleteAccountDialogTitle),
+          content: Text(context.l10n.deleteAccountDialogBody),
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.pop(dialogContext, false);
               },
-              child: const Text(AppStrings.actionCancel),
+              child: Text(context.l10n.actionCancel),
             ),
             FilledButton(
               style: FilledButton.styleFrom(
@@ -199,7 +197,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
               onPressed: () {
                 Navigator.pop(dialogContext, true);
               },
-              child: const Text(ProfileStrings.deleteAccountTitle),
+              child: Text(context.l10n.deleteAccountTitle),
             ),
           ],
         );
@@ -229,7 +227,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            '${ProfileStrings.deleteAccountFailedPrefix}${friendlyError(e)}',
+            '${context.l10n.deleteAccountFailedPrefix}${friendlyError(context, e)}',
           ),
         ),
       );
@@ -334,7 +332,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
             final canChange = passwordValid && passwordsMatch && !isChanging;
 
             return AlertDialog(
-              title: const Text(ProfileStrings.changePasswordDialogTitle),
+              title: Text(context.l10n.changePasswordDialogTitle),
 
               content: SingleChildScrollView(
                 child: Column(
@@ -350,8 +348,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       onChanged: (_) {
                         setDialogState(() {});
                       },
-                      decoration: const InputDecoration(
-                        labelText: ProfileStrings.newPasswordLabel,
+                      decoration: InputDecoration(
+                        labelText: context.l10n.newPasswordLabel,
                         prefixIcon: Icon(Icons.lock_outline),
                         border: OutlineInputBorder(),
                       ),
@@ -367,8 +365,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            ProfileStrings.passwordRequirementsIntro,
+                          Text(
+                            context.l10n.passwordRequirementsIntro,
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 13,
@@ -380,31 +378,31 @@ class _EditProfilePageState extends State<EditProfilePage> {
                           _buildPasswordRequirement(
                             fulfilled: hasMinLength,
                             hasStartedTyping: hasStartedTyping,
-                            text: ProfileStrings.reqMinLength,
+                            text: context.l10n.reqMinLength,
                           ),
 
                           _buildPasswordRequirement(
                             fulfilled: hasUppercase,
                             hasStartedTyping: hasStartedTyping,
-                            text: ProfileStrings.reqUppercase,
+                            text: context.l10n.reqUppercase,
                           ),
 
                           _buildPasswordRequirement(
                             fulfilled: hasLowercase,
                             hasStartedTyping: hasStartedTyping,
-                            text: ProfileStrings.reqLowercase,
+                            text: context.l10n.reqLowercase,
                           ),
 
                           _buildPasswordRequirement(
                             fulfilled: hasNumber,
                             hasStartedTyping: hasStartedTyping,
-                            text: ProfileStrings.reqNumber,
+                            text: context.l10n.reqNumber,
                           ),
 
                           _buildPasswordRequirement(
                             fulfilled: hasSymbol,
                             hasStartedTyping: hasStartedTyping,
-                            text: ProfileStrings.reqSymbol,
+                            text: context.l10n.reqSymbol,
                           ),
                         ],
                       ),
@@ -423,7 +421,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                         setDialogState(() {});
                       },
                       decoration: InputDecoration(
-                        labelText: ProfileStrings.repeatPasswordLabel,
+                        labelText: context.l10n.repeatPasswordLabel,
                         prefixIcon: const Icon(Icons.lock_outline),
                         border: const OutlineInputBorder(),
                         suffixIcon: confirmPassword.isEmpty
@@ -441,10 +439,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
                     if (confirmPassword.isNotEmpty && !passwordsMatch) ...[
                       const SizedBox(height: 6),
-                      const Align(
+                      Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
-                          ProfileStrings.passwordsDontMatch,
+                          context.l10n.passwordsDontMatch,
                           style: TextStyle(color: Colors.red, fontSize: 12),
                         ),
                       ),
@@ -460,7 +458,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       : () {
                           Navigator.pop(dialogContext);
                         },
-                  child: const Text(AppStrings.actionCancel),
+                  child: Text(context.l10n.actionCancel),
                 ),
 
                 FilledButton(
@@ -480,9 +478,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
                             Navigator.pop(dialogContext);
 
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
+                              SnackBar(
                                 content: Text(
-                                  ProfileStrings.changePasswordSuccess,
+                                  context.l10n.changePasswordSuccess,
                                 ),
                               ),
                             );
@@ -496,8 +494,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(
-                                  '${ProfileStrings.changePasswordFailedPrefix}'
-                                  '${friendlyError(e)}',
+                                  '${context.l10n.changePasswordFailedPrefix}'
+                                  '${friendlyError(context, e)}',
                                 ),
                               ),
                             );
@@ -510,7 +508,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                           height: 18,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : const Text(ProfileStrings.changeAction),
+                      : Text(context.l10n.changeAction),
                 ),
               ],
             );
@@ -598,7 +596,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text(ProfileStrings.editAppBarTitle)),
+      appBar: AppBar(title: Text(context.l10n.editAppBarTitle)),
 
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
@@ -616,7 +614,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
             Center(
               child: TextButton(
                 onPressed: isSaving || isDeletingAccount ? null : pickAvatar,
-                child: const Text(ProfileStrings.changePhoto),
+                child: Text(context.l10n.changePhoto),
               ),
             ),
 
@@ -625,8 +623,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
             // ───────────────────────────────────
             // NICKNAME
             // ───────────────────────────────────
-            const Text(
-              ProfileStrings.nicknameLabel,
+            Text(
+              context.l10n.nicknameLabel,
               style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
             ),
 
@@ -647,8 +645,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
             // ───────────────────────────────────
             // BIO
             // ───────────────────────────────────
-            const Text(
-              ProfileStrings.bioLabel,
+            Text(
+              context.l10n.bioLabel,
               style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
             ),
 
@@ -659,9 +657,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
               maxLength: 150,
               minLines: 3,
               maxLines: 5,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 border: OutlineInputBorder(),
-                hintText: ProfileStrings.bioHint,
+                hintText: context.l10n.bioHint,
                 alignLabelWithHint: true,
               ),
             ),
@@ -671,8 +669,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
             // ───────────────────────────────────
             // EMAIL
             // ───────────────────────────────────
-            const Text(
-              ProfileStrings.emailLabel,
+            Text(
+              context.l10n.emailLabel,
               style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
             ),
 
@@ -704,7 +702,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       )
                     : const Icon(Icons.save),
                 label: Text(
-                  isSaving ? ProfileStrings.saving : ProfileStrings.saveChanges,
+                  isSaving ? context.l10n.saving : context.l10n.saveChanges,
                 ),
               ),
             ),
@@ -714,8 +712,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
             // ───────────────────────────────────
             // SEGURETAT
             // ───────────────────────────────────
-            const Text(
-              ProfileStrings.securityTitle,
+            Text(
+              context.l10n.securityTitle,
               style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
             ),
 
@@ -728,14 +726,12 @@ class _EditProfilePageState extends State<EditProfilePage> {
               child: ListTile(
                 leading: const Icon(Icons.lock_outline),
 
-                title: const Text(
-                  ProfileStrings.changePasswordTitle,
+                title: Text(
+                  context.l10n.changePasswordTitle,
                   style: TextStyle(fontWeight: FontWeight.w600),
                 ),
 
-                subtitle: const Text(
-                  ProfileStrings.changePasswordSubtitle,
-                ),
+                subtitle: Text(context.l10n.changePasswordSubtitle),
 
                 trailing: const Icon(Icons.chevron_right),
 
@@ -750,8 +746,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
             // ───────────────────────────────────
             // INFORMACIÓ
             // ───────────────────────────────────
-            const Text(
-              ProfileStrings.informationTitle,
+            Text(
+              context.l10n.informationTitle,
               style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
             ),
 
@@ -763,8 +759,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
               child: ListTile(
                 leading: const Icon(Icons.info_outline),
-                title: const Text(
-                  LegalStrings.aboutTitle,
+                title: Text(
+                  context.l10n.aboutTitle,
                   style: TextStyle(fontWeight: FontWeight.w600),
                 ),
                 trailing: const Icon(Icons.chevron_right),
@@ -777,8 +773,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
             // ───────────────────────────────────
             // ZONA DE PERILL
             // ───────────────────────────────────
-            const Text(
-              ProfileStrings.dangerZoneTitle,
+            Text(
+              context.l10n.dangerZoneTitle,
               style: TextStyle(
                 fontSize: 17,
                 fontWeight: FontWeight.bold,
@@ -801,17 +797,15 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       )
                     : const Icon(Icons.delete_outline, color: Colors.red),
 
-                title: const Text(
-                  ProfileStrings.deleteAccountTitle,
+                title: Text(
+                  context.l10n.deleteAccountTitle,
                   style: TextStyle(
                     color: Colors.red,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
 
-                subtitle: const Text(
-                  ProfileStrings.deleteAccountSubtitle,
-                ),
+                subtitle: Text(context.l10n.deleteAccountSubtitle),
 
                 onTap: isSaving || isDeletingAccount ? null : deleteAccount,
               ),

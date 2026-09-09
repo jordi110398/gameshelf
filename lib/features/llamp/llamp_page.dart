@@ -1,7 +1,7 @@
+import 'package:gameshelf/core/localization/app_localizations_x.dart';
 import 'package:flutter/material.dart';
 import 'package:gameshelf/core/navigation/page_transitions.dart';
 import 'package:gameshelf/core/services/shelf_skin_service.dart';
-import 'package:gameshelf/core/strings/llamp_strings.dart';
 import 'package:gameshelf/core/utils/error_messages.dart';
 import 'package:gameshelf/core/widgets/app_logo.dart';
 import 'package:gameshelf/core/widgets/bookshelf_background.dart';
@@ -69,7 +69,9 @@ class LlampPageState extends State<LlampPage> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('${LlampStrings.loadFailedPrefix}${friendlyError(e)}'),
+          content: Text(
+            '${context.l10n.llampLoadFailedPrefix}${friendlyError(context, e)}',
+          ),
         ),
       );
     }
@@ -90,10 +92,10 @@ class LlampPageState extends State<LlampPage> {
       appBar: AppBar(
         leadingWidth: AppLogo.width(context),
         leading: AppLogo(onTap: widget.onLogoTap),
-        title: const Text(LlampStrings.appBarTitle),
+        title: Text(context.l10n.llampAppBarTitle),
         actions: [
           IconButton(
-            tooltip: LlampStrings.myShelvesAction,
+            tooltip: context.l10n.myShelvesAction,
             icon: const Icon(Icons.grid_view_outlined),
             onPressed: _openMyShelves,
           ),
@@ -117,8 +119,8 @@ class LlampPageState extends State<LlampPage> {
       child: ListView(
         padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
         children: [
-          const Text(
-            LlampStrings.sectionRecommendations,
+          Text(
+            context.l10n.sectionRecommendations,
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 14),
@@ -126,8 +128,8 @@ class LlampPageState extends State<LlampPage> {
 
           const SizedBox(height: 32),
 
-          const Text(
-            LlampStrings.sectionFriendsShelves,
+          Text(
+            context.l10n.sectionFriendsShelves,
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 14),
@@ -150,7 +152,7 @@ class LlampPageState extends State<LlampPage> {
             ),
             const SizedBox(height: 10),
             Text(
-              LlampStrings.emptyRecommendationsNoData,
+              context.l10n.emptyRecommendationsNoData,
               textAlign: TextAlign.center,
               style: TextStyle(color: Colors.grey.shade300),
             ),
@@ -185,7 +187,7 @@ class LlampPageState extends State<LlampPage> {
             Icon(Icons.bolt_outlined, size: 32, color: Colors.grey.shade400),
             const SizedBox(height: 10),
             Text(
-              LlampStrings.emptyFriendsShelves,
+              context.l10n.emptyFriendsShelves,
               textAlign: TextAlign.center,
               style: TextStyle(color: Colors.grey.shade300),
             ),

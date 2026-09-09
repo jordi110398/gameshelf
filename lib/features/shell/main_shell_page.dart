@@ -1,6 +1,6 @@
+import 'package:gameshelf/core/localization/app_localizations_x.dart';
 import 'package:flutter/material.dart';
 import 'package:gameshelf/core/navigation/page_transitions.dart';
-import 'package:gameshelf/core/strings/app_strings.dart';
 import 'package:gameshelf/core/widgets/floating_pill.dart';
 import 'package:gameshelf/core/widgets/pressable_scale.dart';
 import 'package:gameshelf/core/widgets/shimmer_box.dart';
@@ -36,26 +36,26 @@ class _NavItemData {
   });
 }
 
-const _navItems = [
+List<_NavItemData> _navItems(BuildContext context) => [
   _NavItemData(
     icon: Icons.home_outlined,
     selectedIcon: Icons.home,
-    label: AppStrings.navHome,
+    label: context.l10n.navHome,
   ),
   _NavItemData(
     icon: Icons.bolt_outlined,
     selectedIcon: Icons.bolt,
-    label: AppStrings.navLlamp,
+    label: context.l10n.navLlamp,
   ),
   _NavItemData(
     icon: Icons.people_outline,
     selectedIcon: Icons.people,
-    label: AppStrings.navSocial,
+    label: context.l10n.navSocial,
   ),
   _NavItemData(
     icon: Icons.person_outline,
     selectedIcon: Icons.person,
-    label: AppStrings.navProfile,
+    label: context.l10n.navProfile,
   ),
 ];
 
@@ -184,7 +184,7 @@ class _FloatingNavBar extends StatelessWidget {
 
   Widget _navTab(BuildContext context, int index) {
     final colorScheme = Theme.of(context).colorScheme;
-    final item = _navItems[index];
+    final item = _navItems(context)[index];
     final isSelected = index == currentIndex;
 
     return PressableScale(
@@ -320,8 +320,8 @@ class ProfileTabState extends State<ProfileTab> {
     }
 
     if (profile == null) {
-      return const Scaffold(
-        body: Center(child: Text('No s\'ha pogut carregar el perfil')),
+      return Scaffold(
+        body: Center(child: Text(context.l10n.profileLoadFailedGeneric)),
       );
     }
 

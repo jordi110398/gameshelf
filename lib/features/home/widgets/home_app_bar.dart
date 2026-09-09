@@ -1,10 +1,9 @@
+import 'package:gameshelf/core/localization/app_localizations_x.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:gameshelf/core/navigation/page_transitions.dart';
 import 'package:gameshelf/core/services/pwa_install_service.dart';
-import 'package:gameshelf/core/strings/home_strings.dart';
-import 'package:gameshelf/core/strings/legal_strings.dart';
 import 'package:gameshelf/core/widgets/app_logo.dart';
 import 'package:gameshelf/features/notifications/notifications_page.dart';
 import 'package:gameshelf/features/notifications/widgets/notification_banner.dart';
@@ -19,11 +18,7 @@ class HomeAppBar extends StatefulWidget implements PreferredSizeWidget {
   final VoidCallback onLibraryChanged;
   final VoidCallback? onLogoTap;
 
-  const HomeAppBar({
-    super.key,
-    required this.onLibraryChanged,
-    this.onLogoTap,
-  });
+  const HomeAppBar({super.key, required this.onLibraryChanged, this.onLogoTap});
 
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
@@ -162,7 +157,7 @@ class _HomeAppBarState extends State<HomeAppBar>
         child: IconButton(
           padding: EdgeInsets.zero,
           icon: const Icon(Icons.add, color: Colors.white),
-          tooltip: HomeStrings.addGameTooltip,
+          tooltip: context.l10n.addGameTooltip,
           onPressed: () async {
             await pushFade(context, (_) => const SearchPage());
 
@@ -186,7 +181,7 @@ class _HomeAppBarState extends State<HomeAppBar>
             child: IconButton(
               padding: EdgeInsets.zero,
               icon: const Icon(Icons.install_mobile_outlined),
-              tooltip: LegalStrings.installAppTitle,
+              tooltip: context.l10n.installAppTitle,
               onPressed: () =>
                   _installService.promptOrShowInstallInstructions(context),
             ),
@@ -226,7 +221,7 @@ class _HomeAppBarState extends State<HomeAppBar>
                   );
                 },
               ),
-              tooltip: HomeStrings.notificationsTooltip,
+              tooltip: context.l10n.notificationsTooltip,
               onPressed: _openNotifications,
             ),
           ),

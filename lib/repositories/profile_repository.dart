@@ -137,6 +137,23 @@ class ProfileRepository {
     await client.from('profiles').update(update).eq('id', user.id);
   }
 
+  // ─────────────────────────────────────────────
+  // CONFIGURACIÓ: IDIOMA
+  // ─────────────────────────────────────────────
+
+  Future<void> updateLanguage(String languageCode) async {
+    final user = client.auth.currentUser;
+
+    if (user == null) {
+      throw Exception('Usuari no autenticat');
+    }
+
+    await client
+        .from('profiles')
+        .update({'language': languageCode})
+        .eq('id', user.id);
+  }
+
   Future<ProfileStats> getMyStats() async {
     final user = client.auth.currentUser;
 

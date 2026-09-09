@@ -1,10 +1,10 @@
+import 'package:gameshelf/core/localization/app_localizations_x.dart';
 import 'dart:html' as html;
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:gameshelf/core/strings/profile_strings.dart';
 import 'package:gameshelf/core/utils/error_messages.dart';
 import 'package:gameshelf/core/utils/hours_format.dart';
 import 'package:gameshelf/core/widgets/dither_banner.dart';
@@ -101,7 +101,7 @@ class _ShareProfilePageState extends State<ShareProfilePage> {
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text(ProfileStrings.shareDownloadedMessage)),
+        SnackBar(content: Text(context.l10n.shareDownloadedMessage)),
       );
     } catch (e) {
       if (!mounted) return;
@@ -109,7 +109,7 @@ class _ShareProfilePageState extends State<ShareProfilePage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            '${ProfileStrings.shareGenerateFailedPrefix}${friendlyError(e)}',
+            '${context.l10n.shareGenerateFailedPrefix}${friendlyError(context, e)}',
           ),
         ),
       );
@@ -132,7 +132,7 @@ class _ShareProfilePageState extends State<ShareProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text(ProfileStrings.shareAppBarTitle)),
+      appBar: AppBar(title: Text(context.l10n.shareAppBarTitle)),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -171,7 +171,7 @@ class _ShareProfilePageState extends State<ShareProfilePage> {
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
                       : const Icon(Icons.download),
-                  label: const Text(ProfileStrings.shareDownloadAction),
+                  label: Text(context.l10n.shareDownloadAction),
                 ),
               ],
             ),
@@ -274,13 +274,19 @@ class _ShareCard extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      _Stat(value: '${stats.games}', label: 'Jocs'),
+                      _Stat(
+                        value: '${stats.games}',
+                        label: context.l10n.statGames,
+                      ),
                       _statDivider(),
-                      _Stat(value: '${stats.completed}', label: 'Completats'),
+                      _Stat(
+                        value: '${stats.completed}',
+                        label: context.l10n.statCompleted,
+                      ),
                       _statDivider(),
                       _Stat(
                         value: '${formatHours(stats.hours)}h',
-                        label: 'Hores',
+                        label: context.l10n.statHours,
                       ),
                     ],
                   ),
@@ -303,8 +309,8 @@ class _ShareCard extends StatelessWidget {
 
                   const SizedBox(height: 12),
 
-                  const Text(
-                    ProfileStrings.shareQrCaption,
+                  Text(
+                    context.l10n.shareQrCaption,
                     textAlign: TextAlign.center,
                     style: TextStyle(color: Colors.white70, fontSize: 12),
                   ),

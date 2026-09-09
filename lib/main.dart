@@ -1,6 +1,7 @@
 import 'dart:js_interop';
 
 import 'package:flutter/material.dart';
+import 'package:gameshelf/core/services/locale_service.dart';
 import 'package:gameshelf/core/services/shelf_skin_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:timeago/timeago.dart' as timeago;
@@ -52,8 +53,10 @@ Future<void> main() async {
     );
   };
 
-  // Registra el català per a timeago
+  // Registra els idiomes de l'app per a timeago (l'anglès és el que fa
+  // servir per defecte si no se'n registra cap altre).
   timeago.setLocaleMessages('ca', timeago.CaMessages());
+  timeago.setLocaleMessages('es', timeago.EsMessages());
 
   await Supabase.initialize(
     url: 'https://qpcruteqjhnhrzwunqeh.supabase.co',
@@ -65,6 +68,7 @@ Future<void> main() async {
   );
 
   ShelfSkinService.instance.init();
+  LocaleService.instance.init();
 
   runApp(const GameShelfApp());
 }

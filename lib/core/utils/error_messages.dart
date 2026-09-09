@@ -1,51 +1,53 @@
+import 'package:flutter/widgets.dart';
+import 'package:gameshelf/core/localization/app_localizations_x.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 /// Tradueix un error tècnic (Supabase o intern) a un missatge entenedor
-/// en català per mostrar-lo a l'usuari.
+/// per mostrar-lo a l'usuari.
 ///
 /// Centralitzat aquí perquè és l'únic lloc on cal tocar el text quan
 /// s'afegeixi traducció a la resta de l'app més endavant.
-String friendlyError(Object error) {
+String friendlyError(BuildContext context, Object error) {
   if (error is AuthException) {
-    return _authMessage(error);
+    return _authMessage(context, error);
   }
 
   if (error is PostgrestException) {
-    return _postgrestMessage(error);
+    return _postgrestMessage(context, error);
   }
 
   if (error is StorageException) {
-    return _storageMessage(error);
+    return _storageMessage(context, error);
   }
 
   if (error is FunctionException) {
-    return _functionMessage(error);
+    return _functionMessage(context, error);
   }
 
-  return _genericMessage(error);
+  return _genericMessage(context, error);
 }
 
-String _authMessage(AuthException error) {
+String _authMessage(BuildContext context, AuthException error) {
   switch (error.code) {
     case 'invalid_credentials':
-      return 'Email o contrasenya incorrectes.';
+      return context.l10n.errorInvalidCredentials;
     case 'email_not_confirmed':
-      return 'Has de confirmar el teu email abans d\'iniciar sessió.';
+      return context.l10n.errorEmailNotConfirmed;
     case 'user_already_exists':
     case 'email_exists':
-      return 'Ja existeix un compte amb aquest email.';
+      return context.l10n.errorEmailExists;
     case 'weak_password':
-      return 'La contrasenya és massa feble.';
+      return context.l10n.errorWeakPassword;
     case 'same_password':
-      return 'La nova contrasenya ha de ser diferent de l\'actual.';
+      return context.l10n.errorSamePassword;
     case 'over_email_send_rate_limit':
     case 'over_request_rate_limit':
-      return 'Has fet massa peticions seguides. Espera una mica i torna-ho a provar.';
+      return context.l10n.errorRateLimited;
     case 'signup_disabled':
-      return 'El registre no està disponible ara mateix.';
+      return context.l10n.errorSignupDisabled;
     case 'session_expired':
     case 'session_not_found':
-      return 'La teva sessió ha caducat. Torna a iniciar sessió.';
+      return context.l10n.errorSessionExpired;
   }
 
   // Els missatges d'AuthException ja estan pensats per mostrar-se a
@@ -54,41 +56,70 @@ String _authMessage(AuthException error) {
   return error.message;
 }
 
-String _postgrestMessage(PostgrestException error) {
+String _postgrestMessage(BuildContext context, PostgrestException error) {
   switch (error.code) {
     case '23505':
-      return 'Ja existeix un registre amb aquestes dades.';
+      return context.l10n.errorDuplicateRecord;
     case '23502':
-      return 'Falten dades obligatòries.';
+      return context.l10n.errorMissingRequiredData;
     case '23503':
-      return 'L\'element referenciat no existeix.';
+      return context.l10n.errorReferencedNotFound;
     case '42501':
-      return 'No tens permís per fer aquesta acció.';
+      return context.l10n.errorPermissionDenied;
   }
 
-  return 'No s\'ha pogut completar l\'operació. Torna-ho a provar.';
+  return context.l10n.errorOperationFailed;
 }
 
-String _storageMessage(StorageException error) {
+String _storageMessage(BuildContext context, StorageException error) {
   if (error.statusCode == '413') {
-    return 'El fitxer és massa gran.';
+    return context.l10n.errorFileTooLarge;
   }
 
-  return 'No s\'ha pogut pujar el fitxer. Torna-ho a provar.';
+  return context.l10n.errorUploadFailed;
 }
 
-String _functionMessage(FunctionException error) {
-  return 'No s\'ha pogut completar l\'operació al servidor.';
+String _functionMessage(BuildContext context, FunctionException error) {
+  return context.l10n.errorServerOperationFailed;
 }
 
-String _genericMessage(Object error) {
+/// Missatges llançats directament des del repositori/servei (que no té
+/// accés a `BuildContext`, per disseny) reconeguts pel seu contingut
+/// exacte i traduïts aquí -- l'alternativa (fer dependre la capa de
+/// repositori de la UI) seria pitjor.
+const _knownRepositoryMessages = {
+  'Usuari no autenticat': 'errorNotAuthenticated',
+  'L\'usuari no ha iniciat sessió.': 'errorNotAuthenticated',
+  'No et pots enviar una sol·licitud a tu mateix': 'errorCannotFriendSelf',
+  'Ja existeix una relació amb aquest usuari': 'errorFriendshipAlreadyExists',
+  'No s\'ha pogut eliminar el compte': 'errorDeleteAccountGeneric',
+  'No s\'ha pogut desar el joc': 'errorSaveGameGeneric',
+};
+
+String _genericMessage(BuildContext context, Object error) {
   if (error is Exception) {
     final text = error.toString().replaceFirst('Exception: ', '');
+
+    final knownKey = _knownRepositoryMessages[text];
+    if (knownKey != null) {
+      switch (knownKey) {
+        case 'errorNotAuthenticated':
+          return context.l10n.errorNotAuthenticated;
+        case 'errorCannotFriendSelf':
+          return context.l10n.errorCannotFriendSelf;
+        case 'errorFriendshipAlreadyExists':
+          return context.l10n.errorFriendshipAlreadyExists;
+        case 'errorDeleteAccountGeneric':
+          return context.l10n.errorDeleteAccountGeneric;
+        case 'errorSaveGameGeneric':
+          return context.l10n.errorSaveGameGeneric;
+      }
+    }
 
     if (text.isNotEmpty && text.length < 200) {
       return text;
     }
   }
 
-  return 'Hi ha hagut un error inesperat. Torna-ho a provar.';
+  return context.l10n.errorUnexpected;
 }

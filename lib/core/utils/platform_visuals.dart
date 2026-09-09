@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:gameshelf/core/localization/app_localizations_x.dart';
 
 /// Valor especial per quan l'usuari no vol (o no pot) triar cap de les
 /// plataformes reals d'IGDB per a aquest joc.
-const platformNotSpecified = 'No especificat';
+String platformNotSpecified(BuildContext context) =>
+    context.l10n.platformNotSpecified;
 
 class PlatformVisual {
   final IconData icon;

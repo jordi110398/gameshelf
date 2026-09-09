@@ -1,5 +1,5 @@
+import 'package:gameshelf/core/localization/app_localizations_x.dart';
 import 'package:flutter/material.dart';
-import 'package:gameshelf/core/strings/legal_strings.dart';
 import 'package:gameshelf/features/legal/widgets/legal_page_scaffold.dart';
 
 class CookiesPolicyPage extends StatelessWidget {
@@ -8,22 +8,22 @@ class CookiesPolicyPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return LegalPageScaffold(
-      title: LegalStrings.cookiesTitle,
-      children: const [
-        LegalParagraph(LegalStrings.lastUpdated),
+      title: context.l10n.cookiesTitle,
+      children: [
+        LegalParagraph(context.l10n.lastUpdated),
 
-        LegalSectionTitle(LegalStrings.cookiesNoThirdPartyTitle),
-        LegalParagraph(LegalStrings.cookiesNoThirdPartyBody),
+        LegalSectionTitle(context.l10n.cookiesNoThirdPartyTitle),
+        LegalParagraph(context.l10n.cookiesNoThirdPartyBody),
 
-        LegalSectionTitle(LegalStrings.cookiesEssentialTitle),
-        LegalParagraph(LegalStrings.cookiesEssentialBody1),
-        LegalParagraph(LegalStrings.cookiesEssentialBody2),
+        LegalSectionTitle(context.l10n.cookiesEssentialTitle),
+        LegalParagraph(context.l10n.cookiesEssentialBody1),
+        LegalParagraph(context.l10n.cookiesEssentialBody2),
 
-        LegalSectionTitle(LegalStrings.cookiesFutureChangesTitle),
-        LegalParagraph(LegalStrings.cookiesFutureChangesBody),
+        LegalSectionTitle(context.l10n.cookiesFutureChangesTitle),
+        LegalParagraph(context.l10n.cookiesFutureChangesBody),
 
-        LegalSectionTitle(LegalStrings.cookiesContactTitle),
-        LegalParagraph(LegalStrings.cookiesContactBody),
+        LegalSectionTitle(context.l10n.cookiesContactTitle),
+        LegalParagraph(context.l10n.cookiesContactBody),
       ],
     );
   }
