@@ -38,7 +38,7 @@ class GameStrings {
   static String editTitle(String gameTitle) => 'Editar $gameTitle';
   static const statusTitle = 'Estat';
   static const myRatingTitle = 'La meva valoració';
-  static const markAsFavorite = 'Marcar com a favorit';
+  static const markAsFavorite = 'Marcar com a preferit';
   static const hoursPlayedTitle = 'Hores jugades';
   static const hoursSuffix = 'hores';
   static const reviewHint = 'Escriu la teva opinió...';
