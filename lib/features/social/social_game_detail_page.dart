@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gameshelf/core/strings/social_strings.dart';
+import 'package:gameshelf/core/utils/hours_format.dart';
 import 'package:gameshelf/core/widgets/rating_stars.dart';
 import 'package:gameshelf/models/game_status.dart';
 import 'package:gameshelf/models/library_game.dart';
@@ -86,7 +87,7 @@ class SocialGameDetailPage extends StatelessWidget {
                     children: [
                       const Icon(Icons.schedule, size: 20),
                       const SizedBox(width: 6),
-                      Text("${userGame.hoursPlayed}h"),
+                      Text("${formatHours(userGame.hoursPlayed)}h"),
                     ],
                   ),
               ],

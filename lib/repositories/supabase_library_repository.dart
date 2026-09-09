@@ -106,7 +106,7 @@ class SupabaseLibraryRepository implements LibraryRepository {
     DateTime? completedAt,
     DateTime? droppedAt,
     DateTime? pausedAt,
-    int hoursPlayed = 0,
+    double hoursPlayed = 0,
     bool favorite = false,
   }) async {
     final user = client.auth.currentUser;

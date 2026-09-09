@@ -11,6 +11,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:gameshelf/core/strings/app_strings.dart';
 import 'package:gameshelf/core/strings/game_strings.dart';
 import 'package:gameshelf/core/utils/error_messages.dart';
+import 'package:gameshelf/core/utils/hours_format.dart';
 import 'package:gameshelf/core/utils/platform_visuals.dart';
 import 'package:gameshelf/core/widgets/date_field.dart';
 import 'package:gameshelf/core/widgets/responsive_center.dart';
@@ -23,7 +24,7 @@ typedef _GameDetails = ({
   DateTime? completedAt,
   DateTime? droppedAt,
   DateTime? pausedAt,
-  int hoursPlayed,
+  double hoursPlayed,
   bool favorite,
 });
 
@@ -209,7 +210,7 @@ class _GameDetailPageState extends State<GameDetailPage> {
         completedAt: null,
         droppedAt: null,
         pausedAt: null,
-        hoursPlayed: 0,
+        hoursPlayed: 0.0,
         favorite: false,
       );
     }
@@ -326,7 +327,9 @@ class _GameDetailPageState extends State<GameDetailPage> {
                       const SizedBox(height: 4),
                       TextField(
                         controller: hoursController,
-                        keyboardType: TextInputType.number,
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
                         decoration: const InputDecoration(
                           border: OutlineInputBorder(),
                           labelText: GameStrings.hoursPlayedTitle,
@@ -366,7 +369,9 @@ class _GameDetailPageState extends State<GameDetailPage> {
     final review = reviewController.text.trim();
     reviewController.dispose();
 
-    final hoursPlayed = int.tryParse(hoursController.text) ?? 0;
+    final hoursPlayed =
+        double.tryParse(hoursController.text.trim().replaceAll(',', '.')) ??
+        0.0;
     hoursController.dispose();
 
     if (confirmed != true) return null;
@@ -387,7 +392,7 @@ class _GameDetailPageState extends State<GameDetailPage> {
       completedAt: status == GameStatus.completed ? completedAt : null,
       droppedAt: status == GameStatus.dropped ? droppedAt : null,
       pausedAt: status == GameStatus.paused ? pausedAt : null,
-      hoursPlayed: status == GameStatus.completed ? hoursPlayed : 0,
+      hoursPlayed: status == GameStatus.completed ? hoursPlayed : 0.0,
       favorite: status == GameStatus.completed ? favorite : false,
     );
   }
@@ -554,7 +559,7 @@ class _GameDetailPageState extends State<GameDetailPage> {
             children: [
               const Icon(Icons.schedule, size: 21),
               const SizedBox(width: 5),
-              Text("${currentUserGame.hoursPlayed}h"),
+              Text("${formatHours(currentUserGame.hoursPlayed)}h"),
             ],
           ),
       ],

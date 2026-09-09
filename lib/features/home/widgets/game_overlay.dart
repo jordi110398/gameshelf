@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gameshelf/core/utils/hours_format.dart';
 import 'package:gameshelf/models/game_status.dart';
 import 'package:gameshelf/models/library_game.dart';
 import 'package:gameshelf/core/widgets/rating_stars.dart';
@@ -28,12 +29,7 @@ class GameOverlay extends StatelessWidget {
         opacity: visible ? 1 : 0,
         duration: const Duration(milliseconds: 200),
         child: Container(
-          padding: const EdgeInsets.fromLTRB(
-            8,
-            12,
-            8,
-            10,
-          ),
+          padding: const EdgeInsets.fromLTRB(8, 12, 8, 10),
           alignment: Alignment.bottomCenter,
           decoration: BoxDecoration(
             gradient: LinearGradient(
@@ -61,7 +57,6 @@ class GameOverlay extends StatelessWidget {
                         // ─────────────────────
                         // ESTAT + IGDB
                         // ─────────────────────
-
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           mainAxisSize: MainAxisSize.min,
@@ -124,14 +119,10 @@ class GameOverlay extends StatelessWidget {
                                   vertical: 2,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: Colors.black.withValues(
-                                    alpha: 0.55,
-                                  ),
+                                  color: Colors.black.withValues(alpha: 0.55),
                                   borderRadius: BorderRadius.circular(6),
                                   border: Border.all(
-                                    color: Colors.white.withValues(
-                                      alpha: 0.18,
-                                    ),
+                                    color: Colors.white.withValues(alpha: 0.18),
                                   ),
                                 ),
                                 child: Text(
@@ -154,7 +145,6 @@ class GameOverlay extends StatelessWidget {
                         // ─────────────────────
                         // REVIEW
                         // ─────────────────────
-
                         if (userGame.review != null &&
                             userGame.review!.trim().isNotEmpty)
                           Padding(
@@ -185,7 +175,6 @@ class GameOverlay extends StatelessWidget {
                         // ─────────────────────
                         // ESTAT + VALORACIÓ
                         // ─────────────────────
-
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           mainAxisSize: MainAxisSize.min,
@@ -214,7 +203,6 @@ class GameOverlay extends StatelessWidget {
                         // ─────────────────────
                         // HORES
                         // ─────────────────────
-
                         Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
@@ -227,7 +215,7 @@ class GameOverlay extends StatelessWidget {
                             const SizedBox(width: 3),
 
                             Text(
-                              "${userGame.hoursPlayed}h",
+                              "${formatHours(userGame.hoursPlayed)}h",
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: isSmall ? 10 : 13,

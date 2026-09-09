@@ -29,6 +29,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:gameshelf/core/services/user_tags_service.dart';
 import 'package:gameshelf/repositories/friendship_repository.dart';
 import 'package:gameshelf/core/utils/error_messages.dart';
+import 'package:gameshelf/core/utils/hours_format.dart';
 import 'package:gameshelf/features/profile/widgets/user_tags_row.dart';
 import 'package:gameshelf/features/game/pages/game_detail_page.dart';
 import 'package:gameshelf/repositories/activity_repository.dart';
@@ -532,7 +533,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
 
     int completed = 0;
     int reviews = 0;
-    int hours = 0;
+    double hours = 0;
 
     for (final game in userGames) {
       if (game['status'] == 'completed') {
@@ -545,7 +546,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
         reviews++;
       }
 
-      hours += (game['hours_played'] as num?)?.toInt() ?? 0;
+      hours += (game['hours_played'] as num?)?.toDouble() ?? 0;
     }
 
     return ProfileStats(
@@ -873,7 +874,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                         _statDivider(context),
                         Expanded(
                           child: _ProfileStat(
-                            value: '${currentStats.hours}h',
+                            value: '${formatHours(currentStats.hours)}h',
                             label: ProfileStrings.statHours,
                           ),
                         ),
