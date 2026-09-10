@@ -326,9 +326,9 @@ class _GameCardState extends State<GameCard> {
                               platform: widget.libraryGame.userGame.platform,
                               favorite: _favorite,
                             ),
-                            // Graella densa: la pestanya del cartutx es
-                            // tallaria contra la fila anterior.
-                            showNotch: false,
+                            platformLabel: platformAbbreviation(
+                              widget.libraryGame.userGame.platform,
+                            ),
                           );
                         },
                       ),

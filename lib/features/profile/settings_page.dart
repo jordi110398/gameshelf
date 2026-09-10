@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gameshelf/core/navigation/page_transitions.dart';
 import 'package:gameshelf/core/localization/app_localizations_x.dart';
-import 'package:gameshelf/core/services/auth_service.dart';
 import 'package:gameshelf/core/services/locale_service.dart';
 import 'package:gameshelf/core/services/shelf_skin_service.dart';
 import 'package:gameshelf/core/utils/error_messages.dart';
@@ -470,16 +469,6 @@ class _SettingsPageState extends State<SettingsPage> {
                 );
               },
             ),
-          ),
-
-          const SizedBox(height: 40),
-
-          OutlinedButton.icon(
-            onPressed: () async {
-              await AuthService().signOut();
-            },
-            icon: const Icon(Icons.logout),
-            label: Text(context.l10n.actionLogout),
           ),
         ],
       ),

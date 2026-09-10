@@ -274,19 +274,25 @@ class _ShareCard extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      _Stat(
-                        value: '${stats.games}',
-                        label: context.l10n.statGames,
+                      Expanded(
+                        child: _Stat(
+                          value: '${stats.games}',
+                          label: context.l10n.statGames,
+                        ),
                       ),
                       _statDivider(),
-                      _Stat(
-                        value: '${stats.completed}',
-                        label: context.l10n.statCompleted,
+                      Expanded(
+                        child: _Stat(
+                          value: '${stats.completed}',
+                          label: context.l10n.statCompleted,
+                        ),
                       ),
                       _statDivider(),
-                      _Stat(
-                        value: '${formatHours(stats.hours)}h',
-                        label: context.l10n.statHours,
+                      Expanded(
+                        child: _Stat(
+                          value: '${formatHours(stats.hours)}h',
+                          label: context.l10n.statHours,
+                        ),
                       ),
                     ],
                   ),
@@ -372,12 +378,16 @@ class _Stat extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Text(
-          value,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            value,
+            maxLines: 1,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
         const SizedBox(height: 3),

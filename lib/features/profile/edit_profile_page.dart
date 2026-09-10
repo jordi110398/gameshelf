@@ -771,6 +771,25 @@ class _EditProfilePageState extends State<EditProfilePage> {
             const SizedBox(height: 32),
 
             // ───────────────────────────────────
+            // TANCAR SESSIÓ
+            // Secció apartada de la resta (abans dins de Configuració,
+            // massa a prop d'altres controls i fàcil de tocar sense
+            // voler).
+            // ───────────────────────────────────
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: () async {
+                  await authService.signOut();
+                },
+                icon: const Icon(Icons.logout),
+                label: Text(context.l10n.actionLogout),
+              ),
+            ),
+
+            const SizedBox(height: 32),
+
+            // ───────────────────────────────────
             // ZONA DE PERILL
             // ───────────────────────────────────
             Text(

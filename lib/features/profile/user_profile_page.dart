@@ -1,6 +1,7 @@
 import 'package:gameshelf/core/localization/app_localizations_x.dart';
 import 'package:flutter/material.dart';
 import 'package:gameshelf/core/navigation/page_transitions.dart';
+import 'package:gameshelf/core/utils/platform_visuals.dart';
 import 'package:gameshelf/core/widgets/app_logo.dart';
 import 'package:gameshelf/core/widgets/bookshelf_background.dart';
 import 'package:gameshelf/core/widgets/cartridge_cover.dart';
@@ -1496,9 +1497,13 @@ class _ProfileStat extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Text(
-          value,
-          style: const TextStyle(fontSize: 21, fontWeight: FontWeight.bold),
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            value,
+            maxLines: 1,
+            style: const TextStyle(fontSize: 21, fontWeight: FontWeight.bold),
+          ),
         ),
 
         const SizedBox(height: 5),
@@ -1569,6 +1574,7 @@ class _GameCoverTile extends StatelessWidget {
               platform: libraryGame.userGame.platform,
               favorite: libraryGame.userGame.favorite,
             ),
+            platformLabel: platformAbbreviation(libraryGame.userGame.platform),
           );
 
     return InkWell(
