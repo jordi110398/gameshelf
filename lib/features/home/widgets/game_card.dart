@@ -335,6 +335,7 @@ class _GameCardState extends State<GameCard> {
                               platformLabel: platformAbbreviation(
                                 widget.libraryGame.userGame.platform,
                               ),
+                              showPlatformLabel: !isActive,
                             ),
                           );
                         },

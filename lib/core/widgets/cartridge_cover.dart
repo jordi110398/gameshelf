@@ -33,12 +33,17 @@ class CartridgeCover extends StatelessWidget {
   /// quan no hi ha plataforma coneguda.
   final String? platformLabel;
 
+  /// `false` mentre la card està activa: l'etiqueta de plataforma
+  /// s'esvaeix perquè no quedi superposada a les hores de l'overlay.
+  final bool showPlatformLabel;
+
   const CartridgeCover({
     super.key,
     required this.cover,
     this.shellColor = kCartridgeDefaultColor,
     this.showNotch = true,
     this.platformLabel,
+    this.showPlatformLabel = true,
   });
 
   @override
@@ -67,27 +72,31 @@ class CartridgeCover extends StatelessWidget {
             // Plataforma abreviada, sobreimpresa a la base de la coberta.
             if (platformLabel != null)
               Positioned(
-                bottom: 3,
+                bottom: 7,
                 left: 0,
                 right: 0,
                 child: Center(
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 5,
-                      vertical: 1.5,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.black.withValues(alpha: 0.55),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Text(
-                      platformLabel!,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 8,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 0.3,
-                        height: 1,
+                  child: AnimatedOpacity(
+                    opacity: showPlatformLabel ? 1 : 0,
+                    duration: const Duration(milliseconds: 200),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 5,
+                        vertical: 1.5,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withValues(alpha: 0.55),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        platformLabel!,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 8,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 0.3,
+                          height: 1,
+                        ),
                       ),
                     ),
                   ),
