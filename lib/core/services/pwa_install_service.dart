@@ -1,9 +1,8 @@
+import 'package:gameshelf/core/localization/app_localizations_x.dart';
 import 'dart:js_interop';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:gameshelf/core/strings/app_strings.dart';
-import 'package:gameshelf/core/strings/legal_strings.dart';
 
 @JS('gsInstallAvailable')
 external bool _gsInstallAvailable();
@@ -52,7 +51,7 @@ class PwaInstallService {
       if (!context.mounted || !accepted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text(LegalStrings.installAppAcceptedMessage)),
+        SnackBar(content: Text(context.l10n.installAppAcceptedMessage)),
       );
 
       return;
@@ -62,12 +61,12 @@ class PwaInstallService {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text(LegalStrings.installAppDialogTitle),
-          content: const Text(LegalStrings.installAppDialogBody),
+          title: Text(context.l10n.installAppDialogTitle),
+          content: Text(context.l10n.installAppDialogBody),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text(AppStrings.actionAccept),
+              child: Text(context.l10n.actionAccept),
             ),
           ],
         );

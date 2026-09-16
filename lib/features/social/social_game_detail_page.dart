@@ -1,5 +1,5 @@
+import 'package:gameshelf/core/localization/app_localizations_x.dart';
 import 'package:flutter/material.dart';
-import 'package:gameshelf/core/strings/social_strings.dart';
 import 'package:gameshelf/core/utils/hours_format.dart';
 import 'package:gameshelf/core/widgets/rating_stars.dart';
 import 'package:gameshelf/models/game_status.dart';
@@ -70,7 +70,7 @@ class SocialGameDetailPage extends StatelessWidget {
                   children: [
                     Icon(status.icon, color: status.color),
                     const SizedBox(width: 6),
-                    Text(status.displayName),
+                    Text(status.localizedDisplayName(context)),
                   ],
                 ),
 
@@ -104,7 +104,7 @@ class SocialGameDetailPage extends StatelessWidget {
               Row(
                 children: [
                   Text(
-                    "${SocialStrings.reviewOfPrefix}$nickname",
+                    "${context.l10n.reviewOfPrefix}$nickname",
                     style: const TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
@@ -135,9 +135,12 @@ class SocialGameDetailPage extends StatelessWidget {
               const Divider(),
               const SizedBox(height: 20),
 
-              const Text(
-                "Descripció",
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              Text(
+                context.l10n.descriptionTitle,
+                style: const TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
 
               const SizedBox(height: 12),

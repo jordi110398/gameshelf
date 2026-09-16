@@ -1,7 +1,6 @@
+import 'package:gameshelf/core/localization/app_localizations_x.dart';
 import 'package:flutter/material.dart';
 import 'package:gameshelf/core/navigation/page_transitions.dart';
-import 'package:gameshelf/core/strings/app_strings.dart';
-import 'package:gameshelf/core/strings/llamp_strings.dart';
 import 'package:gameshelf/core/utils/error_messages.dart';
 import 'package:gameshelf/core/widgets/wood_drawer_container.dart';
 import 'package:gameshelf/features/llamp/edit_shelf_page.dart';
@@ -60,7 +59,9 @@ class _MyShelvesPageState extends State<MyShelvesPage> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('${LlampStrings.loadFailedPrefix}${friendlyError(e)}'),
+          content: Text(
+            '${context.l10n.llampLoadFailedPrefix}${friendlyError(context, e)}',
+          ),
         ),
       );
     }
@@ -76,7 +77,7 @@ class _MyShelvesPageState extends State<MyShelvesPage> {
         return StatefulBuilder(
           builder: (context, setDialogState) {
             return AlertDialog(
-              title: const Text(LlampStrings.newShelfDialogTitle),
+              title: Text(context.l10n.newShelfDialogTitle),
               content: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -103,8 +104,8 @@ class _MyShelvesPageState extends State<MyShelvesPage> {
                     child: TextField(
                       controller: controller,
                       autofocus: true,
-                      decoration: const InputDecoration(
-                        hintText: LlampStrings.shelfTitleHint,
+                      decoration: InputDecoration(
+                        hintText: context.l10n.shelfTitleHint,
                       ),
                       onSubmitted: (value) => Navigator.pop(context, (
                         title: value,
@@ -117,14 +118,14 @@ class _MyShelvesPageState extends State<MyShelvesPage> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text(AppStrings.actionCancel),
+                  child: Text(context.l10n.actionCancel),
                 ),
                 FilledButton(
                   onPressed: () => Navigator.pop(context, (
                     title: controller.text,
                     emoji: selectedEmoji,
                   )),
-                  child: const Text(AppStrings.actionSave),
+                  child: Text(context.l10n.actionSave),
                 ),
               ],
             );
@@ -152,7 +153,7 @@ class _MyShelvesPageState extends State<MyShelvesPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            '${LlampStrings.createShelfFailedPrefix}${friendlyError(e)}',
+            '${context.l10n.createShelfFailedPrefix}${friendlyError(context, e)}',
           ),
         ),
       );
@@ -167,11 +168,11 @@ class _MyShelvesPageState extends State<MyShelvesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text(LlampStrings.myShelvesTitle)),
+      appBar: AppBar(title: Text(context.l10n.myShelvesTitle)),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _createShelf,
         icon: const Icon(Icons.add),
-        label: const Text(LlampStrings.newShelfAction),
+        label: Text(context.l10n.newShelfAction),
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -206,7 +207,7 @@ class _MyShelvesPageState extends State<MyShelvesPage> {
             ),
             const SizedBox(height: 16),
             Text(
-              LlampStrings.emptyMyShelves,
+              context.l10n.emptyMyShelves,
               textAlign: TextAlign.center,
               style: TextStyle(color: Colors.grey.shade600),
             ),
@@ -264,9 +265,9 @@ class _ShelfTile extends StatelessWidget {
                 spacing: 6,
                 children: [
                   if (shelf.isPinned)
-                    _buildBadge(context, LlampStrings.pinnedBadge),
+                    _buildBadge(context, context.l10n.pinnedBadge),
                   if (shelf.isPublished)
-                    _buildBadge(context, LlampStrings.publishedBadge),
+                    _buildBadge(context, context.l10n.publishedBadge),
                 ],
               ),
             ],

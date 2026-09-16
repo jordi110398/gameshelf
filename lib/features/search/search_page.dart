@@ -1,3 +1,4 @@
+import 'package:gameshelf/core/localization/app_localizations_x.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -6,7 +7,6 @@ import 'package:gameshelf/models/game.dart';
 import 'package:gameshelf/repositories/igdb_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:gameshelf/features/game/pages/game_detail_page.dart';
-import 'package:gameshelf/core/strings/game_strings.dart';
 import 'package:gameshelf/core/widgets/responsive_center.dart';
 
 class SearchPage extends StatefulWidget {
@@ -78,7 +78,7 @@ class _SearchPageState extends State<SearchPage> {
             autofocus: true,
             onChanged: onSearchChanged,
             decoration: InputDecoration(
-              hintText: GameStrings.searchHint,
+              hintText: context.l10n.gameSearchHint,
               prefixIcon: const Icon(Icons.search, size: 20),
               filled: true,
               fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
@@ -115,7 +115,7 @@ class _SearchPageState extends State<SearchPage> {
         child: loading
             ? const Center(child: CircularProgressIndicator())
             : games.isEmpty
-            ? const Center(child: Text(GameStrings.searchEmptyPrompt))
+            ? Center(child: Text(context.l10n.searchEmptyPrompt))
             : ListView.builder(
                 itemCount: games.length,
                 itemBuilder: (_, i) {

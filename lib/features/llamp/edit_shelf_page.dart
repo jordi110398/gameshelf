@@ -1,6 +1,5 @@
+import 'package:gameshelf/core/localization/app_localizations_x.dart';
 import 'package:flutter/material.dart';
-import 'package:gameshelf/core/strings/app_strings.dart';
-import 'package:gameshelf/core/strings/llamp_strings.dart';
 import 'package:gameshelf/core/utils/error_messages.dart';
 import 'package:gameshelf/models/game.dart';
 import 'package:gameshelf/models/library_game.dart';
@@ -55,9 +54,9 @@ class _EditShelfPageState extends State<EditShelfPage> {
   void _showError(String prefix, Object e) {
     if (!mounted) return;
 
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text('$prefix${friendlyError(e)}')));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('$prefix${friendlyError(context, e)}')),
+    );
   }
 
   // ─────────────────────────────────────────────
@@ -71,23 +70,21 @@ class _EditShelfPageState extends State<EditShelfPage> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text(LlampStrings.editShelfTitle),
+          title: Text(context.l10n.editShelfTitle),
           content: TextField(
             controller: controller,
             autofocus: true,
-            decoration: const InputDecoration(
-              hintText: LlampStrings.shelfTitleHint,
-            ),
+            decoration: InputDecoration(hintText: context.l10n.shelfTitleHint),
             onSubmitted: (value) => Navigator.pop(context, value),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text(AppStrings.actionCancel),
+              child: Text(context.l10n.actionCancel),
             ),
             FilledButton(
               onPressed: () => Navigator.pop(context, controller.text),
-              child: const Text(AppStrings.actionSave),
+              child: Text(context.l10n.actionSave),
             ),
           ],
         );
@@ -116,7 +113,9 @@ class _EditShelfPageState extends State<EditShelfPage> {
         );
       });
     } catch (e) {
-      _showError(LlampStrings.renameFailedPrefix, e);
+      if (!mounted) return;
+
+      _showError(context.l10n.renameFailedPrefix, e);
     }
   }
 
@@ -143,8 +142,10 @@ class _EditShelfPageState extends State<EditShelfPage> {
     } catch (e) {
       if (mounted) setState(() => isBusy = false);
 
+      if (!mounted) return;
+
       _showError(
-        value ? LlampStrings.pinFailedPrefix : LlampStrings.unpinFailedPrefix,
+        value ? context.l10n.pinFailedPrefix : context.l10n.unpinFailedPrefix,
         e,
       );
     }
@@ -165,7 +166,9 @@ class _EditShelfPageState extends State<EditShelfPage> {
     } catch (e) {
       if (mounted) setState(() => isBusy = false);
 
-      _showError(LlampStrings.publishFailedPrefix, e);
+      if (!mounted) return;
+
+      _showError(context.l10n.publishFailedPrefix, e);
     }
   }
 
@@ -188,9 +191,9 @@ class _EditShelfPageState extends State<EditShelfPage> {
 
   Future<void> _pickGame() async {
     if (shelf.gameIds.length >= _maxGamesPerShelf) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text(LlampStrings.shelfFullMessage)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(context.l10n.shelfFullMessage)));
       return;
     }
 
@@ -212,10 +215,10 @@ class _EditShelfPageState extends State<EditShelfPage> {
             builder: (context, scrollController) {
               return Column(
                 children: [
-                  const Padding(
+                  Padding(
                     padding: EdgeInsets.all(16),
                     child: Text(
-                      LlampStrings.pickGameSheetTitle,
+                      context.l10n.pickGameSheetTitle,
                       style: TextStyle(
                         fontSize: 17,
                         fontWeight: FontWeight.bold,
@@ -229,8 +232,8 @@ class _EditShelfPageState extends State<EditShelfPage> {
                               padding: const EdgeInsets.all(24),
                               child: Text(
                                 library.isEmpty
-                                    ? LlampStrings.emptyLibraryForShelf
-                                    : LlampStrings.allGamesAlreadyInShelf,
+                                    ? context.l10n.emptyLibraryForShelf
+                                    : context.l10n.allGamesAlreadyInShelf,
                                 textAlign: TextAlign.center,
                                 style: TextStyle(color: Colors.grey.shade600),
                               ),
@@ -302,7 +305,9 @@ class _EditShelfPageState extends State<EditShelfPage> {
         gameById[picked.game.igdbId] = picked.game;
       });
     } catch (e) {
-      _showError(LlampStrings.addGameFailedPrefix, e);
+      if (!mounted) return;
+
+      _showError(context.l10n.addGameFailedPrefix, e);
     }
   }
 
@@ -325,7 +330,9 @@ class _EditShelfPageState extends State<EditShelfPage> {
         );
       });
     } catch (e) {
-      _showError(LlampStrings.removeGameFailedPrefix, e);
+      if (!mounted) return;
+
+      _showError(context.l10n.removeGameFailedPrefix, e);
     }
   }
 
@@ -338,16 +345,16 @@ class _EditShelfPageState extends State<EditShelfPage> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text(LlampStrings.deleteShelfTitle),
-          content: Text(LlampStrings.deleteShelfBody(shelf.title)),
+          title: Text(context.l10n.deleteShelfTitle),
+          content: Text(context.l10n.deleteShelfBody(shelf.title)),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: const Text(AppStrings.actionCancel),
+              child: Text(context.l10n.actionCancel),
             ),
             FilledButton(
               onPressed: () => Navigator.pop(context, true),
-              child: const Text(AppStrings.actionDelete),
+              child: Text(context.l10n.actionDelete),
             ),
           ],
         );
@@ -363,7 +370,9 @@ class _EditShelfPageState extends State<EditShelfPage> {
 
       Navigator.pop(context);
     } catch (e) {
-      _showError(LlampStrings.deleteShelfFailedPrefix, e);
+      if (!mounted) return;
+
+      _showError(context.l10n.deleteShelfFailedPrefix, e);
     }
   }
 
@@ -378,7 +387,7 @@ class _EditShelfPageState extends State<EditShelfPage> {
         title: Text(shelf.displayTitle),
         actions: [
           IconButton(
-            tooltip: AppStrings.actionEdit,
+            tooltip: context.l10n.actionEdit,
             icon: const Icon(Icons.edit_outlined),
             onPressed: _rename,
           ),
@@ -391,15 +400,15 @@ class _EditShelfPageState extends State<EditShelfPage> {
               children: [
                 SwitchListTile(
                   contentPadding: EdgeInsets.zero,
-                  title: const Text(LlampStrings.pinToProfileTitle),
-                  subtitle: const Text(LlampStrings.pinToProfileSubtitle),
+                  title: Text(context.l10n.pinToProfileTitle),
+                  subtitle: Text(context.l10n.pinToProfileSubtitle),
                   value: shelf.isPinned,
                   onChanged: isBusy ? null : _togglePinned,
                 ),
                 SwitchListTile(
                   contentPadding: EdgeInsets.zero,
-                  title: const Text(LlampStrings.publishToLlampTitle),
-                  subtitle: const Text(LlampStrings.publishToLlampSubtitle),
+                  title: Text(context.l10n.publishToLlampTitle),
+                  subtitle: Text(context.l10n.publishToLlampSubtitle),
                   value: shelf.isPublished,
                   onChanged: isBusy ? null : _togglePublished,
                 ),
@@ -438,7 +447,7 @@ class _EditShelfPageState extends State<EditShelfPage> {
                     side: const BorderSide(color: Colors.red),
                   ),
                   icon: const Icon(Icons.delete_outline),
-                  label: const Text(LlampStrings.deleteShelfTitle),
+                  label: Text(context.l10n.deleteShelfTitle),
                 ),
               ],
             ),

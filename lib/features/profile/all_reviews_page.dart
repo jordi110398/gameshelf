@@ -1,6 +1,6 @@
+import 'package:gameshelf/core/localization/app_localizations_x.dart';
 import 'package:flutter/material.dart';
 import 'package:gameshelf/core/navigation/page_transitions.dart';
-import 'package:gameshelf/core/strings/profile_strings.dart';
 import 'package:gameshelf/core/widgets/bookshelf_background.dart';
 import 'package:gameshelf/features/game/pages/game_detail_page.dart';
 import 'package:gameshelf/features/profile/widgets/review_card.dart';
@@ -29,7 +29,7 @@ class AllReviewsPage extends StatelessWidget {
     final isLightWood = profile.shelfWoodColor.isLight;
 
     return Scaffold(
-      appBar: AppBar(title: const Text(ProfileStrings.myReviewsTitle)),
+      appBar: AppBar(title: Text(context.l10n.myReviewsTitle)),
       body: Stack(
         children: [
           Positioned.fill(

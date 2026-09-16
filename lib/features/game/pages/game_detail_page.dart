@@ -1,3 +1,4 @@
+import 'package:gameshelf/core/localization/app_localizations_x.dart';
 import 'package:flutter/material.dart';
 import 'package:gameshelf/core/navigation/page_transitions.dart';
 import 'package:gameshelf/core/widgets/rating_stars.dart';
@@ -8,8 +9,6 @@ import 'package:gameshelf/models/user_game.dart';
 import 'package:gameshelf/repositories/supabase_library_repository.dart';
 import 'package:gameshelf/repositories/activity_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:gameshelf/core/strings/app_strings.dart';
-import 'package:gameshelf/core/strings/game_strings.dart';
 import 'package:gameshelf/core/utils/error_messages.dart';
 import 'package:gameshelf/core/utils/hours_format.dart';
 import 'package:gameshelf/core/utils/platform_visuals.dart';
@@ -87,10 +86,10 @@ class _GameDetailPageState extends State<GameDetailPage> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Padding(
+              Padding(
                 padding: EdgeInsets.all(20),
                 child: Text(
-                  GameStrings.addToLibrarySheetTitle,
+                  context.l10n.addToLibrarySheetTitle,
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
               ),
@@ -100,7 +99,7 @@ class _GameDetailPageState extends State<GameDetailPage> {
                   GameStatus.playing.icon,
                   color: GameStatus.playing.color,
                 ),
-                title: Text(GameStatus.playing.displayName),
+                title: Text(GameStatus.playing.localizedDisplayName(context)),
                 onTap: () {
                   Navigator.pop(context, GameStatus.playing);
                 },
@@ -111,7 +110,7 @@ class _GameDetailPageState extends State<GameDetailPage> {
                   GameStatus.completed.icon,
                   color: GameStatus.completed.color,
                 ),
-                title: Text(GameStatus.completed.displayName),
+                title: Text(GameStatus.completed.localizedDisplayName(context)),
                 onTap: () {
                   Navigator.pop(context, GameStatus.completed);
                 },
@@ -122,7 +121,9 @@ class _GameDetailPageState extends State<GameDetailPage> {
                   GameStatus.wantToPlay.icon,
                   color: GameStatus.wantToPlay.color,
                 ),
-                title: Text(GameStatus.wantToPlay.displayName),
+                title: Text(
+                  GameStatus.wantToPlay.localizedDisplayName(context),
+                ),
                 onTap: () {
                   Navigator.pop(context, GameStatus.wantToPlay);
                 },
@@ -133,7 +134,7 @@ class _GameDetailPageState extends State<GameDetailPage> {
                   GameStatus.paused.icon,
                   color: GameStatus.paused.color,
                 ),
-                title: Text(GameStatus.paused.displayName),
+                title: Text(GameStatus.paused.localizedDisplayName(context)),
                 onTap: () {
                   Navigator.pop(context, GameStatus.paused);
                 },
@@ -144,7 +145,7 @@ class _GameDetailPageState extends State<GameDetailPage> {
                   GameStatus.dropped.icon,
                   color: GameStatus.dropped.color,
                 ),
-                title: Text(GameStatus.dropped.displayName),
+                title: Text(GameStatus.dropped.localizedDisplayName(context)),
                 onTap: () {
                   Navigator.pop(context, GameStatus.dropped);
                 },
@@ -187,7 +188,7 @@ class _GameDetailPageState extends State<GameDetailPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            '${GameStrings.addToLibraryFailedPrefix}${friendlyError(e)}',
+            '${context.l10n.addToLibraryFailedPrefix}${friendlyError(context, e)}',
           ),
         ),
       );
@@ -215,7 +216,10 @@ class _GameDetailPageState extends State<GameDetailPage> {
       );
     }
 
-    final platformOptions = [...widget.game.platforms, platformNotSpecified];
+    final platformOptions = [
+      ...widget.game.platforms,
+      platformNotSpecified(context),
+    ];
 
     var platform = platformOptions.first;
     var rating = 0;
@@ -235,8 +239,8 @@ class _GameDetailPageState extends State<GameDetailPage> {
             return AlertDialog(
               title: Text(
                 status == GameStatus.completed
-                    ? GameStrings.confirmCompletedTitle
-                    : GameStrings.confirmDatesTitle,
+                    ? context.l10n.confirmCompletedTitle
+                    : context.l10n.confirmDatesTitle,
               ),
               content: SingleChildScrollView(
                 child: Column(
@@ -244,8 +248,8 @@ class _GameDetailPageState extends State<GameDetailPage> {
                   children: [
                     DropdownButtonFormField<String>(
                       initialValue: platform,
-                      decoration: const InputDecoration(
-                        labelText: GameStrings.platformLabel,
+                      decoration: InputDecoration(
+                        labelText: context.l10n.platformLabel,
                         border: OutlineInputBorder(),
                       ),
                       items: platformOptions.map((p) {
@@ -260,7 +264,7 @@ class _GameDetailPageState extends State<GameDetailPage> {
                     const SizedBox(height: 16),
 
                     DateField(
-                      label: GameStrings.dateStartedLabel,
+                      label: context.l10n.dateStartedLabel,
                       value: startedAt,
                       onChanged: (d) => setDialogState(() => startedAt = d),
                     ),
@@ -268,7 +272,7 @@ class _GameDetailPageState extends State<GameDetailPage> {
                     if (status == GameStatus.completed) ...[
                       const SizedBox(height: 16),
                       DateField(
-                        label: GameStrings.dateCompletedLabel,
+                        label: context.l10n.dateCompletedLabel,
                         value: completedAt,
                         onChanged: (d) => setDialogState(() => completedAt = d),
                       ),
@@ -277,7 +281,7 @@ class _GameDetailPageState extends State<GameDetailPage> {
                     if (status == GameStatus.dropped) ...[
                       const SizedBox(height: 16),
                       DateField(
-                        label: GameStrings.dateDroppedLabel,
+                        label: context.l10n.dateDroppedLabel,
                         value: droppedAt,
                         onChanged: (d) => setDialogState(() => droppedAt = d),
                       ),
@@ -301,9 +305,9 @@ class _GameDetailPageState extends State<GameDetailPage> {
                         controller: reviewController,
                         minLines: 3,
                         maxLines: 6,
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           border: OutlineInputBorder(),
-                          hintText: GameStrings.reviewHint,
+                          hintText: context.l10n.reviewHint,
                           alignLabelWithHint: true,
                         ),
                       ),
@@ -315,7 +319,7 @@ class _GameDetailPageState extends State<GameDetailPage> {
                       SwitchListTile(
                         contentPadding: EdgeInsets.zero,
                         value: favorite,
-                        title: const Text(GameStrings.markAsFavorite),
+                        title: Text(context.l10n.markAsFavorite),
                         secondary: Icon(
                           favorite ? Icons.star : Icons.star_border,
                           color: favorite ? Colors.amber : null,
@@ -330,11 +334,11 @@ class _GameDetailPageState extends State<GameDetailPage> {
                         keyboardType: const TextInputType.numberWithOptions(
                           decimal: true,
                         ),
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           border: OutlineInputBorder(),
-                          labelText: GameStrings.hoursPlayedTitle,
+                          labelText: context.l10n.hoursPlayedTitle,
                           hintText: "0",
-                          suffixText: GameStrings.hoursSuffix,
+                          suffixText: context.l10n.hoursSuffix,
                         ),
                       ),
                     ],
@@ -342,7 +346,7 @@ class _GameDetailPageState extends State<GameDetailPage> {
                     if (status == GameStatus.paused) ...[
                       const SizedBox(height: 16),
                       DateField(
-                        label: GameStrings.datePausedLabel,
+                        label: context.l10n.datePausedLabel,
                         value: pausedAt,
                         onChanged: (d) => setDialogState(() => pausedAt = d),
                       ),
@@ -353,11 +357,11 @@ class _GameDetailPageState extends State<GameDetailPage> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context, false),
-                  child: const Text(AppStrings.actionCancel),
+                  child: Text(context.l10n.actionCancel),
                 ),
                 FilledButton(
                   onPressed: () => Navigator.pop(context, true),
-                  child: const Text(GameStrings.addToLibraryAction),
+                  child: Text(context.l10n.addToLibraryAction),
                 ),
               ],
             );
@@ -374,10 +378,10 @@ class _GameDetailPageState extends State<GameDetailPage> {
         0.0;
     hoursController.dispose();
 
-    if (confirmed != true) return null;
+    if (confirmed != true || !mounted) return null;
 
     return (
-      platform: platform == platformNotSpecified ? null : platform,
+      platform: platform == platformNotSpecified(context) ? null : platform,
       rating:
           (status == GameStatus.completed || status == GameStatus.dropped) &&
               rating > 0
@@ -418,7 +422,7 @@ class _GameDetailPageState extends State<GameDetailPage> {
         return StatefulBuilder(
           builder: (context, setDialogState) {
             return AlertDialog(
-              title: const Text(GameStrings.rateDialogTitle),
+              title: Text(context.l10n.rateDialogTitle),
               content: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -433,9 +437,9 @@ class _GameDetailPageState extends State<GameDetailPage> {
                       controller: reviewController,
                       minLines: 3,
                       maxLines: 6,
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         border: OutlineInputBorder(),
-                        hintText: GameStrings.reviewHint,
+                        hintText: context.l10n.reviewHint,
                         alignLabelWithHint: true,
                       ),
                     ),
@@ -445,11 +449,11 @@ class _GameDetailPageState extends State<GameDetailPage> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context, false),
-                  child: const Text(AppStrings.actionCancel),
+                  child: Text(context.l10n.actionCancel),
                 ),
                 FilledButton(
                   onPressed: () => Navigator.pop(context, true),
-                  child: const Text(GameStrings.saveAction),
+                  child: Text(context.l10n.saveAction),
                 ),
               ],
             );
@@ -489,7 +493,9 @@ class _GameDetailPageState extends State<GameDetailPage> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('${GameStrings.rateFailedPrefix}${friendlyError(e)}'),
+          content: Text(
+            '${context.l10n.rateFailedPrefix}${friendlyError(context, e)}',
+          ),
         ),
       );
     }
@@ -526,8 +532,8 @@ class _GameDetailPageState extends State<GameDetailPage> {
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text(
-                GameStrings.igdbLabel,
+              Text(
+                context.l10n.igdbLabel,
                 style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
               ),
               const SizedBox(width: 4),
@@ -548,7 +554,7 @@ class _GameDetailPageState extends State<GameDetailPage> {
               size: 22,
             ),
             const SizedBox(width: 6),
-            Text(currentUserGame.status.displayName),
+            Text(currentUserGame.status.localizedDisplayName(context)),
           ],
         ),
 
@@ -703,8 +709,8 @@ class _GameDetailPageState extends State<GameDetailPage> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      const Text(
-                        GameStrings.myReviewTitle,
+                      Text(
+                        context.l10n.myReviewTitle,
                         style: TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
@@ -761,8 +767,8 @@ class _GameDetailPageState extends State<GameDetailPage> {
 
                 const SizedBox(height: 24),
 
-                const Text(
-                  GameStrings.descriptionTitle,
+                Text(
+                  context.l10n.descriptionTitle,
                   style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                 ),
 
@@ -784,8 +790,8 @@ class _GameDetailPageState extends State<GameDetailPage> {
 
                   label: Text(
                     inLibrary
-                        ? GameStrings.editAction
-                        : GameStrings.addToLibraryAction,
+                        ? context.l10n.editAction
+                        : context.l10n.addToLibraryAction,
                   ),
 
                   onPressed: () async {

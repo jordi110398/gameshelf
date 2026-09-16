@@ -1,10 +1,10 @@
+import 'package:gameshelf/core/localization/app_localizations_x.dart';
 import 'package:flutter/material.dart';
 import 'package:gameshelf/models/game.dart';
 import 'package:gameshelf/models/user_game.dart';
 import 'package:gameshelf/models/game_status.dart';
 import 'package:gameshelf/repositories/supabase_library_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:gameshelf/core/strings/game_strings.dart';
 import 'package:gameshelf/core/utils/hours_format.dart';
 import 'package:gameshelf/core/utils/platform_visuals.dart';
 import 'package:gameshelf/core/widgets/date_field.dart';
@@ -27,7 +27,7 @@ class _EditGamePageState extends State<EditGamePage> {
   late bool favorite;
   late final TextEditingController reviewController;
 
-  late String platform;
+  String? platform;
 
   late DateTime startedAt;
   late DateTime completedAt;
@@ -55,9 +55,9 @@ class _EditGamePageState extends State<EditGamePage> {
       text: widget.userGame.review ?? "",
     );
 
-    platform = platformOptions.contains(widget.userGame.platform)
-        ? widget.userGame.platform!
-        : platformNotSpecified;
+    platform = widget.game.platforms.contains(widget.userGame.platform)
+        ? widget.userGame.platform
+        : null;
 
     final now = DateTime.now();
 
@@ -68,8 +68,8 @@ class _EditGamePageState extends State<EditGamePage> {
     resumedAt = widget.userGame.resumedAt ?? now;
   }
 
-  List<String> get platformOptions {
-    return [...widget.game.platforms, platformNotSpecified];
+  List<String> platformOptions(BuildContext context) {
+    return [...widget.game.platforms, platformNotSpecified(context)];
   }
 
   bool get canReview {
@@ -103,9 +103,7 @@ class _EditGamePageState extends State<EditGamePage> {
 
       status: status,
 
-      platform: isWantToPlay
-          ? widget.userGame.platform
-          : (platform == platformNotSpecified ? null : platform),
+      platform: isWantToPlay ? widget.userGame.platform : platform,
 
       // Només Completed o Dropped
       rating: canReview ? rating : null,
@@ -157,7 +155,7 @@ class _EditGamePageState extends State<EditGamePage> {
         status == GameStatus.completed || status == GameStatus.dropped;
 
     return Scaffold(
-      appBar: AppBar(title: Text(GameStrings.editTitle(widget.game.title))),
+      appBar: AppBar(title: Text(context.l10n.editTitle(widget.game.title))),
 
       body: ResponsiveCenter(
         maxWidth: 480,
@@ -171,8 +169,8 @@ class _EditGamePageState extends State<EditGamePage> {
               // ───────────────────────────
               // ESTAT
               // ───────────────────────────
-              const Text(
-                GameStrings.statusTitle,
+              Text(
+                context.l10n.statusTitle,
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
 
@@ -190,7 +188,7 @@ class _EditGamePageState extends State<EditGamePage> {
                       children: [
                         Icon(value.icon, color: value.color, size: 20),
                         const SizedBox(width: 8),
-                        Text(value.displayName),
+                        Text(value.localizedDisplayName(context)),
                       ],
                     ),
                   );
@@ -216,14 +214,14 @@ class _EditGamePageState extends State<EditGamePage> {
                 // PLATAFORMA
                 // ───────────────────────────
                 DropdownButtonFormField<String>(
-                  initialValue: platform,
+                  initialValue: platform ?? platformNotSpecified(context),
 
-                  decoration: const InputDecoration(
-                    labelText: GameStrings.platformLabel,
+                  decoration: InputDecoration(
+                    labelText: context.l10n.platformLabel,
                     border: OutlineInputBorder(),
                   ),
 
-                  items: platformOptions.map((p) {
+                  items: platformOptions(context).map((p) {
                     return DropdownMenuItem(value: p, child: Text(p));
                   }).toList(),
 
@@ -231,7 +229,9 @@ class _EditGamePageState extends State<EditGamePage> {
                     if (value == null) return;
 
                     setState(() {
-                      platform = value;
+                      platform = value == platformNotSpecified(context)
+                          ? null
+                          : value;
                     });
                   },
                 ),
@@ -242,7 +242,7 @@ class _EditGamePageState extends State<EditGamePage> {
                 // DATES
                 // ───────────────────────────
                 DateField(
-                  label: GameStrings.dateStartedLabel,
+                  label: context.l10n.dateStartedLabel,
                   value: startedAt,
                   onChanged: (d) => setState(() => startedAt = d),
                 ),
@@ -250,7 +250,7 @@ class _EditGamePageState extends State<EditGamePage> {
                 if (status == GameStatus.completed) ...[
                   const SizedBox(height: 16),
                   DateField(
-                    label: GameStrings.dateCompletedLabel,
+                    label: context.l10n.dateCompletedLabel,
                     value: completedAt,
                     onChanged: (d) => setState(() => completedAt = d),
                   ),
@@ -259,7 +259,7 @@ class _EditGamePageState extends State<EditGamePage> {
                 if (status == GameStatus.dropped) ...[
                   const SizedBox(height: 16),
                   DateField(
-                    label: GameStrings.dateDroppedLabel,
+                    label: context.l10n.dateDroppedLabel,
                     value: droppedAt,
                     onChanged: (d) => setState(() => droppedAt = d),
                   ),
@@ -268,7 +268,7 @@ class _EditGamePageState extends State<EditGamePage> {
                 if (status == GameStatus.paused) ...[
                   const SizedBox(height: 16),
                   DateField(
-                    label: GameStrings.datePausedLabel,
+                    label: context.l10n.datePausedLabel,
                     value: pausedAt,
                     onChanged: (d) => setState(() => pausedAt = d),
                   ),
@@ -277,7 +277,7 @@ class _EditGamePageState extends State<EditGamePage> {
                 if (isResuming) ...[
                   const SizedBox(height: 16),
                   DateField(
-                    label: GameStrings.dateResumedLabel,
+                    label: context.l10n.dateResumedLabel,
                     value: resumedAt,
                     onChanged: (d) => setState(() => resumedAt = d),
                   ),
@@ -290,8 +290,8 @@ class _EditGamePageState extends State<EditGamePage> {
                 // Només Completed o Dropped
                 // ───────────────────────────
                 if (canReview) ...[
-                  const Text(
-                    GameStrings.myRatingTitle,
+                  Text(
+                    context.l10n.myRatingTitle,
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
 
@@ -326,7 +326,7 @@ class _EditGamePageState extends State<EditGamePage> {
 
                     value: favorite,
 
-                    title: const Text(GameStrings.markAsFavorite),
+                    title: Text(context.l10n.markAsFavorite),
 
                     secondary: Icon(
                       favorite ? Icons.star : Icons.star_border,
@@ -346,8 +346,8 @@ class _EditGamePageState extends State<EditGamePage> {
                 // ───────────────────────────
                 // HORES
                 // ───────────────────────────
-                const Text(
-                  GameStrings.hoursPlayedTitle,
+                Text(
+                  context.l10n.hoursPlayedTitle,
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
 
@@ -359,10 +359,10 @@ class _EditGamePageState extends State<EditGamePage> {
                     decimal: true,
                   ),
 
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     border: OutlineInputBorder(),
                     hintText: "0",
-                    suffixText: GameStrings.hoursSuffix,
+                    suffixText: context.l10n.hoursSuffix,
                   ),
                 ),
 
@@ -373,8 +373,8 @@ class _EditGamePageState extends State<EditGamePage> {
                 // Només Completed o Dropped
                 // ───────────────────────────
                 if (canReview) ...[
-                  const Text(
-                    GameStrings.myReviewTitle,
+                  Text(
+                    context.l10n.myReviewTitle,
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
 
@@ -386,9 +386,9 @@ class _EditGamePageState extends State<EditGamePage> {
                     maxLines: 8,
                     maxLength: 500,
 
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       border: OutlineInputBorder(),
-                      hintText: GameStrings.reviewHint,
+                      hintText: context.l10n.reviewHint,
                       alignLabelWithHint: true,
                     ),
                   ),
@@ -408,7 +408,7 @@ class _EditGamePageState extends State<EditGamePage> {
 
                   icon: const Icon(Icons.save),
 
-                  label: const Text(GameStrings.saveAction),
+                  label: Text(context.l10n.saveAction),
                 ),
               ),
             ],

@@ -1,9 +1,9 @@
+import 'package:gameshelf/core/localization/app_localizations_x.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:gameshelf/core/services/auth_service.dart';
-import 'package:gameshelf/core/strings/auth_strings.dart';
 import 'package:gameshelf/features/auth/widgets/auth_text_field.dart';
 import 'package:gameshelf/core/utils/error_messages.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -142,9 +142,9 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
     final session = Supabase.instance.client.auth.currentSession;
 
     if (session == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text(AuthStrings.resetLinkExpired)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(context.l10n.resetLinkExpired)));
       return;
     }
 
@@ -166,15 +166,15 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
         barrierDismissible: false,
         builder: (dialogContext) {
           return AlertDialog(
-            title: const Text(AuthStrings.resetSuccessTitle),
-            content: const Text(AuthStrings.resetSuccessBody),
+            title: Text(context.l10n.resetSuccessTitle),
+            content: Text(context.l10n.resetSuccessBody),
             actions: [
               FilledButton(
                 onPressed: () {
                   Navigator.pop(dialogContext);
                   context.go('/');
                 },
-                child: const Text(AuthStrings.resetSuccessButton),
+                child: Text(context.l10n.resetSuccessButton),
               ),
             ],
           );
@@ -185,7 +185,9 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('${AuthStrings.resetFailedPrefix}${friendlyError(e)}'),
+          content: Text(
+            '${context.l10n.resetFailedPrefix}${friendlyError(context, e)}',
+          ),
         ),
       );
 
@@ -237,7 +239,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
         confirmPasswordController.text.isNotEmpty && !_passwordsMatch;
 
     return Scaffold(
-      appBar: AppBar(title: const Text(AuthStrings.resetAppBarTitle)),
+      appBar: AppBar(title: Text(context.l10n.resetAppBarTitle)),
       body: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 420),
@@ -250,15 +252,15 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
 
                 const SizedBox(height: 24),
 
-                const Text(
-                  AuthStrings.resetTitle,
+                Text(
+                  context.l10n.resetTitle,
                   style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
                 ),
 
                 const SizedBox(height: 12),
 
-                const Text(
-                  AuthStrings.resetBody,
+                Text(
+                  context.l10n.resetBody,
                   textAlign: TextAlign.center,
                   style: TextStyle(fontSize: 14),
                 ),
@@ -267,7 +269,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
 
                 AuthTextField(
                   controller: passwordController,
-                  label: AuthStrings.resetNewPasswordLabel,
+                  label: context.l10n.resetNewPasswordLabel,
                   icon: Icons.lock,
                   obscureText: true,
                 ),
@@ -279,8 +281,8 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        AuthStrings.passwordRequirementsTitle,
+                      Text(
+                        context.l10n.passwordRequirementsTitle,
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.bold,
@@ -291,27 +293,27 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
 
                       _buildPasswordRequirement(
                         fulfilled: _hasMinLength,
-                        text: AuthStrings.passwordReqMinLength,
+                        text: context.l10n.passwordReqMinLength,
                       ),
 
                       _buildPasswordRequirement(
                         fulfilled: _hasUppercase,
-                        text: AuthStrings.passwordReqUppercase,
+                        text: context.l10n.passwordReqUppercase,
                       ),
 
                       _buildPasswordRequirement(
                         fulfilled: _hasLowercase,
-                        text: AuthStrings.passwordReqLowercase,
+                        text: context.l10n.passwordReqLowercase,
                       ),
 
                       _buildPasswordRequirement(
                         fulfilled: _hasNumber,
-                        text: AuthStrings.passwordReqNumber,
+                        text: context.l10n.passwordReqNumber,
                       ),
 
                       _buildPasswordRequirement(
                         fulfilled: _hasSymbol,
-                        text: AuthStrings.passwordReqSymbol,
+                        text: context.l10n.passwordReqSymbol,
                       ),
                     ],
                   ),
@@ -321,7 +323,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
 
                 AuthTextField(
                   controller: confirmPasswordController,
-                  label: AuthStrings.resetConfirmPasswordLabel,
+                  label: context.l10n.resetConfirmPasswordLabel,
                   icon: Icons.lock_outline,
                   obscureText: true,
                 ),
@@ -329,10 +331,10 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                 const SizedBox(height: 8),
 
                 if (showPasswordMismatch)
-                  const Align(
+                  Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
-                      AuthStrings.resetPasswordMismatch,
+                      context.l10n.resetPasswordMismatch,
                       style: TextStyle(color: Colors.red, fontSize: 12),
                     ),
                   ),
@@ -355,7 +357,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                             height: 22,
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
-                        : const Text(AuthStrings.resetSubmit),
+                        : Text(context.l10n.resetSubmit),
                   ),
                 ),
 
@@ -363,7 +365,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
 
                 TextButton(
                   onPressed: _isSaving ? null : () => context.go('/'),
-                  child: const Text(AuthStrings.resetBackToLogin),
+                  child: Text(context.l10n.resetBackToLogin),
                 ),
               ],
             ),

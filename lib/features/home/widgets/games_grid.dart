@@ -1,6 +1,5 @@
+import 'package:gameshelf/core/localization/app_localizations_x.dart';
 import 'package:flutter/material.dart';
-import 'package:gameshelf/core/strings/app_strings.dart';
-import 'package:gameshelf/core/strings/home_strings.dart';
 import 'package:gameshelf/core/widgets/shelf_list.dart';
 import 'package:gameshelf/models/library_game.dart';
 import 'game_card.dart';
@@ -65,25 +64,25 @@ class _GameGridState extends State<GameGrid> {
           context: context,
           builder: (context) {
             return AlertDialog(
-              title: const Text(HomeStrings.deleteGameTitle),
+              title: Text(context.l10n.deleteGameTitle),
               content: Text(
-                '${HomeStrings.deleteGameBodyPrefix}'
+                '${context.l10n.deleteGameBodyPrefix}'
                 '${libraryGame.game.title}'
-                '${HomeStrings.deleteGameBodySuffix}',
+                '${context.l10n.deleteGameBodySuffix}',
               ),
               actions: [
                 TextButton(
                   onPressed: () {
                     Navigator.pop(context, false);
                   },
-                  child: const Text(AppStrings.actionCancel),
+                  child: Text(context.l10n.actionCancel),
                 ),
                 FilledButton(
                   style: FilledButton.styleFrom(backgroundColor: Colors.red),
                   onPressed: () {
                     Navigator.pop(context, true);
                   },
-                  child: const Text(AppStrings.actionDelete),
+                  child: Text(context.l10n.actionDelete),
                 ),
               ],
             );

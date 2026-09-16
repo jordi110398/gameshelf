@@ -1,5 +1,5 @@
+import 'package:gameshelf/core/localization/app_localizations_x.dart';
 import 'package:flutter/material.dart';
-import 'package:gameshelf/core/strings/profile_strings.dart';
 import 'package:gameshelf/core/utils/error_messages.dart';
 import 'package:gameshelf/core/widgets/responsive_center.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -31,17 +31,17 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
     final confirmPassword = confirmPasswordController.text;
 
     if (password.isEmpty || confirmPassword.isEmpty) {
-      _showError(ProfileStrings.fillAllFields);
+      _showError(context.l10n.fillAllFields);
       return;
     }
 
     if (password.length < 6) {
-      _showError(ProfileStrings.passwordMinLength6);
+      _showError(context.l10n.passwordMinLength6);
       return;
     }
 
     if (password != confirmPassword) {
-      _showError(ProfileStrings.passwordsDontMatch);
+      _showError(context.l10n.passwordsDontMatch);
       return;
     }
 
@@ -57,9 +57,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(ProfileStrings.passwordUpdatedSuccess),
-        ),
+        SnackBar(content: Text(context.l10n.passwordUpdatedSuccess)),
       );
 
       Navigator.pop(context);
@@ -70,7 +68,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
         isSaving = false;
       });
 
-      _showError(friendlyError(e));
+      _showError(friendlyError(context, e));
     }
   }
 
@@ -83,7 +81,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text(ProfileStrings.changePasswordPageTitle)),
+      appBar: AppBar(title: Text(context.l10n.changePasswordPageTitle)),
       body: ResponsiveCenter(
         maxWidth: 420,
         child: SingleChildScrollView(
@@ -91,8 +89,8 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                ProfileStrings.newPasswordFieldLabel,
+              Text(
+                context.l10n.newPasswordFieldLabel,
                 style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
               ),
 
@@ -123,8 +121,8 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
 
               const SizedBox(height: 24),
 
-              const Text(
-                ProfileStrings.repeatPasswordFieldLabel,
+              Text(
+                context.l10n.repeatPasswordFieldLabel,
                 style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
               ),
 
@@ -157,7 +155,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
               const SizedBox(height: 12),
 
               Text(
-                ProfileStrings.passwordMinLength6,
+                context.l10n.passwordMinLength6,
                 style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
               ),
 
@@ -176,8 +174,8 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                       : const Icon(Icons.lock_reset),
                   label: Text(
                     isSaving
-                        ? ProfileStrings.updating
-                        : ProfileStrings.changePasswordPageTitle,
+                        ? context.l10n.updating
+                        : context.l10n.changePasswordPageTitle,
                   ),
                 ),
               ),

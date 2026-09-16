@@ -28,11 +28,17 @@ class CartridgeCover extends StatelessWidget {
   /// contra la fila anterior.
   final bool showNotch;
 
+  /// Abreviatura de la plataforma (p. ex. "NS2", "PC") a mostrar en
+  /// petit a la base del cartutx -- vegeu `platformAbbreviation`. `null`
+  /// quan no hi ha plataforma coneguda.
+  final String? platformLabel;
+
   const CartridgeCover({
     super.key,
     required this.cover,
     this.shellColor = kCartridgeDefaultColor,
     this.showNotch = true,
+    this.platformLabel,
   });
 
   @override
@@ -57,6 +63,36 @@ class CartridgeCover extends StatelessWidget {
           clipBehavior: Clip.none,
           children: [
             ClipRRect(borderRadius: BorderRadius.circular(4), child: cover),
+
+            // Plataforma abreviada, sobreimpresa a la base de la coberta.
+            if (platformLabel != null)
+              Positioned(
+                bottom: 3,
+                left: 0,
+                right: 0,
+                child: Center(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 5,
+                      vertical: 1.5,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.55),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Text(
+                      platformLabel!,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 8,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 0.3,
+                        height: 1,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
 
             // Pestanya superior, com el relleu d'un cartutx de veritat.
             if (showNotch)

@@ -1,10 +1,10 @@
+import 'package:gameshelf/core/localization/app_localizations_x.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:gameshelf/models/activity_item.dart';
 import 'package:gameshelf/repositories/activity_repository.dart';
 import 'package:gameshelf/features/activity/widgets/activity_card.dart';
-import 'package:gameshelf/core/strings/activity_strings.dart';
 import 'package:gameshelf/core/utils/error_messages.dart';
 import 'package:gameshelf/core/widgets/bookshelf_background.dart';
 import 'package:gameshelf/core/widgets/responsive_center.dart';
@@ -81,7 +81,7 @@ class _ActivityFeedPageState extends State<ActivityFeedPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            '${ActivityStrings.loadFailedPrefix}${friendlyError(e)}',
+            '${context.l10n.activityLoadFailedPrefix}${friendlyError(context, e)}',
           ),
         ),
       );
@@ -142,7 +142,7 @@ class _ActivityFeedPageState extends State<ActivityFeedPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            '${ActivityStrings.loadMoreFailedPrefix}${friendlyError(e)}',
+            '${context.l10n.loadMoreFailedPrefix}${friendlyError(context, e)}',
           ),
         ),
       );
@@ -200,7 +200,7 @@ class _ActivityFeedPageState extends State<ActivityFeedPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            '${ActivityStrings.refreshFailedPrefix}${friendlyError(e)}',
+            '${context.l10n.refreshFailedPrefix}${friendlyError(context, e)}',
           ),
         ),
       );
@@ -214,7 +214,7 @@ class _ActivityFeedPageState extends State<ActivityFeedPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text(ActivityStrings.appBarTitle)),
+      appBar: AppBar(title: Text(context.l10n.activityAppBarTitle)),
       body: Stack(
         children: [
           const Positioned.fill(child: BookshelfBackground()),
@@ -231,11 +231,11 @@ class _ActivityFeedPageState extends State<ActivityFeedPage> {
                             ? ListView(
                                 controller: _scrollController,
                                 physics: const AlwaysScrollableScrollPhysics(),
-                                children: const [
+                                children: [
                                   Padding(
                                     padding: EdgeInsets.only(top: 80),
                                     child: Center(
-                                      child: Text(ActivityStrings.emptyFeed),
+                                      child: Text(context.l10n.emptyFeed),
                                     ),
                                   ),
                                 ],
@@ -282,9 +282,7 @@ class _ActivityFeedPageState extends State<ActivityFeedPage> {
                             child: FilledButton.icon(
                               onPressed: _refresh,
                               icon: const Icon(Icons.arrow_upward, size: 18),
-                              label: const Text(
-                                ActivityStrings.newActivityAvailable,
-                              ),
+                              label: Text(context.l10n.newActivityAvailable),
                             ),
                           ),
                         ),

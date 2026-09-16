@@ -1,6 +1,6 @@
+import 'package:gameshelf/core/localization/app_localizations_x.dart';
 import 'package:flutter/material.dart';
 import 'package:gameshelf/core/navigation/page_transitions.dart';
-import 'package:gameshelf/core/strings/activity_strings.dart';
 import 'package:gameshelf/core/widgets/wood_drawer_container.dart';
 import 'package:gameshelf/models/activity_item.dart';
 import 'package:gameshelf/repositories/profile_repository.dart';
@@ -48,29 +48,29 @@ class _ActivityCardState extends State<ActivityCard> {
   String get _actionText {
     switch (widget.item.type) {
       case ActivityType.startedPlaying:
-        return '${ActivityStrings.actionStartedPlayingPrefix}'
+        return '${context.l10n.actionStartedPlayingPrefix}'
             '${widget.item.gameTitle}';
       case ActivityType.completed:
-        return '${ActivityStrings.actionCompletedPrefix}'
+        return '${context.l10n.actionCompletedPrefix}'
             '${widget.item.gameTitle}';
       case ActivityType.dropped:
-        return '${ActivityStrings.actionDroppedPrefix}'
+        return '${context.l10n.actionDroppedPrefix}'
             '${widget.item.gameTitle}';
       case ActivityType.review:
-        return '${ActivityStrings.actionReviewPrefix}'
+        return '${context.l10n.actionReviewPrefix}'
             '${widget.item.gameTitle}';
       case ActivityType.addedToLibrary:
-        return '${ActivityStrings.actionAddedToLibraryVerb}'
+        return '${context.l10n.actionAddedToLibraryVerb}'
             '${widget.item.gameTitle}'
-            '${ActivityStrings.actionAddedToLibrarySuffix}';
+            '${context.l10n.actionAddedToLibrarySuffix}';
       case ActivityType.friendshipFormed:
         // No s'utilitza: el build() construeix un RichText propi per a
         // aquest tipus (calen dos enllaços de perfil, no un).
-        return '${ActivityStrings.friendshipFormedConnector}'
-            '@${widget.item.friendNickname ?? ActivityStrings.friendshipFormedUnknownFriend} '
-            '${ActivityStrings.friendshipFormedSuffix}';
+        return '${context.l10n.friendshipFormedConnector}'
+            '@${widget.item.friendNickname ?? context.l10n.friendshipFormedUnknownFriend} '
+            '${context.l10n.friendshipFormedSuffix}';
       case ActivityType.shelfPublished:
-        return '${ActivityStrings.actionShelfPublishedPrefix}'
+        return '${context.l10n.actionShelfPublishedPrefix}'
             '"${widget.item.shelfTitle}"';
       case ActivityType.unknown:
         // ActivityRepository ja el descarta abans que arribi aquí.
@@ -101,9 +101,9 @@ class _ActivityCardState extends State<ActivityCard> {
       if (!context.mounted) return;
 
       if (review == null || review.trim().isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text(ActivityStrings.reviewNotFound)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(context.l10n.reviewNotFound)));
         return;
       }
 
@@ -324,7 +324,7 @@ class _ActivityCardState extends State<ActivityCard> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            '${ActivityStrings.reviewLoadFailedPrefix}${friendlyError(e)}',
+            '${context.l10n.reviewLoadFailedPrefix}${friendlyError(context, e)}',
           ),
         ),
       );
@@ -387,13 +387,13 @@ class _ActivityCardState extends State<ActivityCard> {
                                     recognizer: TapGestureRecognizer()
                                       ..onTap = () => _openProfile(context),
                                   ),
-                                  const TextSpan(
-                                    text: ActivityStrings
-                                        .friendshipFormedConnector,
+                                  TextSpan(
+                                    text:
+                                        context.l10n.friendshipFormedConnector,
                                   ),
                                   TextSpan(
                                     text:
-                                        '@${widget.item.friendNickname ?? ActivityStrings.friendshipFormedUnknownFriend} ',
+                                        '@${widget.item.friendNickname ?? context.l10n.friendshipFormedUnknownFriend} ',
                                     style: const TextStyle(
                                       fontWeight: FontWeight.bold,
                                     ),
@@ -405,9 +405,8 @@ class _ActivityCardState extends State<ActivityCard> {
                                         }
                                       },
                                   ),
-                                  const TextSpan(
-                                    text:
-                                        ActivityStrings.friendshipFormedSuffix,
+                                  TextSpan(
+                                    text: context.l10n.friendshipFormedSuffix,
                                   ),
                                 ]
                               : [
@@ -458,7 +457,7 @@ class _ActivityCardState extends State<ActivityCard> {
                   TextButton(
                     onPressed: () => _showReview(context),
                     style: TextButton.styleFrom(padding: EdgeInsets.zero),
-                    child: const Text(ActivityStrings.seeReview),
+                    child: Text(context.l10n.seeReview),
                   ),
                 ],
 

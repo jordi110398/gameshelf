@@ -1,9 +1,8 @@
+import 'package:gameshelf/core/localization/app_localizations_x.dart';
 import 'dart:typed_data';
 
 import 'package:crop_your_image/crop_your_image.dart';
 import 'package:flutter/material.dart';
-import 'package:gameshelf/core/strings/app_strings.dart';
-import 'package:gameshelf/core/strings/profile_strings.dart';
 
 /// Pantalla per centrar/retallar la foto de perfil abans de pujar-la:
 /// l'usuari pot desplaçar i fer zoom a la imatge dins d'un marc fix
@@ -29,9 +28,9 @@ class _CropAvatarPageState extends State<CropAvatarPage> {
       case CropFailure():
         setState(() => _isCropping = false);
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text(ProfileStrings.cropFailedMessage)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(context.l10n.cropFailedMessage)));
     }
   }
 
@@ -42,7 +41,7 @@ class _CropAvatarPageState extends State<CropAvatarPage> {
       appBar: AppBar(
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
-        title: const Text(ProfileStrings.cropAvatarTitle),
+        title: Text(context.l10n.cropAvatarTitle),
         leading: IconButton(
           icon: const Icon(Icons.close),
           onPressed: () => Navigator.pop(context),
@@ -56,7 +55,7 @@ class _CropAvatarPageState extends State<CropAvatarPage> {
                     _controller.crop();
                   },
             child: Text(
-              AppStrings.actionSave,
+              context.l10n.actionSave,
               style: const TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,

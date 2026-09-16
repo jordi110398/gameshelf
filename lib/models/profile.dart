@@ -12,8 +12,10 @@ class Profile {
   final ShelfCoverStyle shelfCoverStyle;
 
   // Només ve informat quan el perfil és el de l'usuari autenticat
-  // (profiles_public, usat per veure altres usuaris, no exposa l'email).
+  // (profiles_public, usat per veure altres usuaris, no exposa l'email
+  // ni l'idioma -- són preferències personals, no públiques).
   final String? email;
+  final String? language;
 
   const Profile({
     required this.id,
@@ -26,6 +28,7 @@ class Profile {
     this.shelfDecorations = const {},
     this.shelfCoverStyle = ShelfCoverStyle.cartridge,
     this.email,
+    this.language,
   });
 
   factory Profile.fromMap(Map<String, dynamic> map) {
@@ -50,6 +53,7 @@ class Profile {
         map['shelf_cover_style'] as String?,
       ),
       email: map['email'] as String?,
+      language: map['language'] as String?,
     );
   }
 
@@ -65,6 +69,7 @@ class Profile {
       'shelf_decorations': shelfDecorations.databaseValues,
       'shelf_cover_style': shelfCoverStyle.databaseValue,
       'email': email,
+      'language': language,
     };
   }
 
@@ -76,6 +81,7 @@ class Profile {
     ShelfWoodColor? shelfWoodColor,
     Set<ShelfDecoration>? shelfDecorations,
     ShelfCoverStyle? shelfCoverStyle,
+    String? language,
   }) {
     return Profile(
       id: id,
@@ -88,6 +94,7 @@ class Profile {
       shelfDecorations: shelfDecorations ?? this.shelfDecorations,
       shelfCoverStyle: shelfCoverStyle ?? this.shelfCoverStyle,
       email: email,
+      language: language ?? this.language,
     );
   }
 }

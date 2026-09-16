@@ -1,7 +1,7 @@
+import 'package:gameshelf/core/localization/app_localizations_x.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:gameshelf/core/strings/notification_strings.dart';
 import 'package:gameshelf/models/notification_item.dart';
 
 /// Mostra un banner flotant a la part superior de la pantalla (per sobre de
@@ -85,13 +85,13 @@ class _NotificationBannerState extends State<_NotificationBanner>
 
     switch (n.type) {
       case NotificationType.friendRequest:
-        return '@${n.actorNickname} ${NotificationStrings.bannerFriendRequestSuffix}';
+        return '@${n.actorNickname} ${context.l10n.bannerFriendRequestSuffix}';
       case NotificationType.friendAccepted:
-        return '@${n.actorNickname} ${NotificationStrings.bannerFriendAcceptedSuffix}';
+        return '@${n.actorNickname} ${context.l10n.bannerFriendAcceptedSuffix}';
       case NotificationType.activityLike:
         final game = n.gameTitle;
-        return '@${n.actorNickname} ${NotificationStrings.bannerActivityLikeSuffix}'
-            '${game != null ? '${NotificationStrings.bannerActivityLikeGamePrefix}$game' : ''}';
+        return '@${n.actorNickname} ${context.l10n.bannerActivityLikeSuffix}'
+            '${game != null ? '${context.l10n.bannerActivityLikeGamePrefix}$game' : ''}';
       case NotificationType.unknown:
         // NotificationRepository ja el descarta abans que arribi aquí.
         return '';
