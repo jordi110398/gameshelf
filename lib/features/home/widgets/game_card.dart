@@ -320,14 +320,21 @@ class _GameCardState extends State<GameCard> {
                             return hero;
                           }
 
-                          return CartridgeCover(
-                            cover: hero,
-                            shellColor: cartridgeShellColorFor(
-                              platform: widget.libraryGame.userGame.platform,
-                              favorite: _favorite,
-                            ),
-                            platformLabel: platformAbbreviation(
-                              widget.libraryGame.userGame.platform,
+                          // Marge superior perquè la pestanya del
+                          // cartutx (que sobresurt del propi
+                          // `CartridgeCover`) no quedi tocant el
+                          // `ClipRRect` de la card i es talli.
+                          return Padding(
+                            padding: const EdgeInsets.only(top: 6),
+                            child: CartridgeCover(
+                              cover: hero,
+                              shellColor: cartridgeShellColorFor(
+                                platform: widget.libraryGame.userGame.platform,
+                                favorite: _favorite,
+                              ),
+                              platformLabel: platformAbbreviation(
+                                widget.libraryGame.userGame.platform,
+                              ),
                             ),
                           );
                         },

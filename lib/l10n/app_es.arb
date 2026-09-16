@@ -262,6 +262,8 @@
   "aboutDeveloperPortfolioUrl": "https://jordi110398.github.io/portfolio/",
   "aboutDevelopmentTitle": "Sobre el desarrollo",
   "aboutDevelopmentBody": "Buena parte del código de GameShelf se ha escrito con la ayuda de herramientas de inteligencia artificial. La idea, el diseño y todas las decisiones del proyecto son originales: la IA ha ayudado a escribirlo, pero la intención detrás de GameShelf es honesta y pensada de verdad para los jugadores.",
+  "aboutArtworkTitle": "Ilustraciones",
+  "aboutArtworkBody": "El logotipo y las ilustraciones de plantas de GameShelf están hechos a mano por el desarrollador.",
   "aboutContactTitle": "Contacto",
   "aboutCatalogDataTitle": "Datos del catálogo de juegos",
   "aboutCatalogDataBody": "La información de los juegos (títulos, portadas, descripciones) proviene de IGDB.",

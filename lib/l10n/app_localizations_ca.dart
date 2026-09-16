@@ -813,6 +813,13 @@ class AppLocalizationsCa extends AppLocalizations {
       'Bona part del codi de GameShelf s\'ha escrit amb l\'ajuda d\'eines d\'intel·ligència artificial. La idea, el disseny i totes les decisions del projecte són originals: la IA hi ha ajudat a escriure\'l, però la intenció darrere de GameShelf és honesta i pensada de debò per als jugadors.';
 
   @override
+  String get aboutArtworkTitle => 'Il·lustracions';
+
+  @override
+  String get aboutArtworkBody =>
+      'El logotip i les il·lustracions de plantes de GameShelf estan fets a mà pel desenvolupador.';
+
+  @override
   String get aboutContactTitle => 'Contacte';
 
   @override

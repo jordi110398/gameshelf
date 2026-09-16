@@ -78,6 +78,9 @@ class AboutPage extends StatelessWidget {
         LegalSectionTitle(context.l10n.aboutDevelopmentTitle),
         LegalParagraph(context.l10n.aboutDevelopmentBody),
 
+        LegalSectionTitle(context.l10n.aboutArtworkTitle),
+        LegalParagraph(context.l10n.aboutArtworkBody),
+
         LegalSectionTitle(context.l10n.aboutContactTitle),
         LegalParagraph(context.l10n.contactEmail),
 

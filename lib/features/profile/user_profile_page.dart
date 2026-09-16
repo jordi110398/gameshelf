@@ -1497,12 +1497,21 @@ class _ProfileStat extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        FittedBox(
-          fit: BoxFit.scaleDown,
-          child: Text(
-            value,
-            maxLines: 1,
-            style: const TextStyle(fontSize: 21, fontWeight: FontWeight.bold),
+        Tooltip(
+          message: value,
+          triggerMode: TooltipTriggerMode.tap,
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              value,
+              maxLines: 1,
+              softWrap: false,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontSize: 21,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
         ),
 

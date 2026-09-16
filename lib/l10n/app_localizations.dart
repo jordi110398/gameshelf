@@ -1588,6 +1588,18 @@ abstract class AppLocalizations {
   /// **'Bona part del codi de GameShelf s\'ha escrit amb l\'ajuda d\'eines d\'intel·ligència artificial. La idea, el disseny i totes les decisions del projecte són originals: la IA hi ha ajudat a escriure\'l, però la intenció darrere de GameShelf és honesta i pensada de debò per als jugadors.'**
   String get aboutDevelopmentBody;
 
+  /// No description provided for @aboutArtworkTitle.
+  ///
+  /// In ca, this message translates to:
+  /// **'Il·lustracions'**
+  String get aboutArtworkTitle;
+
+  /// No description provided for @aboutArtworkBody.
+  ///
+  /// In ca, this message translates to:
+  /// **'El logotip i les il·lustracions de plantes de GameShelf estan fets a mà pel desenvolupador.'**
+  String get aboutArtworkBody;
+
   /// No description provided for @aboutContactTitle.
   ///
   /// In ca, this message translates to:

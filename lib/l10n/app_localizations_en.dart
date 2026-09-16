@@ -806,6 +806,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'Much of GameShelf\'s code was written with the help of artificial intelligence tools. The idea, design, and every decision behind the project are original: AI helped write it, but the intent behind GameShelf is honest and genuinely built for gamers.';
 
   @override
+  String get aboutArtworkTitle => 'Artwork';
+
+  @override
+  String get aboutArtworkBody =>
+      'GameShelf\'s logo and plant illustrations are hand-drawn by the developer.';
+
+  @override
   String get aboutContactTitle => 'Contact';
 
   @override

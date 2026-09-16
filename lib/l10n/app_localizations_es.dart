@@ -813,6 +813,13 @@ class AppLocalizationsEs extends AppLocalizations {
       'Buena parte del código de GameShelf se ha escrito con la ayuda de herramientas de inteligencia artificial. La idea, el diseño y todas las decisiones del proyecto son originales: la IA ha ayudado a escribirlo, pero la intención detrás de GameShelf es honesta y pensada de verdad para los jugadores.';
 
   @override
+  String get aboutArtworkTitle => 'Ilustraciones';
+
+  @override
+  String get aboutArtworkBody =>
+      'El logotipo y las ilustraciones de plantas de GameShelf están hechos a mano por el desarrollador.';
+
+  @override
   String get aboutContactTitle => 'Contacto';
 
   @override
