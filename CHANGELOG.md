@@ -4,6 +4,21 @@ Tots els canvis importants d'aquest projecte es documentaran en aquest fitxer.
 
 Aquest projecte segueix el format de Keep a Changelog.
 
+## [1.0.4] - 16-09-2026
+
+### Added
+- Internacionalització completa: l'app és disponible en català, castellà i anglès.
+- Etiqueta amb la plataforma abreviada (NS2, PS5, PC, XBOX...) a la base dels cartutxos, allà on es coneix la plataforma del joc.
+- Apartat "Il·lustracions" a "Sobre GameShelf": el logotip i les il·lustracions de plantes estan fets a mà pel desenvolupador.
+
+### Changed
+- El botó de tancar sessió té secció pròpia a Editar perfil, separat de Configuració, per evitar clics accidentals.
+- Els cartutxos d'Inici i de les estanteries d'altres usuaris tornen a mostrar la pestanya superior, igual que a Perfil/Descobreix.
+
+### Fixed
+- Les xifres de les estadístiques del perfil (i de la targeta per compartir) es desbordaven amb números grans, com les hores jugades; ara s'encongeixen i, en el cas de les hores, es pot fer tap per veure la xifra completa.
+- La pestanya del cartutx a Inici i a les estanteries d'altres usuaris quedava tallada contra el marc de la targeta.
+
 ## [1.0.3] - 09-09-2026
 
 ### Fixed
