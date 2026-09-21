@@ -81,11 +81,23 @@ class SupabaseLibraryRepository implements LibraryRepository {
   // GUARDAR JOC A LA TAULA games
   // ─────────────────────────────────────────────
 
+  // Límits de longitud que valida la Edge Function `save-game`.
+  static String? _clip(String? value, int max) {
+    if (value == null || value.length <= max) return value;
+    return value.substring(0, max);
+  }
+
   Future<void> saveGame(Game game) async {
-    final response = await client.functions.invoke(
-      'save-game',
-      body: game.toMap(),
-    );
+    final body = game.toMap();
+
+    body['title'] = _clip(game.title, 500);
+    body['summary'] = _clip(game.summary, 5000);
+    body['storyline'] = _clip(game.storyline, 5000);
+    body['slug'] = _clip(game.slug, 500);
+    body['cover_url'] = _clip(game.coverUrl, 1000);
+    body['artwork_url'] = _clip(game.artworkUrl, 1000);
+
+    final response = await client.functions.invoke('save-game', body: body);
 
     if (response.status != 200) {
       throw Exception('No s\'ha pogut desar el joc');

@@ -561,6 +561,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'Add games and start building your collection.';
 
   @override
+  String get emptyPlayingTitle => 'No games in progress';
+
+  @override
+  String get emptyPlayingSubtitle =>
+      'Games you\'re currently playing will appear here.';
+
+  @override
   String get emptyDroppedTitle => 'No dropped games';
 
   @override
@@ -1292,6 +1299,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get languageChangeFailedPrefix => 'Couldn\'t change the language: ';
+
+  @override
+  String get translationCredit => '';
 
   @override
   String get changePasswordPageTitle => 'Change password';

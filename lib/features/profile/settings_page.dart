@@ -470,6 +470,14 @@ class _SettingsPageState extends State<SettingsPage> {
               },
             ),
           ),
+
+          if (context.l10n.translationCredit.trim().isNotEmpty) ...[
+            const SizedBox(height: 10),
+            Text(
+              context.l10n.translationCredit,
+              style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+            ),
+          ],
         ],
       ),
     );

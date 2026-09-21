@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:gameshelf/core/localization/app_localizations_x.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -80,7 +81,13 @@ String _storageMessage(BuildContext context, StorageException error) {
 }
 
 String _functionMessage(BuildContext context, FunctionException error) {
-  return context.l10n.errorServerOperationFailed;
+  final message = context.l10n.errorServerOperationFailed;
+
+  if (kDebugMode) {
+    return '$message [${error.status}: ${error.details}]';
+  }
+
+  return message;
 }
 
 /// Missatges llançats directament des del repositori/servei (que no té

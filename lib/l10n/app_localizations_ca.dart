@@ -566,6 +566,13 @@ class AppLocalizationsCa extends AppLocalizations {
       'Afegeix jocs i comença a construir la teva col·lecció.';
 
   @override
+  String get emptyPlayingTitle => 'Cap joc en curs';
+
+  @override
+  String get emptyPlayingSubtitle =>
+      'Aquí apareixeran els jocs que estiguis jugant.';
+
+  @override
   String get emptyDroppedTitle => 'Cap joc abandonat';
 
   @override
@@ -1306,6 +1313,9 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get languageChangeFailedPrefix => 'No s\'ha pogut canviar l\'idioma: ';
+
+  @override
+  String get translationCredit => '';
 
   @override
   String get changePasswordPageTitle => 'Canviar contrasenya';

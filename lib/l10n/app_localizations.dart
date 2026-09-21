@@ -1162,6 +1162,18 @@ abstract class AppLocalizations {
   /// **'Afegeix jocs i comença a construir la teva col·lecció.'**
   String get emptyLibrarySubtitle;
 
+  /// No description provided for @emptyPlayingTitle.
+  ///
+  /// In ca, this message translates to:
+  /// **'Cap joc en curs'**
+  String get emptyPlayingTitle;
+
+  /// No description provided for @emptyPlayingSubtitle.
+  ///
+  /// In ca, this message translates to:
+  /// **'Aquí apareixeran els jocs que estiguis jugant.'**
+  String get emptyPlayingSubtitle;
+
   /// No description provided for @emptyDroppedTitle.
   ///
   /// In ca, this message translates to:
@@ -2511,6 +2523,12 @@ abstract class AppLocalizations {
   /// In ca, this message translates to:
   /// **'No s\'ha pogut canviar l\'idioma: '**
   String get languageChangeFailedPrefix;
+
+  /// No description provided for @translationCredit.
+  ///
+  /// In ca, this message translates to:
+  /// **''**
+  String get translationCredit;
 
   /// No description provided for @changePasswordPageTitle.
   ///
