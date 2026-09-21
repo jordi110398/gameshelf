@@ -1309,6 +1309,9 @@ class AppLocalizationsEs extends AppLocalizations {
       'No se ha podido cambiar el idioma: ';
 
   @override
+  String get translationCredit => '';
+
+  @override
   String get changePasswordPageTitle => 'Cambiar contraseña';
 
   @override

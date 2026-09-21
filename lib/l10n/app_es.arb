@@ -431,6 +431,7 @@
   "languageSpanish": "Castellano",
   "languageEnglish": "Inglés",
   "languageChangeFailedPrefix": "No se ha podido cambiar el idioma: ",
+  "translationCredit": "",
   "changePasswordPageTitle": "Cambiar contraseña",
   "fillAllFields": "Rellena todos los campos.",
   "passwordMinLength6": "La contraseña debe tener al menos 6 caracteres.",

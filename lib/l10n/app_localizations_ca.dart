@@ -1308,6 +1308,9 @@ class AppLocalizationsCa extends AppLocalizations {
   String get languageChangeFailedPrefix => 'No s\'ha pogut canviar l\'idioma: ';
 
   @override
+  String get translationCredit => '';
+
+  @override
   String get changePasswordPageTitle => 'Canviar contrasenya';
 
   @override

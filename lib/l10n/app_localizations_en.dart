@@ -1294,6 +1294,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get languageChangeFailedPrefix => 'Couldn\'t change the language: ';
 
   @override
+  String get translationCredit => '';
+
+  @override
   String get changePasswordPageTitle => 'Change password';
 
   @override

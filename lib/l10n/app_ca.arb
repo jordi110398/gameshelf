@@ -431,6 +431,7 @@
   "languageSpanish": "Castellà",
   "languageEnglish": "Anglès",
   "languageChangeFailedPrefix": "No s'ha pogut canviar l'idioma: ",
+  "translationCredit": "",
   "changePasswordPageTitle": "Canviar contrasenya",
   "fillAllFields": "Omple tots els camps.",
   "passwordMinLength6": "La contrasenya ha de tenir almenys 6 caràcters.",

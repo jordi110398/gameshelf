@@ -2512,6 +2512,12 @@ abstract class AppLocalizations {
   /// **'No s\'ha pogut canviar l\'idioma: '**
   String get languageChangeFailedPrefix;
 
+  /// No description provided for @translationCredit.
+  ///
+  /// In ca, this message translates to:
+  /// **''**
+  String get translationCredit;
+
   /// No description provided for @changePasswordPageTitle.
   ///
   /// In ca, this message translates to:
