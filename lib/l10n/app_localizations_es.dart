@@ -567,6 +567,13 @@ class AppLocalizationsEs extends AppLocalizations {
       'Añade juegos y empieza a construir tu colección.';
 
   @override
+  String get emptyPlayingTitle => 'Ningún juego en curso';
+
+  @override
+  String get emptyPlayingSubtitle =>
+      'Aquí aparecerán los juegos que estés jugando.';
+
+  @override
   String get emptyDroppedTitle => 'Ningún juego abandonado';
 
   @override

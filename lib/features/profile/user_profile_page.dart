@@ -1360,6 +1360,13 @@ class _UserProfilePageState extends State<UserProfilePage> {
           const SizedBox(width: 8),
 
           _buildFilterChip(
+            label: context.l10n.gameStatusPlaying,
+            status: GameStatus.playing,
+          ),
+
+          const SizedBox(width: 8),
+
+          _buildFilterChip(
             label: context.l10n.profileFilterDropped,
             status: GameStatus.dropped,
           ),

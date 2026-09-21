@@ -190,6 +190,8 @@
   "filterWishlist": "Wishlist",
   "emptyLibraryTitle": "La teva biblioteca està buida",
   "emptyLibrarySubtitle": "Afegeix jocs i comença a construir la teva col·lecció.",
+  "emptyPlayingTitle": "Cap joc en curs",
+  "emptyPlayingSubtitle": "Aquí apareixeran els jocs que estiguis jugant.",
   "emptyDroppedTitle": "Cap joc abandonat",
   "emptyDroppedSubtitle": "Aquí apareixeran els jocs que decideixis deixar.",
   "emptyWishlistTitle": "No tens jocs pendents",

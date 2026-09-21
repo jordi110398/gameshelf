@@ -13,7 +13,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:gameshelf/core/services/profile_service.dart';
 import 'package:gameshelf/models/profile.dart';
 
-enum LibraryFilter { library, dropped, wantToPlay }
+enum LibraryFilter { library, playing, dropped, wantToPlay }
 
 enum LibrarySort { dateAdded, datePlayed, hoursPlayed, status, title }
 
@@ -123,6 +123,12 @@ class HomePageState extends State<HomePage> {
               game.userGame.status == GameStatus.paused ||
               game.userGame.status == GameStatus.completed ||
               game.userGame.status == GameStatus.dropped;
+        }).toList();
+        break;
+
+      case LibraryFilter.playing:
+        filteredGames = games.where((game) {
+          return game.userGame.status == GameStatus.playing;
         }).toList();
         break;
 
@@ -450,6 +456,10 @@ class HomePageState extends State<HomePage> {
           game.userGame.status == GameStatus.dropped;
     }).length;
 
+    final playingCount = games.where((game) {
+      return game.userGame.status == GameStatus.playing;
+    }).length;
+
     final droppedCount = games.where((game) {
       return game.userGame.status == GameStatus.dropped;
     }).length;
@@ -502,6 +512,21 @@ class HomePageState extends State<HomePage> {
                                   setState(
                                     () =>
                                         selectedFilter = LibraryFilter.library,
+                                  );
+                                },
+                              ),
+                              const SizedBox(width: 6),
+                              _buildFilterButton(
+                                context: context,
+                                icon: GameStatus.playing.icon,
+                                label: context.l10n.gameStatusPlaying,
+                                count: playingCount,
+                                selected:
+                                    selectedFilter == LibraryFilter.playing,
+                                onTap: () {
+                                  setState(
+                                    () =>
+                                        selectedFilter = LibraryFilter.playing,
                                   );
                                 },
                               ),
@@ -566,6 +591,12 @@ class HomePageState extends State<HomePage> {
         icon = Icons.videogame_asset_outlined;
         title = context.l10n.emptyLibraryTitle;
         subtitle = context.l10n.emptyLibrarySubtitle;
+        break;
+
+      case LibraryFilter.playing:
+        icon = GameStatus.playing.icon;
+        title = context.l10n.emptyPlayingTitle;
+        subtitle = context.l10n.emptyPlayingSubtitle;
         break;
 
       case LibraryFilter.dropped:

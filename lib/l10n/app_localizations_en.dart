@@ -561,6 +561,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'Add games and start building your collection.';
 
   @override
+  String get emptyPlayingTitle => 'No games in progress';
+
+  @override
+  String get emptyPlayingSubtitle =>
+      'Games you\'re currently playing will appear here.';
+
+  @override
   String get emptyDroppedTitle => 'No dropped games';
 
   @override
