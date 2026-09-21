@@ -4,6 +4,18 @@ Tots els canvis importants d'aquest projecte es documentaran en aquest fitxer.
 
 Aquest projecte segueix el format de Keep a Changelog.
 
+## [1.0.5] - 21-09-2026
+
+### Added
+- Filtre "Jugant" entre Biblioteca i Dropped, tant a Inici (amb comptador i missatge d'estat buit) com al perfil d'un amic.
+- Espai per al crèdit de la traducció a "Sobre GameShelf" i sota el selector d'idioma a Configuració (només es mostra si té text).
+
+### Changed
+- L'etiqueta de plataforma del cartutx s'esvaeix en activar la card, perquè no se superposi a les hores, i s'allunya una mica de la vora inferior.
+
+### Fixed
+- No es podien afegir jocs amb textos molt llargs a l'IGDB (p. ex. Tomb Raider): la funció `save-game` els rebutjava. Ara es trunquen als límits abans d'enviar-los.
+
 ## [1.0.4] - 16-09-2026
 
 ### Added
