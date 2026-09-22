@@ -8,6 +8,8 @@ const _ledgeGradients = {
   ShelfWoodColor.ebony: [Color(0xFF2C2C2F), Color(0xFF0C0C0D)],
   ShelfWoodColor.cherry: [Color(0xFF5C2A22), Color(0xFF230D0A)],
   ShelfWoodColor.birch: [Color(0xFFB79F74), Color(0xFF5A4B31)],
+  ShelfWoodColor.lilac: [Color(0xFF6D4FA8), Color(0xFF241A3D)],
+  ShelfWoodColor.bubblegum: [Color(0xFF7A2F52), Color(0xFF2C0E1C)],
 };
 
 /// El "prestatge" físic (planxa de fusta) que suporta una filera de jocs.

@@ -17,6 +17,8 @@ const _woodSwatches = {
   ShelfWoodColor.ebony: Color(0xFF2B2620),
   ShelfWoodColor.cherry: Color(0xFF7A3327),
   ShelfWoodColor.birch: Color(0xFFC9B48C),
+  ShelfWoodColor.lilac: Color(0xFF8B5CF6),
+  ShelfWoodColor.bubblegum: Color(0xFFEC4899),
 };
 
 Map<ShelfWoodColor, String> _woodLabels(BuildContext context) => {
@@ -25,6 +27,8 @@ Map<ShelfWoodColor, String> _woodLabels(BuildContext context) => {
   ShelfWoodColor.ebony: context.l10n.shelfWoodEbony,
   ShelfWoodColor.cherry: context.l10n.shelfWoodCherry,
   ShelfWoodColor.birch: context.l10n.shelfWoodBirch,
+  ShelfWoodColor.lilac: context.l10n.shelfWoodLilac,
+  ShelfWoodColor.bubblegum: context.l10n.shelfWoodBubblegum,
 };
 
 Map<ShelfDecoration, String> _decorationLabels(BuildContext context) => {
@@ -293,7 +297,11 @@ class _SettingsPageState extends State<SettingsPage> {
                 ValueListenableBuilder<ShelfLightStyle>(
                   valueListenable: ShelfSkinService.instance.lightStyle,
                   builder: (context, currentStyle, _) {
-                    return SegmentedButton<ShelfLightStyle>(
+                    // 4 segments amb icona + etiqueta no caben en amples
+                    // petits -- scroll horitzontal per no desbordar.
+                    return SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: SegmentedButton<ShelfLightStyle>(
                       segments: [
                         ButtonSegment(
                           value: ShelfLightStyle.neon,
@@ -305,11 +313,27 @@ class _SettingsPageState extends State<SettingsPage> {
                           label: Text(context.l10n.shelfLightsBulbs),
                           icon: Icon(Icons.lightbulb_outline),
                         ),
+                        ButtonSegment(
+                          value: ShelfLightStyle.stars,
+                          label: Text(context.l10n.shelfLightsStars),
+                          icon: Icon(Icons.star_border),
+                        ),
+                        ButtonSegment(
+                          value: ShelfLightStyle.christmas,
+                          label: Text(context.l10n.shelfLightsChristmas),
+                          icon: Icon(Icons.park_outlined),
+                        ),
+                        ButtonSegment(
+                          value: ShelfLightStyle.hearts,
+                          label: Text(context.l10n.shelfLightsHearts),
+                          icon: Icon(Icons.favorite_border),
+                        ),
                       ],
-                      selected: {currentStyle},
-                      onSelectionChanged: isSavingShelfStyle
-                          ? null
-                          : (selection) => _setLightStyle(selection.first),
+                        selected: {currentStyle},
+                        onSelectionChanged: isSavingShelfStyle
+                            ? null
+                            : (selection) => _setLightStyle(selection.first),
+                      ),
                     );
                   },
                 ),

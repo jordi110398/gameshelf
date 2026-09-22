@@ -8,6 +8,8 @@ const _woodDrawerGradients = {
   ShelfWoodColor.ebony: [Color(0xFF201F22), Color(0xFF0A0A0B)],
   ShelfWoodColor.cherry: [Color(0xFF3A1F1A), Color(0xFF1A0C09)],
   ShelfWoodColor.birch: [Color(0xFF8C7A56), Color(0xFF4A3F2A)],
+  ShelfWoodColor.lilac: [Color(0xFF5A4080), Color(0xFF1E1730)],
+  ShelfWoodColor.bubblegum: [Color(0xFF622548), Color(0xFF241019)],
 };
 
 /// Decoració de "calaix de fusta" semi-transparent, reutilitzable en

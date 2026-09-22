@@ -41,6 +41,18 @@ class AppTheme {
           background: const Color(0xFF171409),
           surface: const Color(0xFF241F13),
         );
+      case ShelfWoodColor.lilac:
+        return _themeFor(
+          seedColor: const Color(0xFF8B5CF6),
+          background: const Color(0xFF120E1D),
+          surface: const Color(0xFF1E1730),
+        );
+      case ShelfWoodColor.bubblegum:
+        return _themeFor(
+          seedColor: const Color(0xFFEC4899),
+          background: const Color(0xFF1A0A13),
+          surface: const Color(0xFF241019),
+        );
     }
   }
 

@@ -2398,6 +2398,24 @@ abstract class AppLocalizations {
   /// **'Bombetes'**
   String get shelfLightsBulbs;
 
+  /// No description provided for @shelfLightsStars.
+  ///
+  /// In ca, this message translates to:
+  /// **'Estrelles'**
+  String get shelfLightsStars;
+
+  /// No description provided for @shelfLightsChristmas.
+  ///
+  /// In ca, this message translates to:
+  /// **'Nadal'**
+  String get shelfLightsChristmas;
+
+  /// No description provided for @shelfLightsHearts.
+  ///
+  /// In ca, this message translates to:
+  /// **'Cors'**
+  String get shelfLightsHearts;
+
   /// No description provided for @shelfWoodLabel.
   ///
   /// In ca, this message translates to:
@@ -2433,6 +2451,18 @@ abstract class AppLocalizations {
   /// In ca, this message translates to:
   /// **'Bedoll'**
   String get shelfWoodBirch;
+
+  /// No description provided for @shelfWoodLilac.
+  ///
+  /// In ca, this message translates to:
+  /// **'Lila'**
+  String get shelfWoodLilac;
+
+  /// No description provided for @shelfWoodBubblegum.
+  ///
+  /// In ca, this message translates to:
+  /// **'Xiclet'**
+  String get shelfWoodBubblegum;
 
   /// No description provided for @shelfDecorationLabel.
   ///

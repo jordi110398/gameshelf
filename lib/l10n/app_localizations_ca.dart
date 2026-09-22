@@ -1251,6 +1251,15 @@ class AppLocalizationsCa extends AppLocalizations {
   String get shelfLightsBulbs => 'Bombetes';
 
   @override
+  String get shelfLightsStars => 'Estrelles';
+
+  @override
+  String get shelfLightsChristmas => 'Nadal';
+
+  @override
+  String get shelfLightsHearts => 'Cors';
+
+  @override
   String get shelfWoodLabel => 'Color de la fusta';
 
   @override
@@ -1267,6 +1276,12 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get shelfWoodBirch => 'Bedoll';
+
+  @override
+  String get shelfWoodLilac => 'Lila';
+
+  @override
+  String get shelfWoodBubblegum => 'Xiclet';
 
   @override
   String get shelfDecorationLabel => 'Decoració';

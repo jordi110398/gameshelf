@@ -49,6 +49,8 @@ const _woodGradients = {
   ShelfWoodColor.ebony: [Color(0xFF2B2B2E), Color(0xFF0B0B0C)],
   ShelfWoodColor.cherry: [Color(0xFF6B2E24), Color(0xFF260F0B)],
   ShelfWoodColor.birch: [Color(0xFFC7AD7C), Color(0xFF6E5B3B)],
+  ShelfWoodColor.lilac: [Color(0xFF7E5CC4), Color(0xFF2C2049)],
+  ShelfWoodColor.bubblegum: [Color(0xFF8C3861), Color(0xFF33101F)],
 };
 
 class _WoodGrainPainter extends CustomPainter {

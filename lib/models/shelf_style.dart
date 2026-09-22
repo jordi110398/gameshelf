@@ -3,13 +3,19 @@
 // tema visual de tota l'app (vegeu `app/theme.dart`) -- no hi ha un
 // selector de tema separat, per mantenir-ho tot homogeni.
 
-enum ShelfLightStyle { neon, bulbs }
+enum ShelfLightStyle { neon, bulbs, stars, christmas, hearts }
 
 extension ShelfLightStyleX on ShelfLightStyle {
   static ShelfLightStyle fromDb(String? value) {
     switch (value) {
       case 'bulbs':
         return ShelfLightStyle.bulbs;
+      case 'stars':
+        return ShelfLightStyle.stars;
+      case 'christmas':
+        return ShelfLightStyle.christmas;
+      case 'hearts':
+        return ShelfLightStyle.hearts;
       case 'neon':
       default:
         return ShelfLightStyle.neon;
@@ -22,11 +28,17 @@ extension ShelfLightStyleX on ShelfLightStyle {
         return 'neon';
       case ShelfLightStyle.bulbs:
         return 'bulbs';
+      case ShelfLightStyle.stars:
+        return 'stars';
+      case ShelfLightStyle.christmas:
+        return 'christmas';
+      case ShelfLightStyle.hearts:
+        return 'hearts';
     }
   }
 }
 
-enum ShelfWoodColor { walnut, oak, ebony, cherry, birch }
+enum ShelfWoodColor { walnut, oak, ebony, cherry, birch, lilac, bubblegum }
 
 extension ShelfWoodColorX on ShelfWoodColor {
   static ShelfWoodColor fromDb(String? value) {
@@ -39,6 +51,10 @@ extension ShelfWoodColorX on ShelfWoodColor {
         return ShelfWoodColor.cherry;
       case 'birch':
         return ShelfWoodColor.birch;
+      case 'lilac':
+        return ShelfWoodColor.lilac;
+      case 'bubblegum':
+        return ShelfWoodColor.bubblegum;
       case 'walnut':
       default:
         return ShelfWoodColor.walnut;
@@ -57,6 +73,10 @@ extension ShelfWoodColorX on ShelfWoodColor {
         return 'cherry';
       case ShelfWoodColor.birch:
         return 'birch';
+      case ShelfWoodColor.lilac:
+        return 'lilac';
+      case ShelfWoodColor.bubblegum:
+        return 'bubblegum';
     }
   }
 

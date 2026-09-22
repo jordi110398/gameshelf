@@ -33,6 +33,12 @@ class ShelfLightFixture extends StatelessWidget {
         return ShelfLedStrip(width: width);
       case ShelfLightStyle.bulbs:
         return ShelfLights(width: width);
+      case ShelfLightStyle.stars:
+        return ShelfLights(width: width, shape: BulbShape.star);
+      case ShelfLightStyle.christmas:
+        return ShelfLights.christmas(width: width);
+      case ShelfLightStyle.hearts:
+        return ShelfLights.hearts(width: width);
     }
   }
 }
