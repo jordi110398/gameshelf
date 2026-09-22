@@ -181,7 +181,11 @@ class ShelfRepository {
 
     final profilesResponse = await client
         .from('profiles_public')
-        .select('id, nickname, avatar_url')
+        .select(
+          'id, nickname, avatar_url, '
+          'shelf_light_style, shelf_wood_color, shelf_decorations, '
+          'shelf_cover_style',
+        )
         .inFilter('id', userIds.toList());
 
     final profileById = {

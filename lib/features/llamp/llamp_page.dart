@@ -14,6 +14,7 @@ import 'package:gameshelf/core/widgets/shimmer_box.dart';
 import 'package:gameshelf/core/widgets/wood_drawer_container.dart';
 import 'package:gameshelf/features/game/pages/game_detail_page.dart';
 import 'package:gameshelf/features/llamp/my_shelves_page.dart';
+import 'package:gameshelf/features/profile/user_profile_page.dart';
 import 'package:gameshelf/models/game.dart';
 import 'package:gameshelf/models/profile.dart';
 import 'package:gameshelf/models/shelf_style.dart';
@@ -231,28 +232,41 @@ class _FriendShelfCard extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    CircleAvatar(
-                      radius: 14,
-                      backgroundImage:
-                          profile.avatarUrl != null &&
-                              profile.avatarUrl!.isNotEmpty
-                          ? NetworkImage(profile.avatarUrl!)
-                          : null,
-                      child:
-                          profile.avatarUrl == null ||
-                              profile.avatarUrl!.isEmpty
-                          ? const Icon(Icons.person, size: 14)
-                          : null,
-                    ),
-                    const SizedBox(width: 8),
                     Expanded(
-                      child: Text(
-                        '${item.shelf.displayTitle} · @${profile.nickname}',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(8),
+                        onTap: () => pushFade(
+                          context,
+                          (_) => UserProfilePage(profile: profile),
+                        ),
+                        child: Row(
+                          children: [
+                            CircleAvatar(
+                              radius: 14,
+                              backgroundImage:
+                                  profile.avatarUrl != null &&
+                                      profile.avatarUrl!.isNotEmpty
+                                  ? NetworkImage(profile.avatarUrl!)
+                                  : null,
+                              child:
+                                  profile.avatarUrl == null ||
+                                      profile.avatarUrl!.isEmpty
+                                  ? const Icon(Icons.person, size: 14)
+                                  : null,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                '${item.shelf.displayTitle} · @${profile.nickname}',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
