@@ -5,13 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:gameshelf/core/navigation/page_transitions.dart';
 import 'package:gameshelf/core/services/pwa_install_service.dart';
 import 'package:gameshelf/core/widgets/app_logo.dart';
+import 'package:gameshelf/features/notifications/notification_navigation.dart';
 import 'package:gameshelf/features/notifications/notifications_page.dart';
 import 'package:gameshelf/features/notifications/widgets/notification_banner.dart';
-import 'package:gameshelf/features/profile/user_profile_page.dart';
 import 'package:gameshelf/features/search/search_page.dart';
 import 'package:gameshelf/models/notification_item.dart';
 import 'package:gameshelf/repositories/notification_repository.dart';
-import 'package:gameshelf/repositories/profile_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class HomeAppBar extends StatefulWidget implements PreferredSizeWidget {
@@ -114,13 +113,9 @@ class _HomeAppBarState extends State<HomeAppBar>
       context,
       notification,
       onTap: () async {
-        final profile = await ProfileRepository(
-          Supabase.instance.client,
-        ).getProfileById(notification.actorId);
+        await openNotificationTarget(context, notification);
 
-        if (profile == null || !mounted) return;
-
-        await pushFade(context, (_) => UserProfilePage(profile: profile));
+        if (!mounted) return;
 
         await _checkForNotifications();
       },

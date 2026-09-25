@@ -1,7 +1,9 @@
 import 'package:gameshelf/core/localization/app_localizations_x.dart';
 import 'package:flutter/material.dart';
 import 'package:gameshelf/core/navigation/page_transitions.dart';
+import 'package:gameshelf/core/services/user_tags_service.dart';
 import 'package:gameshelf/core/widgets/rating_stars.dart';
+import 'package:gameshelf/core/widgets/tag_chip.dart';
 import 'package:gameshelf/features/game/pages/edit_game_page.dart';
 import 'package:gameshelf/models/game.dart';
 import 'package:gameshelf/models/game_status.dart';
@@ -501,6 +503,8 @@ class _GameDetailPageState extends State<GameDetailPage> {
     }
   }
 
+  static const _tagsService = UserTagsService();
+
   Widget buildGenreChips(BuildContext context) {
     if (widget.game.genres.isEmpty) {
       return const SizedBox.shrink();
@@ -510,12 +514,38 @@ class _GameDetailPageState extends State<GameDetailPage> {
       spacing: 8,
       runSpacing: 8,
       children: widget.game.genres.map((genre) {
-        return Chip(
-          label: Text(genre),
-          padding: const EdgeInsets.symmetric(horizontal: 4),
-          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        );
+        final style = _tagsService.styleForGenre(genre);
+
+        return TagChip(icon: style.icon, color: style.color, label: genre);
       }).toList(),
+    );
+  }
+
+  Widget buildPlatformChips(BuildContext context) {
+    if (widget.game.platforms.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    // Totes a la mateixa alçada en una sola fila, com una petita
+    // col·lecció horitzontal -- en lloc de Wrap, que les partiria en
+    // diverses línies.
+    return SizedBox(
+      height: 32,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        itemCount: widget.game.platforms.length,
+        separatorBuilder: (_, _) => const SizedBox(width: 8),
+        itemBuilder: (context, index) {
+          final platform = widget.game.platforms[index];
+          final visual = platformVisualFor(platform);
+
+          return TagChip(
+            icon: visual?.icon ?? Icons.videogame_asset,
+            color: visual?.color ?? Colors.blueGrey,
+            label: platform,
+          );
+        },
+      ),
     );
   }
 
@@ -685,6 +715,16 @@ class _GameDetailPageState extends State<GameDetailPage> {
                 const SizedBox(height: 16),
 
                 buildGenreChips(context),
+              ],
+              // ─────────────────────────────
+              // PLATAFORMES
+              // ─────────────────────────────
+              if (widget.game.platforms.isNotEmpty) ...[
+                const SizedBox(height: 16),
+                const Divider(),
+                const SizedBox(height: 12),
+
+                buildPlatformChips(context),
               ],
               // ─────────────────────────────
               // INFORMACIÓ PERSONAL

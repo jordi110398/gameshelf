@@ -1,6 +1,7 @@
 import 'package:gameshelf/core/localization/app_localizations_x.dart';
 import 'package:flutter/material.dart';
 import 'package:gameshelf/core/navigation/page_transitions.dart';
+import 'package:gameshelf/core/services/tab_navigation_service.dart';
 import 'package:gameshelf/core/widgets/floating_pill.dart';
 import 'package:gameshelf/core/widgets/pressable_scale.dart';
 import 'package:gameshelf/core/widgets/shimmer_box.dart';
@@ -71,6 +72,10 @@ class _MainShellPageState extends State<MainShellPage> {
   void initState() {
     super.initState();
 
+    TabNavigationService.instance.requestedTab.addListener(
+      _handleTabRequest,
+    );
+
     final nickname = widget.initialSearchNickname;
     if (nickname == null || nickname.trim().isEmpty) return;
 
@@ -82,6 +87,25 @@ class _MainShellPageState extends State<MainShellPage> {
       setState(() => _currentIndex = 2);
       _socialKey.currentState?.searchForNickname(nickname.trim());
     });
+  }
+
+  @override
+  void dispose() {
+    TabNavigationService.instance.requestedTab.removeListener(
+      _handleTabRequest,
+    );
+    super.dispose();
+  }
+
+  // Petició externa de canvi de pestanya (vegeu `TabNavigationService`),
+  // p. ex. en tornar de Notificacions després de tocar-ne una que porta
+  // a Descobreix.
+  void _handleTabRequest() {
+    final requested = TabNavigationService.instance.requestedTab.value;
+    if (requested == null) return;
+
+    TabNavigationService.instance.requestedTab.value = null;
+    _selectTab(requested);
   }
 
   void _selectTab(int index) {

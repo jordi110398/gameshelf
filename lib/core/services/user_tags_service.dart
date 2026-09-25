@@ -129,5 +129,14 @@ class UserTagsService {
   /// Retorna l'estil (icona + color) associat a un tag.
   TagStyle styleForTag(String tag) => _tagStyles[tag] ?? _defaultStyle;
 
+  /// Estil d'un gènere de joc, heretat del tag de personalitat amb què
+  /// està relacionat (vegeu `_genreToTagMap`) -- així un gènere i el tag
+  /// que en resulta al perfil sempre comparteixen color. Estil per
+  /// defecte si el gènere no té cap tag associat.
+  TagStyle styleForGenre(String genre) {
+    final tag = _genreToTag(genre);
+    return tag != null ? styleForTag(tag) : _defaultStyle;
+  }
+
   String? _genreToTag(String genre) => _genreToTagMap[genre.toLowerCase()];
 }

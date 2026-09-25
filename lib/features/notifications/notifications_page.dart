@@ -2,16 +2,14 @@ import 'package:gameshelf/core/localization/app_localizations_x.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:gameshelf/core/navigation/page_transitions.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:gameshelf/core/utils/error_messages.dart';
 import 'package:gameshelf/core/widgets/bookshelf_background.dart';
 import 'package:gameshelf/core/widgets/responsive_center.dart';
+import 'package:gameshelf/features/notifications/notification_navigation.dart';
 import 'package:gameshelf/models/notification_item.dart';
 import 'package:gameshelf/repositories/notification_repository.dart';
-import 'package:gameshelf/repositories/profile_repository.dart';
-import 'package:gameshelf/features/profile/user_profile_page.dart';
 
 class NotificationsPage extends StatefulWidget {
   const NotificationsPage({super.key});
@@ -22,7 +20,6 @@ class NotificationsPage extends StatefulWidget {
 
 class _NotificationsPageState extends State<NotificationsPage> {
   final _repository = NotificationRepository(Supabase.instance.client);
-  final _profileRepository = ProfileRepository(Supabase.instance.client);
 
   List<NotificationItem> _items = [];
   bool _isLoading = true;
@@ -80,6 +77,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
                       friendshipId: n.friendshipId,
                       activityId: n.activityId,
                       gameTitle: n.gameTitle,
+                      shelfId: n.shelfId,
+                      shelfTitle: n.shelfTitle,
                       readAt: DateTime.now(),
                       createdAt: n.createdAt,
                     ),
@@ -111,6 +110,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
             friendshipId: item.friendshipId,
             activityId: item.activityId,
             gameTitle: item.gameTitle,
+            shelfId: item.shelfId,
+            shelfTitle: item.shelfTitle,
             readAt: DateTime.now(),
             createdAt: item.createdAt,
           );
@@ -118,11 +119,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
       });
     }
 
-    final profile = await _profileRepository.getProfileById(item.actorId);
+    if (!mounted) return;
 
-    if (profile == null || !mounted) return;
-
-    await pushFade(context, (_) => UserProfilePage(profile: profile));
+    await openNotificationTarget(context, item);
   }
 
   String _messageFor(NotificationItem item) {
@@ -134,6 +133,17 @@ class _NotificationsPageState extends State<NotificationsPage> {
       case NotificationType.activityLike:
         return '${context.l10n.listActivityLikePrefix}'
             '${item.gameTitle ?? context.l10n.listActivityLikeUnknownGame}';
+      case NotificationType.dropped:
+        return '${context.l10n.actionDroppedPrefix}${item.gameTitle}';
+      case NotificationType.review:
+        return '${context.l10n.actionReviewPrefix}${item.gameTitle}';
+      case NotificationType.addedToLibrary:
+        return '${context.l10n.actionAddedToLibraryVerb}'
+            '${item.gameTitle}'
+            '${context.l10n.actionAddedToLibrarySuffix}';
+      case NotificationType.shelfPublished:
+        return '${context.l10n.actionShelfPublishedPrefix}'
+            '"${item.shelfTitle}"';
       case NotificationType.unknown:
         // NotificationRepository ja el descarta abans que arribi aquí.
         return '';
@@ -148,8 +158,35 @@ class _NotificationsPageState extends State<NotificationsPage> {
         return Icons.people_alt_outlined;
       case NotificationType.activityLike:
         return Icons.star;
+      case NotificationType.dropped:
+        return Icons.cancel;
+      case NotificationType.review:
+        return Icons.edit_note;
+      case NotificationType.addedToLibrary:
+        return Icons.add_circle_outline;
+      case NotificationType.shelfPublished:
+        return Icons.bolt;
       case NotificationType.unknown:
         return Icons.notifications_none;
+    }
+  }
+
+  Color _colorFor(NotificationType type) {
+    switch (type) {
+      case NotificationType.activityLike:
+        return Colors.amber;
+      case NotificationType.dropped:
+        return Colors.redAccent;
+      case NotificationType.review:
+        return Colors.teal;
+      case NotificationType.addedToLibrary:
+        return Colors.green;
+      case NotificationType.shelfPublished:
+        return Colors.pinkAccent;
+      case NotificationType.friendRequest:
+      case NotificationType.friendAccepted:
+      case NotificationType.unknown:
+        return Colors.grey.shade500;
     }
   }
 
@@ -266,11 +303,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                                   Icon(
                                     _iconFor(item.type),
                                     size: 20,
-                                    color:
-                                        item.type ==
-                                            NotificationType.activityLike
-                                        ? Colors.amber
-                                        : Colors.grey.shade500,
+                                    color: _colorFor(item.type),
                                   ),
                                 ],
                               ),

@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:gameshelf/core/services/user_tags_service.dart';
 import 'package:gameshelf/core/utils/hours_format.dart';
 import 'package:gameshelf/models/game_status.dart';
 import 'package:gameshelf/models/library_game.dart';
 import 'package:gameshelf/core/widgets/rating_stars.dart';
+
+const _tagsService = UserTagsService();
 
 class GameOverlay extends StatelessWidget {
   final LibraryGame libraryGame;
@@ -113,6 +116,10 @@ class GameOverlay extends StatelessWidget {
                             spacing: 4,
                             runSpacing: 4,
                             children: game.genres.map((genre) {
+                              final color = _tagsService
+                                  .styleForGenre(genre)
+                                  .color;
+
                               return Container(
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 5,
@@ -122,13 +129,17 @@ class GameOverlay extends StatelessWidget {
                                   color: Colors.black.withValues(alpha: 0.55),
                                   borderRadius: BorderRadius.circular(6),
                                   border: Border.all(
-                                    color: Colors.white.withValues(alpha: 0.18),
+                                    color: color.withValues(alpha: 0.55),
                                   ),
                                 ),
                                 child: Text(
                                   genre,
                                   style: TextStyle(
-                                    color: Colors.white,
+                                    color: Color.lerp(
+                                      color,
+                                      Colors.white,
+                                      0.35,
+                                    ),
                                     fontSize: isSmall ? 7 : 10,
                                     fontWeight: FontWeight.w500,
                                   ),

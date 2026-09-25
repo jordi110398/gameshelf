@@ -92,6 +92,19 @@ class _NotificationBannerState extends State<_NotificationBanner>
         final game = n.gameTitle;
         return '@${n.actorNickname} ${context.l10n.bannerActivityLikeSuffix}'
             '${game != null ? '${context.l10n.bannerActivityLikeGamePrefix}$game' : ''}';
+      case NotificationType.dropped:
+        return '@${n.actorNickname} ${context.l10n.actionDroppedPrefix}'
+            '${n.gameTitle}';
+      case NotificationType.review:
+        return '@${n.actorNickname} ${context.l10n.actionReviewPrefix}'
+            '${n.gameTitle}';
+      case NotificationType.addedToLibrary:
+        return '@${n.actorNickname} ${context.l10n.actionAddedToLibraryVerb}'
+            '${n.gameTitle}'
+            '${context.l10n.actionAddedToLibrarySuffix}';
+      case NotificationType.shelfPublished:
+        return '@${n.actorNickname} ${context.l10n.actionShelfPublishedPrefix}'
+            '"${n.shelfTitle}"';
       case NotificationType.unknown:
         // NotificationRepository ja el descarta abans que arribi aquí.
         return '';
@@ -106,6 +119,14 @@ class _NotificationBannerState extends State<_NotificationBanner>
         return Icons.people_alt;
       case NotificationType.activityLike:
         return Icons.star;
+      case NotificationType.dropped:
+        return Icons.cancel;
+      case NotificationType.review:
+        return Icons.edit_note;
+      case NotificationType.addedToLibrary:
+        return Icons.add_circle_outline;
+      case NotificationType.shelfPublished:
+        return Icons.bolt;
       case NotificationType.unknown:
         return Icons.notifications_none;
     }

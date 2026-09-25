@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gameshelf/core/services/user_tags_service.dart';
+import 'package:gameshelf/core/widgets/tag_chip.dart';
 import 'package:gameshelf/models/library_game.dart';
 
 /// Etiquetes de personalitat calculades a partir dels gèneres de la
@@ -27,29 +28,7 @@ class UserTagsRow extends StatelessWidget {
       children: tags.map((tag) {
         final style = _tagsService.styleForTag(tag);
 
-        return Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          decoration: BoxDecoration(
-            color: style.color.withValues(alpha: 0.15),
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: style.color.withValues(alpha: 0.35)),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(style.icon, size: 14, color: style.color),
-              const SizedBox(width: 5),
-              Text(
-                tag,
-                style: TextStyle(
-                  color: style.color,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
-        );
+        return TagChip(icon: style.icon, color: style.color, label: tag);
       }).toList(),
     );
   }

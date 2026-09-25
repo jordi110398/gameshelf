@@ -1,4 +1,13 @@
-enum NotificationType { friendRequest, friendAccepted, activityLike, unknown }
+enum NotificationType {
+  friendRequest,
+  friendAccepted,
+  activityLike,
+  dropped,
+  shelfPublished,
+  review,
+  addedToLibrary,
+  unknown,
+}
 
 extension NotificationTypeX on NotificationType {
   /// Un tipus no reconegut (p. ex. afegit per una versió més nova de l'app
@@ -14,6 +23,14 @@ extension NotificationTypeX on NotificationType {
         return NotificationType.friendAccepted;
       case 'activity_like':
         return NotificationType.activityLike;
+      case 'dropped':
+        return NotificationType.dropped;
+      case 'shelf_published':
+        return NotificationType.shelfPublished;
+      case 'review':
+        return NotificationType.review;
+      case 'added_to_library':
+        return NotificationType.addedToLibrary;
       default:
         return NotificationType.unknown;
     }
@@ -29,6 +46,8 @@ class NotificationItem {
   final String? friendshipId;
   final String? activityId;
   final String? gameTitle;
+  final String? shelfId;
+  final String? shelfTitle;
   final DateTime? readAt;
   final DateTime createdAt;
 
@@ -41,6 +60,8 @@ class NotificationItem {
     this.friendshipId,
     this.activityId,
     this.gameTitle,
+    this.shelfId,
+    this.shelfTitle,
     this.readAt,
     required this.createdAt,
   });
@@ -59,6 +80,8 @@ class NotificationItem {
       friendshipId: map['friendship_id'] as String?,
       activityId: map['activity_id'] as String?,
       gameTitle: map['game_title'] as String?,
+      shelfId: map['shelf_id'] as String?,
+      shelfTitle: map['shelf_title'] as String?,
       readAt: map['read_at'] != null
           ? DateTime.parse(map['read_at'] as String)
           : null,
