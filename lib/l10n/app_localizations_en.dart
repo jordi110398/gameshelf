@@ -154,6 +154,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get actionDroppedPrefix => 'dropped ';
 
   @override
+  String get actionPausedPrefix => 'paused ';
+
+  @override
+  String get actionRatedPrefix => 'rated ';
+
+  @override
+  String get actionRatedSuffix => ' {rating}/5';
+
+  @override
+  String get actionHoursLoggedPrefix => 'played {hours} hours of ';
+
+  @override
   String get actionReviewPrefix => 'posted a review of ';
 
   @override

@@ -2,6 +2,9 @@ enum ActivityType {
   startedPlaying,
   completed,
   dropped,
+  paused,
+  rated,
+  hoursLogged,
   review,
   addedToLibrary,
   friendshipFormed,
@@ -23,6 +26,12 @@ extension ActivityTypeX on ActivityType {
         return ActivityType.completed;
       case 'dropped':
         return ActivityType.dropped;
+      case 'paused':
+        return ActivityType.paused;
+      case 'rated':
+        return ActivityType.rated;
+      case 'hours_logged':
+        return ActivityType.hoursLogged;
       case 'review':
         return ActivityType.review;
       case 'added_to_library':
@@ -48,6 +57,7 @@ class ActivityItem {
   final String? gameCoverUrl;
   final double? rating;
   final String? reviewSnippet;
+  final double? hoursPlayed;
   final DateTime createdAt;
   final int likeCount;
   final bool likedByMe;
@@ -73,6 +83,7 @@ class ActivityItem {
     this.gameCoverUrl,
     this.rating,
     this.reviewSnippet,
+    this.hoursPlayed,
     required this.createdAt,
     this.likeCount = 0,
     this.likedByMe = false,
@@ -99,6 +110,7 @@ class ActivityItem {
       gameCoverUrl: map['game_cover_url'] as String?,
       rating: (map['rating'] as num?)?.toDouble(),
       reviewSnippet: map['review_snippet'] as String?,
+      hoursPlayed: (map['hours_played'] as num?)?.toDouble(),
       createdAt: DateTime.parse(map['created_at'] as String),
       likeCount: (map['like_count'] as num?)?.toInt() ?? 0,
       likedByMe: map['liked_by_me'] as bool? ?? false,

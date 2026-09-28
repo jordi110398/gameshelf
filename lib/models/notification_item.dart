@@ -2,7 +2,12 @@ enum NotificationType {
   friendRequest,
   friendAccepted,
   activityLike,
+  startedPlaying,
+  completed,
   dropped,
+  paused,
+  rated,
+  hoursLogged,
   shelfPublished,
   review,
   addedToLibrary,
@@ -23,8 +28,18 @@ extension NotificationTypeX on NotificationType {
         return NotificationType.friendAccepted;
       case 'activity_like':
         return NotificationType.activityLike;
+      case 'started_playing':
+        return NotificationType.startedPlaying;
+      case 'completed':
+        return NotificationType.completed;
       case 'dropped':
         return NotificationType.dropped;
+      case 'paused':
+        return NotificationType.paused;
+      case 'rated':
+        return NotificationType.rated;
+      case 'hours_logged':
+        return NotificationType.hoursLogged;
       case 'shelf_published':
         return NotificationType.shelfPublished;
       case 'review':
@@ -48,6 +63,8 @@ class NotificationItem {
   final String? gameTitle;
   final String? shelfId;
   final String? shelfTitle;
+  final int? rating;
+  final double? hoursPlayed;
   final DateTime? readAt;
   final DateTime createdAt;
 
@@ -62,6 +79,8 @@ class NotificationItem {
     this.gameTitle,
     this.shelfId,
     this.shelfTitle,
+    this.rating,
+    this.hoursPlayed,
     this.readAt,
     required this.createdAt,
   });
@@ -82,6 +101,8 @@ class NotificationItem {
       gameTitle: map['game_title'] as String?,
       shelfId: map['shelf_id'] as String?,
       shelfTitle: map['shelf_title'] as String?,
+      rating: map['rating'] as int?,
+      hoursPlayed: (map['hours_played'] as num?)?.toDouble(),
       readAt: map['read_at'] != null
           ? DateTime.parse(map['read_at'] as String)
           : null,

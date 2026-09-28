@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:gameshelf/core/utils/error_messages.dart';
+import 'package:gameshelf/core/utils/hours_format.dart';
 import 'package:gameshelf/core/widgets/bookshelf_background.dart';
 import 'package:gameshelf/core/widgets/responsive_center.dart';
 import 'package:gameshelf/features/notifications/notification_navigation.dart';
@@ -79,6 +80,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
                       gameTitle: n.gameTitle,
                       shelfId: n.shelfId,
                       shelfTitle: n.shelfTitle,
+                      rating: n.rating,
+                      hoursPlayed: n.hoursPlayed,
                       readAt: DateTime.now(),
                       createdAt: n.createdAt,
                     ),
@@ -112,6 +115,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
             gameTitle: item.gameTitle,
             shelfId: item.shelfId,
             shelfTitle: item.shelfTitle,
+            rating: item.rating,
+            hoursPlayed: item.hoursPlayed,
             readAt: DateTime.now(),
             createdAt: item.createdAt,
           );
@@ -133,8 +138,23 @@ class _NotificationsPageState extends State<NotificationsPage> {
       case NotificationType.activityLike:
         return '${context.l10n.listActivityLikePrefix}'
             '${item.gameTitle ?? context.l10n.listActivityLikeUnknownGame}';
+      case NotificationType.startedPlaying:
+        return '${context.l10n.actionStartedPlayingPrefix}${item.gameTitle}';
+      case NotificationType.completed:
+        return '${context.l10n.actionCompletedPrefix}${item.gameTitle}';
       case NotificationType.dropped:
         return '${context.l10n.actionDroppedPrefix}${item.gameTitle}';
+      case NotificationType.paused:
+        return '${context.l10n.actionPausedPrefix}${item.gameTitle}';
+      case NotificationType.rated:
+        return '${context.l10n.actionRatedPrefix}${item.gameTitle}'
+            '${context.l10n.actionRatedSuffix.replaceFirst('{rating}', '${item.rating}')}';
+      case NotificationType.hoursLogged:
+        final prefix = context.l10n.actionHoursLoggedPrefix.replaceFirst(
+          '{hours}',
+          formatHours(item.hoursPlayed ?? 0),
+        );
+        return '$prefix${item.gameTitle}';
       case NotificationType.review:
         return '${context.l10n.actionReviewPrefix}${item.gameTitle}';
       case NotificationType.addedToLibrary:
@@ -158,8 +178,18 @@ class _NotificationsPageState extends State<NotificationsPage> {
         return Icons.people_alt_outlined;
       case NotificationType.activityLike:
         return Icons.star;
+      case NotificationType.startedPlaying:
+        return Icons.videogame_asset;
+      case NotificationType.completed:
+        return Icons.emoji_events;
       case NotificationType.dropped:
         return Icons.cancel;
+      case NotificationType.paused:
+        return Icons.pause_circle_outline;
+      case NotificationType.rated:
+        return Icons.star_rate;
+      case NotificationType.hoursLogged:
+        return Icons.schedule;
       case NotificationType.review:
         return Icons.edit_note;
       case NotificationType.addedToLibrary:
@@ -175,8 +205,18 @@ class _NotificationsPageState extends State<NotificationsPage> {
     switch (type) {
       case NotificationType.activityLike:
         return Colors.amber;
+      case NotificationType.startedPlaying:
+        return Colors.blueAccent;
+      case NotificationType.completed:
+        return Colors.amber;
       case NotificationType.dropped:
         return Colors.redAccent;
+      case NotificationType.paused:
+        return Colors.orangeAccent;
+      case NotificationType.rated:
+        return Colors.amber;
+      case NotificationType.hoursLogged:
+        return Colors.cyan;
       case NotificationType.review:
         return Colors.teal;
       case NotificationType.addedToLibrary:

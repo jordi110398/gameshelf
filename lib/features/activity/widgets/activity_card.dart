@@ -10,6 +10,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:flutter/gestures.dart';
 import 'package:gameshelf/core/utils/error_messages.dart';
+import 'package:gameshelf/core/utils/hours_format.dart';
 
 class ActivityCard extends StatefulWidget {
   final ActivityItem item;
@@ -31,6 +32,12 @@ class _ActivityCardState extends State<ActivityCard> {
         return (icon: Icons.emoji_events, color: Colors.amber);
       case ActivityType.dropped:
         return (icon: Icons.cancel, color: Colors.redAccent);
+      case ActivityType.paused:
+        return (icon: Icons.pause_circle_outline, color: Colors.orangeAccent);
+      case ActivityType.rated:
+        return (icon: Icons.star_rate, color: Colors.amber);
+      case ActivityType.hoursLogged:
+        return (icon: Icons.schedule, color: Colors.cyan);
       case ActivityType.review:
         return (icon: Icons.edit_note, color: Colors.teal);
       case ActivityType.addedToLibrary:
@@ -56,6 +63,23 @@ class _ActivityCardState extends State<ActivityCard> {
       case ActivityType.dropped:
         return '${context.l10n.actionDroppedPrefix}'
             '${widget.item.gameTitle}';
+      case ActivityType.paused:
+        return '${context.l10n.actionPausedPrefix}'
+            '${widget.item.gameTitle}';
+      case ActivityType.rated:
+        final suffix = context.l10n.actionRatedSuffix.replaceFirst(
+          '{rating}',
+          widget.item.rating?.toInt().toString() ?? '',
+        );
+        return '${context.l10n.actionRatedPrefix}'
+            '${widget.item.gameTitle}'
+            '$suffix';
+      case ActivityType.hoursLogged:
+        final prefix = context.l10n.actionHoursLoggedPrefix.replaceFirst(
+          '{hours}',
+          formatHours(widget.item.hoursPlayed ?? 0),
+        );
+        return '$prefix${widget.item.gameTitle}';
       case ActivityType.review:
         return '${context.l10n.actionReviewPrefix}'
             '${widget.item.gameTitle}';

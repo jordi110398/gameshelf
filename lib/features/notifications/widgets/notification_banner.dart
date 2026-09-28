@@ -2,6 +2,7 @@ import 'package:gameshelf/core/localization/app_localizations_x.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:gameshelf/core/utils/hours_format.dart';
 import 'package:gameshelf/models/notification_item.dart';
 
 /// Mostra un banner flotant a la part superior de la pantalla (per sobre de
@@ -92,9 +93,32 @@ class _NotificationBannerState extends State<_NotificationBanner>
         final game = n.gameTitle;
         return '@${n.actorNickname} ${context.l10n.bannerActivityLikeSuffix}'
             '${game != null ? '${context.l10n.bannerActivityLikeGamePrefix}$game' : ''}';
+      case NotificationType.startedPlaying:
+        return '@${n.actorNickname} ${context.l10n.actionStartedPlayingPrefix}'
+            '${n.gameTitle}';
+      case NotificationType.completed:
+        return '@${n.actorNickname} ${context.l10n.actionCompletedPrefix}'
+            '${n.gameTitle}';
       case NotificationType.dropped:
         return '@${n.actorNickname} ${context.l10n.actionDroppedPrefix}'
             '${n.gameTitle}';
+      case NotificationType.paused:
+        return '@${n.actorNickname} ${context.l10n.actionPausedPrefix}'
+            '${n.gameTitle}';
+      case NotificationType.rated:
+        final suffix = context.l10n.actionRatedSuffix.replaceFirst(
+          '{rating}',
+          '${n.rating}',
+        );
+        return '@${n.actorNickname} ${context.l10n.actionRatedPrefix}'
+            '${n.gameTitle}'
+            '$suffix';
+      case NotificationType.hoursLogged:
+        final prefix = context.l10n.actionHoursLoggedPrefix.replaceFirst(
+          '{hours}',
+          formatHours(n.hoursPlayed ?? 0),
+        );
+        return '@${n.actorNickname} $prefix${n.gameTitle}';
       case NotificationType.review:
         return '@${n.actorNickname} ${context.l10n.actionReviewPrefix}'
             '${n.gameTitle}';
@@ -119,8 +143,18 @@ class _NotificationBannerState extends State<_NotificationBanner>
         return Icons.people_alt;
       case NotificationType.activityLike:
         return Icons.star;
+      case NotificationType.startedPlaying:
+        return Icons.videogame_asset;
+      case NotificationType.completed:
+        return Icons.emoji_events;
       case NotificationType.dropped:
         return Icons.cancel;
+      case NotificationType.paused:
+        return Icons.pause_circle_outline;
+      case NotificationType.rated:
+        return Icons.star_rate;
+      case NotificationType.hoursLogged:
+        return Icons.schedule;
       case NotificationType.review:
         return Icons.edit_note;
       case NotificationType.addedToLibrary:

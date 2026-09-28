@@ -156,6 +156,18 @@ class AppLocalizationsEs extends AppLocalizations {
   String get actionDroppedPrefix => 'ha abandonado ';
 
   @override
+  String get actionPausedPrefix => 'ha pausado ';
+
+  @override
+  String get actionRatedPrefix => 'ha valorado ';
+
+  @override
+  String get actionRatedSuffix => ' con {rating}/5';
+
+  @override
+  String get actionHoursLoggedPrefix => 'ha jugado {hours} horas a ';
+
+  @override
   String get actionReviewPrefix => 'ha publicado una review de ';
 
   @override

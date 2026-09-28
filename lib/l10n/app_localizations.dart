@@ -370,6 +370,30 @@ abstract class AppLocalizations {
   /// **'ha abandonat '**
   String get actionDroppedPrefix;
 
+  /// No description provided for @actionPausedPrefix.
+  ///
+  /// In ca, this message translates to:
+  /// **'ha pausat '**
+  String get actionPausedPrefix;
+
+  /// No description provided for @actionRatedPrefix.
+  ///
+  /// In ca, this message translates to:
+  /// **'ha valorat '**
+  String get actionRatedPrefix;
+
+  /// No description provided for @actionRatedSuffix.
+  ///
+  /// In ca, this message translates to:
+  /// **' amb {rating}/5'**
+  String get actionRatedSuffix;
+
+  /// No description provided for @actionHoursLoggedPrefix.
+  ///
+  /// In ca, this message translates to:
+  /// **'ha jugat {hours} hores a '**
+  String get actionHoursLoggedPrefix;
+
   /// No description provided for @actionReviewPrefix.
   ///
   /// In ca, this message translates to:
