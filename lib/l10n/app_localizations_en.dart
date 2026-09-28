@@ -160,10 +160,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get actionRatedPrefix => 'rated ';
 
   @override
-  String get actionRatedSuffix => ' {rating}/5';
+  String actionRatedSuffix(String rating) {
+    return ' $rating/5';
+  }
 
   @override
-  String get actionHoursLoggedPrefix => 'played {hours} hours of ';
+  String actionHoursLoggedPrefix(String hours) {
+    return 'played $hours hours of ';
+  }
 
   @override
   String get actionReviewPrefix => 'posted a review of ';

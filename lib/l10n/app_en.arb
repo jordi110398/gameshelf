@@ -54,7 +54,13 @@
   "actionPausedPrefix": "paused ",
   "actionRatedPrefix": "rated ",
   "actionRatedSuffix": " {rating}/5",
+  "@actionRatedSuffix": {
+    "placeholders": { "rating": { "type": "String" } }
+  },
   "actionHoursLoggedPrefix": "played {hours} hours of ",
+  "@actionHoursLoggedPrefix": {
+    "placeholders": { "hours": { "type": "String" } }
+  },
   "actionReviewPrefix": "posted a review of ",
   "actionAddedToLibrarySuffix": " to their library",
   "actionAddedToLibraryVerb": "added ",

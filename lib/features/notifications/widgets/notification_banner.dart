@@ -106,16 +106,12 @@ class _NotificationBannerState extends State<_NotificationBanner>
         return '@${n.actorNickname} ${context.l10n.actionPausedPrefix}'
             '${n.gameTitle}';
       case NotificationType.rated:
-        final suffix = context.l10n.actionRatedSuffix.replaceFirst(
-          '{rating}',
-          '${n.rating}',
-        );
+        final suffix = context.l10n.actionRatedSuffix('${n.rating}');
         return '@${n.actorNickname} ${context.l10n.actionRatedPrefix}'
             '${n.gameTitle}'
             '$suffix';
       case NotificationType.hoursLogged:
-        final prefix = context.l10n.actionHoursLoggedPrefix.replaceFirst(
-          '{hours}',
+        final prefix = context.l10n.actionHoursLoggedPrefix(
           formatHours(n.hoursPlayed ?? 0),
         );
         return '@${n.actorNickname} $prefix${n.gameTitle}';

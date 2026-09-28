@@ -386,13 +386,13 @@ abstract class AppLocalizations {
   ///
   /// In ca, this message translates to:
   /// **' amb {rating}/5'**
-  String get actionRatedSuffix;
+  String actionRatedSuffix(String rating);
 
   /// No description provided for @actionHoursLoggedPrefix.
   ///
   /// In ca, this message translates to:
   /// **'ha jugat {hours} hores a '**
-  String get actionHoursLoggedPrefix;
+  String actionHoursLoggedPrefix(String hours);
 
   /// No description provided for @actionReviewPrefix.
   ///

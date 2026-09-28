@@ -67,16 +67,14 @@ class _ActivityCardState extends State<ActivityCard> {
         return '${context.l10n.actionPausedPrefix}'
             '${widget.item.gameTitle}';
       case ActivityType.rated:
-        final suffix = context.l10n.actionRatedSuffix.replaceFirst(
-          '{rating}',
+        final suffix = context.l10n.actionRatedSuffix(
           widget.item.rating?.toInt().toString() ?? '',
         );
         return '${context.l10n.actionRatedPrefix}'
             '${widget.item.gameTitle}'
             '$suffix';
       case ActivityType.hoursLogged:
-        final prefix = context.l10n.actionHoursLoggedPrefix.replaceFirst(
-          '{hours}',
+        final prefix = context.l10n.actionHoursLoggedPrefix(
           formatHours(widget.item.hoursPlayed ?? 0),
         );
         return '$prefix${widget.item.gameTitle}';

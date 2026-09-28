@@ -162,10 +162,14 @@ class AppLocalizationsCa extends AppLocalizations {
   String get actionRatedPrefix => 'ha valorat ';
 
   @override
-  String get actionRatedSuffix => ' amb {rating}/5';
+  String actionRatedSuffix(String rating) {
+    return ' amb $rating/5';
+  }
 
   @override
-  String get actionHoursLoggedPrefix => 'ha jugat {hours} hores a ';
+  String actionHoursLoggedPrefix(String hours) {
+    return 'ha jugat $hours hores a ';
+  }
 
   @override
   String get actionReviewPrefix => 'ha publicat una review de ';

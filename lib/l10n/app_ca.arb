@@ -54,7 +54,13 @@
   "actionPausedPrefix": "ha pausat ",
   "actionRatedPrefix": "ha valorat ",
   "actionRatedSuffix": " amb {rating}/5",
+  "@actionRatedSuffix": {
+    "placeholders": { "rating": { "type": "String" } }
+  },
   "actionHoursLoggedPrefix": "ha jugat {hours} hores a ",
+  "@actionHoursLoggedPrefix": {
+    "placeholders": { "hours": { "type": "String" } }
+  },
   "actionReviewPrefix": "ha publicat una review de ",
   "actionAddedToLibrarySuffix": " a la seva biblioteca",
   "actionAddedToLibraryVerb": "ha afegit ",

@@ -148,10 +148,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
         return '${context.l10n.actionPausedPrefix}${item.gameTitle}';
       case NotificationType.rated:
         return '${context.l10n.actionRatedPrefix}${item.gameTitle}'
-            '${context.l10n.actionRatedSuffix.replaceFirst('{rating}', '${item.rating}')}';
+            '${context.l10n.actionRatedSuffix('${item.rating}')}';
       case NotificationType.hoursLogged:
-        final prefix = context.l10n.actionHoursLoggedPrefix.replaceFirst(
-          '{hours}',
+        final prefix = context.l10n.actionHoursLoggedPrefix(
           formatHours(item.hoursPlayed ?? 0),
         );
         return '$prefix${item.gameTitle}';
